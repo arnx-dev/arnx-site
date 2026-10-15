@@ -156,7 +156,8 @@ pre code {
   font-size: 43px;
   line-height: 1;
   font-weight: 900;
-  letter-spacing: -3px;
+  letter-spacing: 0;
+  font-kerning: none;
   text-decoration: none;
 }
 .site-header {
