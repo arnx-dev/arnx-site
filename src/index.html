@@ -4,18 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#faf8f3" />
-    <title>arnx — Code review with tests you keep</title>
+    <title>arnx — Test your change. Keep the evidence.</title>
     <meta
       name="description"
-      content="Your agent writes code. arnx puts it to the test. Investigate failures, answer questions, check the fix and keep regression tests. Private developer pilot."
+      content="Test your change before opening or merging a PR. Open-source CLI, executable evidence, tests you keep. Bring your own model. Private developer pilot."
     />
     <meta
       property="og:title"
-      content="arnx — Code review with tests you keep"
+      content="arnx — Test your change. Keep the evidence."
     />
     <meta
       property="og:description"
-      content="See the failure. Check the fix. Keep the test. Private developer pilot."
+      content="Test your change. Keep the evidence. Bring your own model. Open-source CLI for your pre-PR and PR review workflow."
     />
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/svg+xml" href="./brand/arnx-favicon.svg" />
@@ -67,7 +67,7 @@
             />
             to the test.
           </h1>
-          <p class="descriptor">Code review with tests you keep.</p>
+          <p class="descriptor">Test your change. Keep the evidence.</p>
           <div
             class="ownership-badges"
             aria-label="Open source and model choice"
@@ -76,9 +76,9 @@
             ><a href="#open-source">BYOM <span>Bring your own model</span></a>
           </div>
           <p class="hero-description">
-            arnx investigates your change and runs tests for suspected bugs.
-            Inspect what fails, answer questions about intent, and give your
-            agent tests to check the fix.
+            Before you open or merge a PR, put your change to the test. arnx
+            investigates suspected bugs, runs tests, and gives you evidence to
+            inspect. You decide what matters and keep the useful tests.
           </p>
           <div class="actions">
             <a class="button primary" href="#pilot"
@@ -165,7 +165,9 @@
         </div>
       </section>
       <section class="section wrap value" aria-labelledby="value-title">
-        <p class="eyebrow">01 / The useful part outlives the review</p>
+        <p class="eyebrow">
+          01 / Test it. Keep the evidence. Bring your own model.
+        </p>
         <h2 id="value-title">
           See the failure.<br /><span class="muted-heading"
             >Check the fix.</span
@@ -173,9 +175,9 @@
           Keep the test.
         </h2>
         <p>
-          A review is easier to act on when you can run the test behind it. arnx
-          turns suspected bugs into executable checks and brings you into the
-          loop when the right behavior needs a decision.
+          Run arnx on your branch before opening a PR, or while reviewing a
+          change before merge. Turn suspected bugs into executable checks,
+          settle unclear intent, and keep accepted tests in your repository.
         </p>
       </section>
       <section
@@ -476,6 +478,17 @@ assert total == 80
           </p>
         </div>
         <div class="faq-list">
+          <details>
+            <summary>Where does arnx fit in a PR workflow?</summary>
+            <p>
+              Run the CLI on your change before opening a PR or during review,
+              before merge. arnx generates and runs tests for suspected bugs.
+              You inspect the evidence, accept useful tests, and hand the fix
+              prompt to your coding agent. Then arnx checks the fix with those
+              tests. The current pilot is a developer-run CLI workflow; it does
+              not post PR comments or provide a hosted GitHub check.
+            </p>
+          </details>
           <details>
             <summary>What does “bring your own model” mean?</summary>
             <p>

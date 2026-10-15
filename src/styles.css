@@ -1505,3 +1505,70 @@ details[open] > summary::after {
   max-width: 440px;
   line-height: 1.8;
 }
+/* Give the evidence and observer more presence alongside the headline. */
+@media (min-width: 1060px) {
+  .hero {
+    grid-template-columns: 1fr 1.1fr;
+    gap: 42px;
+  }
+  .hero-scene {
+    height: 700px;
+  }
+  .hero-evidence {
+    left: 0;
+    top: 58px;
+  }
+  .hero-evidence .card-content {
+    padding: 22px 24px;
+  }
+  .hero-evidence pre code {
+    font-size: 16px;
+    line-height: 2;
+  }
+  .hero-evidence .card-heading strong {
+    font-size: 16px;
+  }
+  .hero-evidence .failure-result {
+    font-size: 14px;
+    padding: 14px;
+  }
+  .hero-mascot {
+    width: 430px;
+    left: -75px;
+    bottom: -45px;
+  }
+  .scene-note {
+    font-size: 22px;
+    right: 12px;
+    bottom: 110px;
+  }
+  .scene-note span {
+    font-size: 42px;
+  }
+  .scene-label {
+    left: 0;
+    font-size: 13px;
+  }
+  .kept-note {
+    font-size: 13px;
+    right: 0;
+  }
+}
+@media (max-width: 760px) {
+  .hero-scene {
+    height: 580px;
+  }
+  .hero-mascot {
+    width: 280px;
+    left: -30px;
+    bottom: -35px;
+  }
+  .scene-note {
+    font-size: 17px;
+    bottom: 32px;
+    right: 3px;
+  }
+  .scene-note span {
+    font-size: 28px;
+  }
+}
