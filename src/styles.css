@@ -1572,3 +1572,51 @@ details[open] > summary::after {
     font-size: 28px;
   }
 }
+
+/* Treat the brand expression as a headline, with room of its own. */
+.scene-note {
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -1.5px;
+  right: 0;
+  bottom: 100px;
+  transform: rotate(-5deg);
+}
+.scene-note span {
+  font-size: 46px;
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+@media (min-width: 1060px) and (max-width: 1199px) {
+  .scene-note {
+    font-size: 30px;
+  }
+}
+@media (max-width: 760px) {
+  .hero-scene {
+    height: 760px;
+  }
+  .hero-mascot {
+    width: 320px;
+    left: -30px;
+    bottom: 130px;
+  }
+  .scene-note {
+    font-size: 34px;
+    bottom: 65px;
+    right: 10px;
+  }
+  .scene-note span {
+    position: absolute;
+    left: -48px;
+    top: -12px;
+    font-size: 40px;
+  }
+}
+@media (max-width: 360px) {
+  .scene-note {
+    font-size: 30px;
+    right: 0;
+  }
+}
