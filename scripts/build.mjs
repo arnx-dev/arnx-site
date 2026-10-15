@@ -33,6 +33,7 @@ export async function buildSite() {
     await copyFile(`src/${page}`, `dist/${page}`);
   for (const asset of publicAssets)
     await copyFile(`public/brand/${asset}`, `dist/brand/${asset}`);
+  await copyFile("public/og.png", "dist/og.png");
   await mkdir("dist/licenses", { recursive: true });
   for (const [pkg, name] of [
     ["inter", "Inter"],
