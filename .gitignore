@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.dev.vars
+.wrangler/
+artifacts/
+# Local internal source material. Never commit to a public site repository.
+docs/brand/
+docs/branding/
+HANDOFF.md
+# Only the selected public assets are tracked; reference boards remain local.
+public/brand/*
+!public/brand/mascot-inspecting.png
+!public/brand/mascot-questioning.png
+!public/brand/mascot-greencheck.png
+!public/brand/arnx-favicon.svg

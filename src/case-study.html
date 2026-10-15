@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf8f3" />
+    <title>arnx pilot — From a finding to a checked fix</title>
+    <meta
+      name="description"
+      content="Your agent writes code. arnx puts it to the test. Investigate failures, answer questions, check the fix and keep regression tests. Private developer pilot."
+    />
+    <meta
+      property="og:title"
+      content="arnx pilot — From a finding to a checked fix"
+    />
+    <meta
+      property="og:description"
+      content="See the failure. Check the fix. Keep the test. Private developer pilot."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="./brand/arnx-favicon.svg" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <script type="module" src="./assets/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header wrap">
+      <a
+        href="./index.html"
+        class="wordmark placeholder-wordmark"
+        aria-label="arnx home"
+        >arnx</a
+      >
+      <nav aria-label="Main navigation">
+        <a href="./index.html#how-it-works">How it works</a
+        ><a href="./index.html#pilot-results">Pilot results</a
+        ><a href="./index.html#faq">FAQ</a>
+      </nav>
+      <a class="nav-cta" href="./index.html#pilot"
+        >Request a pilot invite <span aria-hidden="true">↗</span></a
+      >
+      <button
+        class="menu-toggle"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+        aria-label="Open navigation"
+      >
+        ☰
+      </button>
+      <nav
+        id="mobile-nav"
+        class="mobile-nav"
+        aria-label="Mobile navigation"
+        hidden
+      >
+        <a href="./index.html#how-it-works">How it works</a
+        ><a href="./index.html#pilot-results">Pilot results</a
+        ><a href="./index.html#faq">FAQ</a
+        ><a href="./index.html#pilot">Request a pilot invite</a>
+      </nav>
+    </header>
+    <main id="main" class="case-article wrap">
+      <a class="text-link" href="./index.html">← Back to arnx</a>
+      <p class="eyebrow" style="margin-top: 40px">
+        Owner-run pilot / October 14, 2026
+      </p>
+      <h1>From a finding<br />to a checked fix.</h1>
+      <p class="descriptor">
+        Your agent fixes the code. arnx runs the tests that check it.
+      </p>
+      <p>
+        On a real Python pipeline backed by Postgres, arnx generated tests for
+        suspected bugs, the owner judged the findings and answered questions,
+        and their coding agent made the fixes. The final sandbox check recorded
+        <strong>54 passed, zero failing and one skipped.</strong> The accepted
+        test files stayed unchanged after acceptance.
+      </p>
+      <h2>The change</h2>
+      <p>
+        A token-callout prediction pipeline spanned 12 commits and 29 files,
+        with 3,311 lines added. It involved hourly snapshots, polling, model
+        training, live scoring and advisory messages. arnx set up five projects;
+        Postgres was available to the aggregator tests, and the owner approved
+        the environment.
+      </p>
+      <p>
+        The review used Opus, additional hunters and a second-model assessment
+        with a fallback. A dropped connection was handled by resuming the
+        review.
+      </p>
+      <h2>See the failure.</h2>
+      <p>
+        Tests reproduced an inverted Gini calculation, callouts lost beyond a
+        2,000-item page cap, stale prices used in evaluation and training folds
+        that split the same hour. Where behavior needed a database, tests ran
+        against Postgres in the approved sandbox.
+      </p>
+      <p>
+        The owner marked 18 findings real, including four the second model had
+        disputed. Those are finding marks, not a count of distinct bugs.
+      </p>
+      <p>
+        Answers about intent mattered too. The owner wanted the price at the
+        time a signal fired. A generated test showed that the implementation
+        didn't match that answer, so arnx retained it as a failing test. A
+        response about callout ID types didn't settle intent; that question
+        stayed open and produced no test.
+      </p>
+      <h2>Check the fix.</h2>
+      <p>
+        <code>arnx accept</code> retained tests and wrote a fix prompt
+        containing their locations, the findings, owner answers and the
+        unresolved question. The owner's coding agent received that prompt, with
+        instructions to change product code and leave the accepted tests intact.
+      </p>
+      <p>
+        The agent changed nine product files. arnx then ran the accepted tests
+        in the approved environment, including Postgres.
+      </p>
+      <table>
+        <caption>
+          Final accepted-test sandbox check
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Project</th>
+            <th scope="col">Passed</th>
+            <th scope="col">Failing</th>
+            <th scope="col">Skipped</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">solanaworker</th>
+            <td>12</td>
+            <td>0</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <th scope="row">aggregator</th>
+            <td>42</td>
+            <td>0</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <th scope="row">Total</th>
+            <td>54</td>
+            <td>0</td>
+            <td>1</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        The skipped test corresponded to a finding not confirmed. Accepted test
+        files were unchanged after acceptance. A temporary schema-path
+        workaround was removed after an arnx acceptance-path fix; the check
+        still passed afterward.
+      </p>
+      <h2>Keep the test.</h2>
+      <p>
+        The product fix was accompanied by regression tests in the repository.
+        The tests used to expose the accepted failures helped check the changes.
+        These remain ordinary, editable test files, ready to run as the project
+        evolves.
+      </p>
+      <h2>Time and cost in this run</h2>
+      <table>
+        <caption>
+          Reported model spend; not a typical-price estimate
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Step</th>
+            <th scope="col">Time</th>
+            <th scope="col">Model spend</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Setup</th>
+            <td>17 min</td>
+            <td>$0.49</td>
+          </tr>
+          <tr>
+            <th scope="row">Review</th>
+            <td>19 min</td>
+            <td>$2.95</td>
+          </tr>
+          <tr>
+            <th scope="row">Acceptance</th>
+            <td>8.5 min</td>
+            <td>$1.92</td>
+          </tr>
+          <tr>
+            <th scope="row">Each check</th>
+            <td>About 3–4 min</td>
+            <td>$0; no model calls</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Setup, review and acceptance totaled $5.36 in reported model spend.
+        Owner review time and the fixing agent's time and cost were not
+        recorded. Local execution still uses compute resources.
+      </p>
+      <h2>What this establishes</h2>
+      <p>
+        The complete workflow worked on one real, owner-judged development
+        change. The branch had been used to tune arnx, and the run crossed
+        builds as acceptance defects were repaired.
+      </p>
+      <p>
+        <strong>Two known issues were missed.</strong> The owner's marks do not
+        establish a general precision rate. A separate held-out comparison tied
+        the earlier build at 8 of 11 confirmed catches.
+      </p>
+      <p>
+        The next step is a controlled pilot with selected developers: repeat the
+        workflow on their changes, measure the effort, and learn whether they
+        keep the tests and come back for another review.
+      </p>
+      <a class="button primary" href="./index.html#pilot"
+        >Request a pilot invite ↗</a
+      >
+    </main>
+    <footer class="wrap footer">
+      <a
+        href="./index.html"
+        class="wordmark placeholder-wordmark"
+        aria-label="arnx home"
+        >arnx</a
+      >
+      <p>Show me the evidence.</p>
+      <span>MIT CLI · Private developer pilot</span
+      ><a href="mailto:info@arnx.dev">Get in touch ↗</a>
+    </footer>
+  </body>
+</html>
