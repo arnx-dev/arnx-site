@@ -1,5 +1,5 @@
 import { build } from "esbuild";
-import { mkdir, rm, copyFile, writeFile } from "node:fs/promises";
+import { mkdir, rm, copyFile, readFile, writeFile } from "node:fs/promises";
 export const publicAssets = [
   "mascot-inspecting.png",
   "mascot-questioning.png",
@@ -7,6 +7,19 @@ export const publicAssets = [
   "arnx-favicon.svg",
 ];
 export async function buildSite() {
+  const measurementId = process.env.GA_MEASUREMENT_ID || "G-MMZS9QVW5F";
+  if (!/^G-[A-Z0-9]+$/.test(measurementId))
+    throw new Error("GA_MEASUREMENT_ID must be a GA4 measurement ID (G-...)");
+  const googleTag = `
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=${measurementId}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', '${measurementId}');
+    </script>`;
   const endpoint = process.env.PILOT_ENDPOINT || "";
   if (
     endpoint &&
@@ -29,8 +42,13 @@ export async function buildSite() {
     define: { PILOT_ENDPOINT: JSON.stringify(endpoint) },
     target: "es2022",
   });
-  for (const page of ["index.html", "case-study.html"])
-    await copyFile(`src/${page}`, `dist/${page}`);
+  for (const page of ["index.html", "case-study.html"]) {
+    const html = await readFile(`src/${page}`, "utf8");
+    await writeFile(
+      `dist/${page}`,
+      html.replace("<head>", `<head>${googleTag}`),
+    );
+  }
   for (const asset of publicAssets)
     await copyFile(`public/brand/${asset}`, `dist/brand/${asset}`);
   await copyFile("public/og.png", "dist/og.png");
