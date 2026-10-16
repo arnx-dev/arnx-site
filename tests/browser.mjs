@@ -21,6 +21,10 @@ try {
   const context = await browser.newContext({
     permissions: ["clipboard-read", "clipboard-write"],
   });
+  // Keep browser tests offline for analytics; inspect the local event queue.
+  await context.route("https://www.googletagmanager.com/**", (route) =>
+    route.fulfill({ body: "", contentType: "application/javascript" }),
+  );
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
@@ -110,6 +114,58 @@ try {
     await page.locator("#form-status a").getAttribute("href"),
     /^mailto:info@arnx.dev/,
   );
+  const analytics = await page.evaluate(() => {
+    window.dataLayer.length = 0;
+    for (const selector of [
+      ".nav-cta",
+      '#mobile-nav a[href="#pilot"]',
+      '.hero a[href="#pilot"]',
+      '.faq a[href^="mailto:"]',
+      "#pilot-form button",
+      "#form-status a",
+      ".direct-email a",
+      'footer a[href^="mailto:"]',
+      ".copy-button",
+    ]) {
+      const action = document.querySelector(selector);
+      action.addEventListener("click", (event) => event.preventDefault(), {
+        once: true,
+      });
+      action.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+    }
+    return window.dataLayer.map((args) => Array.from(args));
+  });
+  assert.equal(analytics.length, 8);
+  assert(
+    analytics.every(
+      ([command, name]) => command === "event" && name === "pilot_click",
+    ),
+  );
+  assert.deepEqual(
+    analytics.map(([, , params]) => params.location),
+    [
+      "nav",
+      "nav",
+      "hero",
+      "faq",
+      "pilot_section",
+      "pilot_section",
+      "pilot_section",
+      "footer",
+    ],
+  );
+  assert(
+    !/dev@example|info@arnx|Python project|subject=|body=/.test(
+      JSON.stringify(analytics),
+    ),
+  );
+  await page.evaluate(() => {
+    delete window.gtag;
+  });
+  await page.locator('.hero a[href="#pilot"]').click();
+  assert.equal(new URL(page.url()).hash, "#pilot");
   await page.emulateMedia({ reducedMotion: "reduce" });
   assert.equal(
     await page.evaluate(
@@ -129,6 +185,24 @@ try {
     (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze())
       .violations.length,
     0,
+  );
+  const caseStudyEvents = await page.evaluate(() => {
+    window.dataLayer.length = 0;
+    for (const action of document.querySelectorAll(
+      'a[href$="#pilot"], footer a[href^="mailto:"]',
+    )) {
+      action.addEventListener("click", (event) => event.preventDefault(), {
+        once: true,
+      });
+      action.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+    }
+    return window.dataLayer.map((args) => Array.from(args));
+  });
+  assert.deepEqual(
+    caseStudyEvents.map(([, , params]) => params.location),
+    ["nav", "nav", "case_study", "footer"],
   );
   // Rebuild with a mock-only endpoint, never send live mail.
   process.env.PILOT_ENDPOINT = "https://forms.example.test/pilot";

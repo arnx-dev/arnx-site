@@ -1,5 +1,34 @@
-export {};
+import { trackEvent } from "./analytics";
 declare const PILOT_ENDPOINT: string;
+document.addEventListener("click", (event) => {
+  if (!(event.target instanceof Element)) return;
+  const action = event.target.closest<HTMLAnchorElement | HTMLButtonElement>(
+    'a, #pilot-form button[type="submit"]',
+  );
+  if (!action) return;
+  const href = action.getAttribute("href") || "";
+  const pilotLink = ["#pilot", "./index.html#pilot"].includes(href);
+  const contactLink = href.startsWith("mailto:info@arnx.dev");
+  const pilotSubmit = action.matches('#pilot-form button[type="submit"]');
+  if (!pilotLink && !contactLink && !pilotSubmit) return;
+
+  const location = action.closest("header")
+    ? "nav"
+    : action.closest("footer")
+      ? "footer"
+      : action.closest(".hero")
+        ? "hero"
+        : action.closest("#pilot")
+          ? "pilot_section"
+          : action.closest(".faq")
+            ? "faq"
+            : "case_study";
+  trackEvent("pilot_click", {
+    location,
+    destination: contactLink ? "email" : pilotSubmit ? "pilot_form" : href,
+    label: contactLink ? "Contact" : "Request a pilot invite",
+  });
+});
 const menu = document.querySelector<HTMLButtonElement>(".menu-toggle");
 const navigation = document.querySelector<HTMLElement>("#mobile-nav");
 function closeMenu() {
