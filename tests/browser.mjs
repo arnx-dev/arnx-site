@@ -49,6 +49,25 @@ try {
       ),
       true,
     );
+    const images = await page.locator("img").evaluateAll((images) =>
+      images.map((image) => ({
+        src: image.getAttribute("src"),
+        srcset: image.getAttribute("srcset"),
+        sizes: image.getAttribute("sizes"),
+        width: image.width,
+        height: image.height,
+        priority: image.fetchPriority,
+        loading: image.loading,
+      })),
+    );
+    assert(
+      images.every(
+        (image) => image.src.endsWith(".webp") && image.srcset && image.sizes,
+      ),
+    );
+    assert(images.every((image) => image.width === image.height));
+    assert.equal(images.filter((image) => image.priority === "high").length, 1);
+    assert(images.slice(1).every((image) => image.loading === "lazy"));
     if (width === 1440 || width === 390) {
       await page.evaluate(async () => {
         for (const image of document.images) image.loading = "eager";

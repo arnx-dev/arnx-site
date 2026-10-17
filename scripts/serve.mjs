@@ -9,6 +9,7 @@ export function serve(port = Number(process.env.PORT || 4173)) {
     ".css": "text/css",
     ".js": "text/javascript",
     ".png": "image/png",
+    ".webp": "image/webp",
     ".svg": "image/svg+xml",
     ".woff2": "font/woff2",
     ".woff": "font/woff",

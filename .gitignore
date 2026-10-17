@@ -16,3 +16,6 @@ public/brand/*
 !public/brand/mascot-questioning.png
 !public/brand/mascot-greencheck.png
 !public/brand/arnx-favicon.svg
+!public/brand/mascot-inspecting-*.webp
+!public/brand/mascot-questioning-*.webp
+!public/brand/mascot-greencheck-*.webp
