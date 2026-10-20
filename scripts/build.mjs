@@ -10,6 +10,14 @@ export const publicAssets = [
   ...[190, 380, 570].map((width) => `mascot-greencheck-${width}.webp`),
   "arnx-favicon.svg",
 ];
+// Each page is served at /<name>.html and, on GitHub Pages, at /<name> too
+// (the arnx CLI links to https://arnx.dev/terms and https://arnx.dev/privacy).
+export const pages = [
+  "index.html",
+  "case-study.html",
+  "terms.html",
+  "privacy.html",
+];
 export async function buildSite() {
   const measurementId = process.env.GA_MEASUREMENT_ID || "G-MMZS9QVW5F";
   if (!/^G-[A-Z0-9]+$/.test(measurementId))
@@ -54,7 +62,7 @@ export async function buildSite() {
     define: { PILOT_ENDPOINT: JSON.stringify(endpoint) },
     target: "es2022",
   });
-  for (const page of ["index.html", "case-study.html"]) {
+  for (const page of pages) {
     const html = await readFile(`src/${page}`, "utf8");
     await writeFile(
       `dist/${page}`,
@@ -76,7 +84,7 @@ export async function buildSite() {
   await writeFile("dist/.nojekyll", "");
   await copyFile("CNAME", "dist/CNAME");
   console.log(
-    "Built dist/: two pages, responsive brand assets, bundled fonts, CSS and JS. No internal documents.",
+    `Built dist/: ${pages.length} pages, responsive brand assets, bundled fonts, CSS and JS. No internal documents.`,
   );
 }
 if (process.argv[1]?.endsWith("build.mjs")) await buildSite();
