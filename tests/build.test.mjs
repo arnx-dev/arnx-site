@@ -41,7 +41,7 @@ test("build only includes public allowlist, not internal docs, reference boards 
 
 // The arnx CLI links to https://arnx.dev/terms, https://arnx.dev/privacy and
 // https://arnx.dev/privacy#telemetry: those paths and that anchor must work.
-test("terms and privacy pages are built, linked and marked as drafts", async () => {
+test("terms and privacy pages are built, marked as drafts, unlinked and not indexed", async () => {
   await buildSite();
   assert(pages.includes("terms.html") && pages.includes("privacy.html"));
   for (const page of ["terms.html", "privacy.html"]) {
@@ -70,11 +70,20 @@ test("terms and privacy pages are built, linked and marked as drafts", async () 
     assert(terms.includes(placeholder));
   const privacy = await readFile("dist/privacy.html", "utf8");
   assert.equal(privacy.match(/id="telemetry"/g).length, 1);
+  // Drafts: reached only by the CLI's direct links, so no page links them and search engines skip them.
+  for (const page of ["terms.html", "privacy.html"]) {
+    const html = await readFile(`dist/${page}`, "utf8");
+    assert(
+      html.includes('<meta name="robots" content="noindex" />'),
+      `${page} lacks noindex`,
+    );
+  }
   for (const page of ["index.html", "case-study.html"]) {
     const html = await readFile(`dist/${page}`, "utf8");
-    const footer = html.match(/<footer[\s\S]*?<\/footer>/)[0];
-    assert(footer.includes('href="./terms.html"'));
-    assert(footer.includes('href="./privacy.html"'));
+    assert(
+      !html.includes("terms.html") && !html.includes("privacy.html"),
+      `${page} links a draft`,
+    );
   }
 });
 
