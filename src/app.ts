@@ -1,5 +1,7 @@
 import { trackEvent } from "./analytics";
+import { initConsent } from "./consent";
 declare const PILOT_ENDPOINT: string;
+void initConsent();
 document.addEventListener("click", (event) => {
   if (!(event.target instanceof Element)) return;
   const action = event.target.closest<HTMLAnchorElement | HTMLButtonElement>(

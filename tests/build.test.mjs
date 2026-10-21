@@ -28,6 +28,10 @@ test("build only includes public allowlist, not internal docs, reference boards 
     assert(head.includes(`gtag/js?id=${measurementId}`));
     assert(head.includes(`gtag('config', '${measurementId}')`));
     assert(head.includes("window.dataLayer = window.dataLayer || []"));
+    // The tag only loads when src/consent.ts calls window.arnxAnalytics.load().
+    assert(head.includes(`id: '${measurementId}'`));
+    assert.match(head, /load: function \(\) \{/);
+    assert(head.includes("ad_storage: 'denied'"));
     assert(!html.includes("gtm.js"));
     assert(!html.includes("../docs"));
     assert.match(html, /54/);
@@ -41,7 +45,7 @@ test("build only includes public allowlist, not internal docs, reference boards 
 
 // The arnx CLI links to https://arnx.dev/terms, https://arnx.dev/privacy and
 // https://arnx.dev/privacy#telemetry: those paths and that anchor must work.
-test("terms and privacy pages are built, marked as drafts, unlinked and not indexed", async () => {
+test("terms and privacy pages are built, filled in, unlinked and not indexed", async () => {
   await buildSite();
   assert(pages.includes("terms.html") && pages.includes("privacy.html"));
   for (const page of ["terms.html", "privacy.html"]) {
@@ -53,21 +57,19 @@ test("terms and privacy pages are built, marked as drafts, unlinked and not inde
       html.includes(`<link rel="canonical" href="https://arnx.dev/${name}"`),
     );
     assert(html.includes("gtag/js?id="));
-    for (const placeholder of [
-      "[LEGAL ENTITY NAME]",
-      "[CONTACT EMAIL]",
-      "[POSTAL ADDRESS]",
-      "[EFFECTIVE DATE]",
-    ])
-      assert(html.includes(placeholder), `${page} lacks ${placeholder}`);
+    // Every owner blank is filled.
+    assert.deepEqual(
+      html.replace(/<!--[\s\S]*?-->/g, "").match(/\[[A-Z][^\]]*\]/g),
+      null,
+      `${page} has a blank left`,
+    );
+    assert(html.includes("ARNX<br />"), `${page} lacks the contact block`);
+    assert(html.includes('href="mailto:info@arnx.dev"'));
     for (const match of html.matchAll(
       /(?:href|src)="(\.\/[^"#]+)(?:#[^"]*)?"/g,
     ))
       await readFile(`dist/${match[1].slice(2)}`);
   }
-  const terms = await readFile("dist/terms.html", "utf8");
-  for (const placeholder of ["[GOVERNING LAW / COURTS]", "[REFUND POLICY]"])
-    assert(terms.includes(placeholder));
   const privacy = await readFile("dist/privacy.html", "utf8");
   assert.equal(privacy.match(/id="telemetry"/g).length, 1);
   // Drafts: reached only by the CLI's direct links, so no page links them and search engines skip them.

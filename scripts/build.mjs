@@ -27,18 +27,29 @@ export async function buildSite() {
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
       gtag('js', new Date());
 
       gtag('config', '${measurementId}');
+      // src/consent.ts calls load(): at once outside the EU, EEA and UK; there only after "Accept".
       // Keep analytics off the initial rendering/network path; preserve queued events.
-      window.addEventListener('load', function () {
-        setTimeout(function () {
-          var tag = document.createElement('script');
-          tag.async = true;
-          tag.src = 'https://www.googletagmanager.com/gtag/js?id=${measurementId}';
-          document.head.appendChild(tag);
-        }, 1500);
-      }, { once: true });
+      window.arnxAnalytics = {
+        id: '${measurementId}',
+        load: function () {
+          if (window.arnxAnalytics.loaded) return;
+          window.arnxAnalytics.loaded = true;
+          function add() {
+            setTimeout(function () {
+              var tag = document.createElement('script');
+              tag.async = true;
+              tag.src = 'https://www.googletagmanager.com/gtag/js?id=${measurementId}';
+              document.head.appendChild(tag);
+            }, 1500);
+          }
+          if (document.readyState === 'complete') add();
+          else window.addEventListener('load', add, { once: true });
+        },
+      };
     </script>`;
   const endpoint = process.env.PILOT_ENDPOINT || "";
   if (

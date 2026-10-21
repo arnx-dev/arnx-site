@@ -25,6 +25,10 @@ try {
   await context.route("https://www.googletagmanager.com/**", (route) =>
     route.fulfill({ body: "", contentType: "application/javascript" }),
   );
+  // Cloudflare's country lookup: outside the EU, EEA and UK, so no banner here.
+  await context.route("**/cdn-cgi/trace", (route) =>
+    route.fulfill({ body: "h=arnx.dev\nloc=US\n", contentType: "text/plain" }),
+  );
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
@@ -260,6 +264,93 @@ try {
     null,
     { timeout: 5000 },
   );
+  // Outside the EU, EEA and UK the tag loads after the page, with no banner.
+  await page.goto(url);
+  await page.waitForFunction(() =>
+    document.querySelector('script[src*="googletagmanager.com/gtag/js"]'),
+  );
+  assert.equal(await page.locator(".consent").count(), 0);
+  assert.equal(await page.locator(".consent-reopen").count(), 0);
+
+  // In the EU, EEA and UK (and when the country is unknown) nothing loads before Accept.
+  for (const trace of ["h=arnx.dev\nloc=DE\n", null]) {
+    const eu = await browser.newContext();
+    const tagRequests = [];
+    await eu.route("https://www.googletagmanager.com/**", (route) => {
+      tagRequests.push(route.request().url());
+      return route.fulfill({ body: "", contentType: "application/javascript" });
+    });
+    await eu.route("**/cdn-cgi/trace", (route) =>
+      trace
+        ? route.fulfill({ body: trace, contentType: "text/plain" })
+        : route.fulfill({ status: 404, body: "Not found" }),
+    );
+    const visitor = await eu.newPage();
+    visitor.on("pageerror", (error) => errors.push(String(error)));
+    for (const width of [1440, 320]) {
+      await visitor.setViewportSize({ width, height: 800 });
+      await visitor.goto(url);
+      await visitor.locator(".consent").waitFor();
+      assert.equal(
+        await visitor.evaluate(
+          () => document.documentElement.scrollWidth > innerWidth,
+        ),
+        false,
+        `Banner overflow at ${width}`,
+      );
+      assert.deepEqual(
+        (
+          await new AxeBuilder({ page: visitor })
+            .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+            .analyze()
+        ).violations.map((v) => v.id),
+        [],
+        `Banner accessibility at ${width}`,
+      );
+    }
+    assert.equal(
+      await visitor.locator(".consent a").getAttribute("href"),
+      "./privacy.html#website",
+    );
+    await visitor.waitForTimeout(2000);
+    assert.deepEqual(tagRequests, [], "the tag loaded before a choice");
+    await visitor.getByRole("button", { name: "Reject" }).click();
+    assert.equal(await visitor.locator(".consent").count(), 0);
+    await visitor.reload();
+    await visitor.waitForTimeout(2000);
+    assert.equal(await visitor.locator(".consent").count(), 0);
+    assert.deepEqual(tagRequests, [], "the tag loaded after Reject");
+    // The footer's "Cookies" button asks again; Accept loads the tag.
+    await visitor.getByRole("button", { name: "Cookies" }).click();
+    assert.equal(
+      await visitor.evaluate(() => document.activeElement.textContent),
+      "Reject",
+    );
+    await visitor.getByRole("button", { name: "Accept" }).click();
+    await visitor.waitForFunction(() =>
+      document.querySelector('script[src*="googletagmanager.com/gtag/js"]'),
+    );
+    assert.equal(tagRequests.length, 1);
+    await visitor.goto(`${url}/privacy`);
+    await visitor.waitForTimeout(2000);
+    assert.equal(await visitor.locator(".consent").count(), 0);
+    assert.equal(tagRequests.length, 2, "an accepted choice is remembered");
+    // Reject after Accept turns the tag off and deletes its cookies.
+    await visitor.evaluate(() => {
+      document.cookie = "_ga=GA1.1.test; path=/";
+    });
+    await visitor.getByRole("button", { name: "Cookies" }).click();
+    await visitor.getByRole("button", { name: "Reject" }).click();
+    assert.deepEqual(
+      await visitor.evaluate(() => [
+        document.cookie.includes("_ga="),
+        window["ga-disable-" + window.arnxAnalytics.id],
+      ]),
+      [false, true],
+    );
+    await eu.close();
+  }
+
   // Rebuild with a mock-only endpoint, never send live mail.
   process.env.PILOT_ENDPOINT = "https://forms.example.test/pilot";
   await buildSite();
@@ -291,7 +382,7 @@ try {
   assert.equal(count, 2);
   assert.deepEqual(errors, []);
   console.log(
-    "Browser checks passed: 5 viewport widths, WCAG AA axe scan, keyboard/menu, FAQ, copy, reduced motion, case study, terms and privacy pages, and form fallback/error/success.",
+    "Browser checks passed: 5 viewport widths, WCAG AA axe scan, keyboard/menu, FAQ, copy, reduced motion, case study, terms and privacy pages, EU/UK cookie banner, and form fallback/error/success.",
   );
 } finally {
   await browser?.close();
