@@ -223,6 +223,43 @@ try {
     caseStudyEvents.map(([, , params]) => params.location),
     ["nav", "nav", "case_study", "footer"],
   );
+  // The CLI links to /terms, /privacy and /privacy#telemetry (no .html).
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const path of ["/terms", "/privacy#telemetry"]) {
+      await page.goto(`${url}${path}`);
+      assert.equal(await page.locator("h1").count(), 1);
+      assert.equal(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth > innerWidth,
+        ),
+        false,
+        `Overflow on ${path} at ${width}`,
+      );
+      assert.deepEqual(
+        (
+          await new AxeBuilder({ page })
+            .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+            .analyze()
+        ).violations.map((v) => v.id),
+        [],
+        `Accessibility on ${path} at ${width}`,
+      );
+    }
+  }
+  const telemetry = page.locator("#telemetry");
+  assert.equal(await telemetry.innerText(), "Telemetry (optional)");
+  // The page scrolls smoothly to the anchor; wait until the heading is in view.
+  await page.waitForFunction(
+    () => {
+      const top = document
+        .querySelector("#telemetry")
+        .getBoundingClientRect().top;
+      return top >= 0 && top < innerHeight / 2;
+    },
+    null,
+    { timeout: 5000 },
+  );
   // Rebuild with a mock-only endpoint, never send live mail.
   process.env.PILOT_ENDPOINT = "https://forms.example.test/pilot";
   await buildSite();
@@ -254,7 +291,7 @@ try {
   assert.equal(count, 2);
   assert.deepEqual(errors, []);
   console.log(
-    "Browser checks passed: 5 viewport widths, WCAG AA axe scan, keyboard/menu, FAQ, copy, reduced motion, case study and form fallback/error/success.",
+    "Browser checks passed: 5 viewport widths, WCAG AA axe scan, keyboard/menu, FAQ, copy, reduced motion, case study, terms and privacy pages, and form fallback/error/success.",
   );
 } finally {
   await browser?.close();

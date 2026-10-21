@@ -20,12 +20,17 @@ export function serve(port = Number(process.env.PORT || 4173)) {
       const path = decodeURIComponent(
         new URL(req.url, "http://localhost").pathname,
       );
-      const file = resolve(
+      let file = resolve(
         root,
         "." + (path.endsWith("/") ? path + "index.html" : path),
       );
       if (!file.startsWith(root + sep)) throw new Error("Not found");
-      const data = await readFile(file);
+      // Like GitHub Pages: /terms serves terms.html when there is no file "terms".
+      const data = await readFile(file).catch(async (error) => {
+        if (extname(file)) throw error;
+        file += ".html";
+        return readFile(file);
+      });
       res.writeHead(200, {
         "Content-Type": mime[extname(file)] || "application/octet-stream",
         "X-Content-Type-Options": "nosniff",

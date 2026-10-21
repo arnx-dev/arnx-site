@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
-import { buildSite, publicAssets } from "../scripts/build.mjs";
+import { buildSite, pages, publicAssets } from "../scripts/build.mjs";
+import { serve } from "../scripts/serve.mjs";
 test("build only includes public allowlist, not internal docs, reference boards or secrets", async () => {
   await buildSite();
   assert.equal((await readFile("dist/CNAME", "utf8")).trim(), "arnx.dev");
@@ -35,5 +36,78 @@ test("build only includes public allowlist, not internal docs, reference boards 
     )) {
       await readFile(`dist/${match[1].slice(2)}`);
     }
+  }
+});
+
+// The arnx CLI links to https://arnx.dev/terms, https://arnx.dev/privacy and
+// https://arnx.dev/privacy#telemetry: those paths and that anchor must work.
+test("terms and privacy pages are built, marked as drafts, unlinked and not indexed", async () => {
+  await buildSite();
+  assert(pages.includes("terms.html") && pages.includes("privacy.html"));
+  for (const page of ["terms.html", "privacy.html"]) {
+    const html = await readFile(`dist/${page}`, "utf8");
+    const name = page.replace(".html", "");
+    assert.match(html, /^<!doctype html>\s*<!--\s*DRAFT:/);
+    assert.equal(html.match(/<h1>/g).length, 1);
+    assert(
+      html.includes(`<link rel="canonical" href="https://arnx.dev/${name}"`),
+    );
+    assert(html.includes("gtag/js?id="));
+    for (const placeholder of [
+      "[LEGAL ENTITY NAME]",
+      "[CONTACT EMAIL]",
+      "[POSTAL ADDRESS]",
+      "[EFFECTIVE DATE]",
+    ])
+      assert(html.includes(placeholder), `${page} lacks ${placeholder}`);
+    for (const match of html.matchAll(
+      /(?:href|src)="(\.\/[^"#]+)(?:#[^"]*)?"/g,
+    ))
+      await readFile(`dist/${match[1].slice(2)}`);
+  }
+  const terms = await readFile("dist/terms.html", "utf8");
+  for (const placeholder of ["[GOVERNING LAW / COURTS]", "[REFUND POLICY]"])
+    assert(terms.includes(placeholder));
+  const privacy = await readFile("dist/privacy.html", "utf8");
+  assert.equal(privacy.match(/id="telemetry"/g).length, 1);
+  // Drafts: reached only by the CLI's direct links, so no page links them and search engines skip them.
+  for (const page of ["terms.html", "privacy.html"]) {
+    const html = await readFile(`dist/${page}`, "utf8");
+    assert(
+      html.includes('<meta name="robots" content="noindex" />'),
+      `${page} lacks noindex`,
+    );
+  }
+  for (const page of ["index.html", "case-study.html"]) {
+    const html = await readFile(`dist/${page}`, "utf8");
+    assert(
+      !html.includes("terms.html") && !html.includes("privacy.html"),
+      `${page} links a draft`,
+    );
+  }
+});
+
+test("local preview serves /terms and /privacy without the .html, as GitHub Pages does", async () => {
+  await buildSite();
+  const server = serve(0);
+  await new Promise((resolve) =>
+    server.listening ? resolve() : server.once("listening", resolve),
+  );
+  try {
+    const base = `http://127.0.0.1:${server.address().port}`;
+    for (const [path, heading] of [
+      ["/terms", "Terms of Service"],
+      ["/privacy", "Privacy Policy"],
+      ["/terms.html", "Terms of Service"],
+    ]) {
+      const response = await fetch(base + path);
+      assert.equal(response.status, 200, path);
+      assert.match(response.headers.get("content-type"), /^text\/html/);
+      assert((await response.text()).includes(`<h1>${heading}</h1>`));
+    }
+    assert.equal((await fetch(`${base}/no-such-page`)).status, 404);
+    assert.equal((await fetch(`${base}/brand/missing.webp`)).status, 404);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
   }
 });
