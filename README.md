@@ -18,13 +18,13 @@ Before deployment, install 0.1.0 without private registry credentials, verify `a
 
 Cloud activation is documented through the CLI. New accounts start with $5 credit. Paid top-ups remain labeled “Top-ups open soon” until the owner confirms live payments. The credits page describes prepaid USD credit and per-role usage charges. GitHub Discussions remains omitted until enabled and verified.
 
-The quickstart and privacy/security copy follow the public CLI README: telemetry is off by default, `arnx init` writes `telemetry = false`, and users opt in with `telemetry = true`. Environment opt-out controls override configuration. Cloud processing is described separately from local tool calls, tests, before/after checks, and report generation. The CLI license does not cover proprietary Cloud infrastructure.
+The quickstart and privacy/security copy follow the public CLI README. The site no longer documents CLI telemetry. Cloud processing is described separately from local tool calls, tests, before/after checks, and report generation. The CLI license does not cover proprietary Cloud infrastructure.
 
 The homepage presents BYOM, Cloud, and Enterprise. Enterprise is an email inquiry for private deployment requirements and dedicated support, with scope agreed directly; it does not promise an existing self-hosted Cloud package, local inference, or an SLA. Cloud and Enterprise CTA events contain only curated action/location metadata.
 
 ## Pages and content
 
-Permanent pages: product, quickstart, case study, community, license, security, privacy, terms, and Cloud credits. `/privacy`, `/terms`, `/credits`, and `/privacy#telemetry` remain compatible with CLI links. The credits page is informational: it directs users to their own signed top-up link from `arnx credits`, with no payment form or shared checkout link. Paid top-ups are labeled “Top-ups open soon” and review pricing is described as “Pay as you go,” as approved by the owner. The build generates the sitemap, robots file, canonical metadata, and WebPage structured data. There are no ratings, fabricated transcripts, or synthetic testimonials.
+Permanent pages: product, quickstart, case study, community, license, security, privacy, terms, and Cloud credits. `/privacy`, `/terms`, and `/credits` remain compatible with CLI links. The site defaults to light mode; the header toggle switches to dark mode and remembers the choice in local storage. The credits page is informational: it directs users to their own signed top-up link from `arnx credits`, with no payment form or shared checkout link. Paid top-ups are labeled “Top-ups open soon” and review pricing is described as “Pay as you go,” as approved by the owner. The build generates the sitemap, robots file, canonical metadata, and WebPage structured data. There are no ratings, fabricated transcripts, or synthetic testimonials.
 
 Only the existing public case study is included. Internal evaluations must not be added to website content or committed to this repository. Raw private code, logs, and repository identifiers are not exported. The final check's 54 passed / 0 failing / 1 skipped is a test result, not a bug-catch rate.
 

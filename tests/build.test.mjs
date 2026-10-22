@@ -92,9 +92,6 @@ test("public build: metadata, licensing, real destinations, and all internal fra
       .license,
     "Apache-2.0",
   );
-  const privacy = await readFile("dist/privacy.html", "utf8");
-  assert.equal(privacy.match(/id="telemetry"/g).length, 1);
-  assert.match(privacy, /CLI usage telemetry is off by default/);
   const quickstart = await readFile("dist/quickstart.html", "utf8");
   assert(
     quickstart.includes('id="install-code">npm install -g @arnx-dev/arnx'),

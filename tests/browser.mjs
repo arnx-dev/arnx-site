@@ -20,7 +20,7 @@ try {
   });
   const context = await browser.newContext({
     permissions: ["clipboard-read", "clipboard-write"],
-    colorScheme: "light",
+    colorScheme: "dark",
   });
   // Keep browser tests offline for analytics; inspect the local event queue.
   await context.route("https://www.googletagmanager.com/**", (route) =>
@@ -40,6 +40,13 @@ try {
       await page.goto(`${url}/${route}`);
       await page.evaluate(() => document.fonts.ready);
       assert.equal(await page.locator("h1").count(), 1, route);
+      assert.equal(
+        await page.evaluate(
+          () => getComputedStyle(document.documentElement).colorScheme,
+        ),
+        "light",
+        "light is the default even when the OS prefers dark",
+      );
       assert.equal(
         await page.evaluate(
           () => document.documentElement.scrollWidth > innerWidth,
@@ -69,6 +76,25 @@ try {
       }
     }
   }
+  const themeToggle = page.getByRole("button", {
+    name: "Dark mode",
+    exact: true,
+  });
+  assert.equal(await themeToggle.getAttribute("aria-pressed"), "false");
+  await themeToggle.focus();
+  await page.keyboard.press("Space");
+  assert.equal(await themeToggle.getAttribute("aria-pressed"), "true");
+  assert.equal(
+    await page.evaluate(() => localStorage.getItem("arnx.theme")),
+    "dark",
+  );
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.reload();
+  assert.equal(
+    await themeToggle.getAttribute("aria-pressed"),
+    "true",
+    "saved choice overrides the OS and survives reload",
+  );
   for (const width of [390, 320]) {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.setViewportSize({ width, height: 844 });
@@ -112,6 +138,46 @@ try {
       }
     }
   }
+  await themeToggle.click();
+  await page.reload();
+  assert.equal(await themeToggle.getAttribute("aria-pressed"), "false");
+  assert.equal(
+    await page.evaluate(
+      () => getComputedStyle(document.documentElement).colorScheme,
+    ),
+    "light",
+  );
+  assert.equal(
+    await page.evaluate(() => localStorage.getItem("arnx.theme")),
+    "light",
+  );
+
+  const blockedStorage = await context.newPage();
+  blockedStorage.on("pageerror", (error) => errors.push(String(error)));
+  await blockedStorage.addInitScript(() => {
+    Object.defineProperty(window, "localStorage", {
+      get() {
+        throw new Error("Storage unavailable");
+      },
+    });
+  });
+  await blockedStorage.goto(url);
+  const blockedToggle = blockedStorage.getByRole("button", {
+    name: "Dark mode",
+    exact: true,
+  });
+  assert.equal(await blockedToggle.getAttribute("aria-pressed"), "false");
+  await blockedToggle.click();
+  assert.equal(
+    await blockedStorage.evaluate(
+      () => getComputedStyle(document.documentElement).colorScheme,
+    ),
+    "dark",
+  );
+  await blockedStorage.reload();
+  assert.equal(await blockedToggle.getAttribute("aria-pressed"), "false");
+  await blockedStorage.close();
+
   await page.emulateMedia({ colorScheme: "light" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(url);
@@ -317,7 +383,7 @@ try {
 
   assert.deepEqual(errors, []);
   console.log(
-    `Browser checks passed: ${pages.length} pages × 5 widths; light/dark phone layouts; WCAG AA scans at desktop/mobile; navigation, clipboard success/failure, CTA events, reduced motion, and consent behavior.`,
+    `Browser checks passed: ${pages.length} pages × 5 widths; light-default theme toggle, saved preferences, light/dark phone layouts; WCAG AA scans at desktop/mobile; navigation, clipboard success/failure, CTA events, reduced motion, and consent behavior.`,
   );
 } finally {
   await browser?.close();

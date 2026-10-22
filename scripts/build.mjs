@@ -27,6 +27,15 @@ export const pages = [
 ];
 export async function buildSite() {
   validateRelease(release);
+  const theme = await build({
+    entryPoints: ["src/theme.ts"],
+    bundle: true,
+    minify: true,
+    write: false,
+    format: "iife",
+    target: "es2022",
+  });
+  const themeScript = `<script>${theme.outputFiles[0].text.replaceAll("</script", "<\\/script")}</script>`;
   const measurementId = process.env.GA_MEASUREMENT_ID || "G-MMZS9QVW5F";
   if (!/^G-[A-Z0-9]+$/.test(measurementId))
     throw new Error("GA_MEASUREMENT_ID must be a GA4 measurement ID (G-...)");
@@ -99,7 +108,10 @@ export async function buildSite() {
     ).replaceAll("<", "\\u003c")}</script>`;
     await writeFile(
       `dist/${page}`,
-      html.replace("<head>", `<head>${googleTag}${structuredData}`),
+      html.replace(
+        "<head>",
+        `<head>${themeScript}${googleTag}${structuredData}`,
+      ),
     );
   }
   for (const asset of publicAssets)

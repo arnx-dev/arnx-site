@@ -7,13 +7,13 @@
     <title>Privacy Policy: arnx</title>
     <meta
       name="description"
-      content="What the arnx CLI sends to providers, local retained data, usage telemetry controls, and website analytics."
+      content="What the arnx CLI sends to providers, local retained data, and website analytics."
     />
     <link rel="canonical" href="https://arnx.dev/privacy" />
     <meta property="og:title" content="Privacy Policy: arnx" />
     <meta
       property="og:description"
-      content="What the arnx CLI sends to providers, local retained data, usage telemetry controls, and website analytics."
+      content="What the arnx CLI sends to providers, local retained data, and website analytics."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://arnx.dev/privacy" />
@@ -28,7 +28,7 @@
     <meta name="twitter:title" content="Privacy Policy: arnx" />
     <meta
       name="twitter:description"
-      content="What the arnx CLI sends to providers, local retained data, usage telemetry controls, and website analytics."
+      content="What the arnx CLI sends to providers, local retained data, and website analytics."
     />
     <meta name="twitter:image" content="https://arnx.dev/og.png" />
     <meta
@@ -48,8 +48,8 @@
         What leaves your machine, and what stays in your repository.
       </p>
       <p>
-        This policy describes the arnx CLI implementation inspected on October
-        22, 2026 and this website. {{CLI_DISTRIBUTION_STATUS}} ARNX is the
+        This policy describes the arnx CLI, arnx cloud, and this website,
+        reviewed on October 22, 2026. {{CLI_DISTRIBUTION_STATUS}} ARNX is the
         operator of arnx.dev; contact
         <a href="mailto:info@arnx.dev">info@arnx.dev</a> about privacy or data
         requests.
@@ -66,6 +66,25 @@
         <a href="./terms.html">Cloud service terms</a> before sharing code.
         Contact <a href="mailto:info@arnx.dev">info@arnx.dev</a> for provider,
         retention, or data-handling questions specific to your use.
+      </p>
+      <h2 id="cloud-accounts">arnx cloud accounts</h2>
+      <p>
+        Sign-in goes through GitHub. We receive your GitHub account ID, login,
+        and email address if shared. Your credit balance and its ledger are kept
+        per account.
+      </p>
+      <p>
+        Payments are processed by Stripe, which sends receipts and invoices by
+        email. Card numbers go directly to Stripe; arnx never sees them.
+        <a href="/credits">Top-ups open soon</a>.
+      </p>
+      <p>
+        Review content passes through arnx cloud to its model providers. After a
+        review, arnx cloud keeps account-linked review records, including
+        status, timestamps, and billed usage by role, alongside the credit
+        ledger. For questions about review-content retention, backups, or model
+        providers’ handling of your data, contact
+        <a href="mailto:info@arnx.dev">info@arnx.dev</a>.
       </p>
       <h2 id="what-is-sent">What can be submitted to a model</h2>
       <ul>
@@ -108,44 +127,13 @@
         before sharing.
         <a href="./security.html">Read the execution boundaries</a>.
       </p>
-      <h2 id="telemetry">Telemetry and controls</h2>
-      <p>
-        <strong>CLI usage telemetry is off by default.</strong>
-        <code>arnx init</code> writes <code>telemetry = false</code> at the top
-        level of <code>.arnx/config.toml</code>. Set
-        <code>telemetry = true</code> to turn it on.
-      </p>
-      <p>
-        Set <code>ARNX_TELEMETRY=0</code> or <code>DO_NOT_TRACK=1</code>, or set
-        top-level <code>telemetry = false</code> in
-        <code>.arnx/config.toml</code>, to disable sending.
-        <code>arnx doctor</code> reports its status.
-      </p>
-      <p>
-        When enabled, setup, review, accept, and check can send an allowlisted
-        event to <code>https://api.arnx.dev/v1/telemetry</code>. It includes a
-        random install ID, CLI version, OS/architecture, timestamp, command, and
-        counts such as projects, languages, changed files, findings, tests,
-        marks, cost, and duration. Provider and effort categories are included.
-      </p>
-      <p>
-        The payload schema excludes source code, diffs, file names or paths,
-        repository names/remotes, test bodies, question text, user answers,
-        credentials, and environment-variable values. The install ID is stored
-        in
-        <code>~/.config/arnx/telemetry.json</code>, or under
-        <code>$XDG_CONFIG_HOME</code>. Transport infrastructure still processes
-        connection information such as IP addresses; this is not a promise of
-        anonymity.
-      </p>
-      <p>
-        The server’s configured retention policy is 90 days for raw telemetry,
-        with weekly aggregate counts retained afterward. Deployment and
-        retention verification remain a release prerequisite. Contact us about
-        data access or deletion.
-      </p>
       <h2 id="website">This website</h2>
       <ul>
+        <li>
+          Light mode is the default. If you switch themes, this website saves
+          your choice in your browser’s local storage so it persists between
+          visits.
+        </li>
         <li>
           arnx.dev is hosted on GitHub Pages and served through Cloudflare,
           which process connection information to deliver pages.
@@ -169,10 +157,6 @@
           content blocker can prevent it. Where the consent controls are shown,
           use Cookies in the footer to change your choice; Reject also removes
           analytics cookies.
-        </li>
-        <li>
-          The CLI does not use Google Analytics. Its telemetry is separate from
-          this website.
         </li>
         <li>
           If you email us, we receive your address and message and use them to

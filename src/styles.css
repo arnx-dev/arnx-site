@@ -1985,89 +1985,139 @@ details[open] > summary::after {
   }
 }
 
-/* Follow the reader's system theme while keeping the same brand colors. */
+/* Light is the default; the header toggle selects and remembers dark mode. */
 :root {
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --color-bg: #0f1115;
-    --color-text: #faf8f3;
-    --color-muted: #bbc2cf;
-    --color-border: #424957;
-    --arnx-slate: #d0d6e1;
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0f1115;
+  --color-text: #faf8f3;
+  --color-muted: #bbc2cf;
+  --color-border: #424957;
+  --arnx-slate: #d0d6e1;
+}
+
+:root[data-theme="dark"] .site-header .mobile-nav,
+:root[data-theme="dark"] .evidence-card,
+:root[data-theme="dark"] .card-content pre {
+  background: #191d25;
+  border-color: var(--color-border);
+}
+
+:root[data-theme="dark"] .primary {
+  background: var(--arnx-mint);
+  color: #0f1115;
+}
+
+:root[data-theme="dark"] .primary:hover {
+  background: #c7f9e4;
+}
+
+:root[data-theme="dark"] .steps code,
+:root[data-theme="dark"] .step-meta {
+  background: #252a34;
+}
+
+:root[data-theme="dark"] .evidence-section {
+  background: #191d25;
+}
+
+:root[data-theme="dark"] .failure .card-heading,
+:root[data-theme="dark"] .card-content .failure-result {
+  background: #3b2024;
+  color: #ffaaa5;
+}
+
+:root[data-theme="dark"] .failure {
+  border-color: #825056;
+}
+
+:root[data-theme="dark"] .question .card-heading,
+:root[data-theme="dark"] .release-notice {
+  background: #272239;
+  border-color: #8f80b4;
+}
+
+:root[data-theme="dark"] .question .card-heading,
+:root[data-theme="dark"] .code-purple {
+  color: var(--arnx-lavender);
+}
+
+:root[data-theme="dark"] .success .card-heading,
+:root[data-theme="dark"] .results-card,
+:root[data-theme="dark"] .final-cta,
+:root[data-theme="dark"] .ownership-badges a {
+  background: #172a22;
+  border-color: #476a59;
+}
+
+:root[data-theme="dark"] .ownership-badges a:last-child {
+  background: #272239;
+  border-color: #8f80b4;
+}
+
+:root[data-theme="dark"] .success .card-heading,
+:root[data-theme="dark"] .success-text,
+:root[data-theme="dark"] .result-numbers > div:first-child strong {
+  color: var(--arnx-mint);
+}
+
+:root[data-theme="dark"] .result-numbers span,
+:root[data-theme="dark"] .results-footer {
+  color: #c0d9cc;
+  border-color: #476a59;
+}
+
+:root[data-theme="dark"] .error-text {
+  color: #ffaaa5;
+}
+
+:root[data-theme="dark"] .consent-actions button {
+  background: var(--arnx-lavender);
+  color: #0f1115;
+  border-color: var(--arnx-lavender);
+}
+
+:root[data-theme="dark"] :focus-visible {
+  outline-color: var(--arnx-lavender);
+}
+
+:root[data-theme="dark"] .hero-mascot {
+  filter: drop-shadow(0 0 26px #faf8f34d);
+}
+
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+}
+.theme-toggle:hover {
+  border-color: var(--color-text);
+}
+.theme-icon-sun,
+:root[data-theme="dark"] .theme-icon-moon {
+  display: none;
+}
+:root[data-theme="dark"] .theme-icon-sun {
+  display: block;
+}
+@media (max-width: 760px) {
+  .site-header {
+    gap: 12px;
   }
-  .site-header .mobile-nav,
-  .evidence-card,
-  .card-content pre {
-    background: #191d25;
-    border-color: var(--color-border);
+  .theme-toggle {
+    margin-left: auto;
   }
-  .primary {
-    background: var(--arnx-mint);
-    color: #0f1115;
-  }
-  .primary:hover {
-    background: #c7f9e4;
-  }
-  .steps code,
-  .step-meta {
-    background: #252a34;
-  }
-  .evidence-section {
-    background: #191d25;
-  }
-  .failure .card-heading,
-  .card-content .failure-result {
-    background: #3b2024;
-    color: #ffaaa5;
-  }
-  .failure {
-    border-color: #825056;
-  }
-  .question .card-heading,
-  .release-notice {
-    background: #272239;
-    border-color: #8f80b4;
-  }
-  .question .card-heading,
-  .code-purple {
-    color: var(--arnx-lavender);
-  }
-  .success .card-heading,
-  .results-card,
-  .final-cta,
-  .ownership-badges a {
-    background: #172a22;
-    border-color: #476a59;
-  }
-  .ownership-badges a:last-child {
-    background: #272239;
-    border-color: #8f80b4;
-  }
-  .success .card-heading,
-  .success-text,
-  .result-numbers > div:first-child strong {
-    color: var(--arnx-mint);
-  }
-  .result-numbers span,
-  .results-footer {
-    color: #c0d9cc;
-    border-color: #476a59;
-  }
-  .error-text {
-    color: #ffaaa5;
-  }
-  .consent-actions button {
-    background: var(--arnx-lavender);
-    color: #0f1115;
-    border-color: var(--arnx-lavender);
-  }
-  :focus-visible {
-    outline-color: var(--arnx-lavender);
-  }
-  .hero-mascot {
-    filter: drop-shadow(0 0 26px #faf8f34d);
+  .menu-toggle {
+    margin-left: 0;
   }
 }
