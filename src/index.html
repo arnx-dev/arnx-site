@@ -4,136 +4,107 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#faf8f3" />
-    <title>arnx — Test your change. Keep the evidence.</title>
+    <title>arnx: Open-source AI code review with executable evidence</title>
     <meta
       name="description"
-      content="Test your change before opening or merging a PR. Open-source CLI, executable evidence, tests you keep. Bring your own model. Private developer pilot."
+      content="Find bugs in AI-generated code. arnx investigates changes, runs tests for suspected bugs, and keeps accepted tests as regression checks."
     />
+    <link rel="canonical" href="https://arnx.dev/" />
     <meta
       property="og:title"
-      content="arnx — Test your change. Keep the evidence."
+      content="arnx: Open-source AI code review with executable evidence"
     />
     <meta
       property="og:description"
-      content="An open-source CLI that investigates code changes and tries to prove suspected bugs by writing and running tests."
+      content="Find bugs in AI-generated code. arnx investigates changes, runs tests for suspected bugs, and keeps accepted tests as regression checks."
     />
     <meta property="og:type" content="website" />
-    <link rel="canonical" href="https://arnx.dev/" />
     <meta property="og:url" content="https://arnx.dev/" />
     <meta property="og:image" content="https://arnx.dev/og.png" />
-    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="arnx — Test your change. Keep the evidence."
+      content="arnx: Test your change. Keep the evidence."
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="arnx — Test your change. Keep the evidence."
+      content="arnx: Open-source AI code review with executable evidence"
     />
     <meta
       name="twitter:description"
-      content="An open-source CLI that investigates code changes and tries to prove suspected bugs by writing and running tests."
+      content="Find bugs in AI-generated code. arnx investigates changes, runs tests for suspected bugs, and keeps accepted tests as regression checks."
     />
     <meta name="twitter:image" content="https://arnx.dev/og.png" />
     <meta
       name="twitter:image:alt"
-      content="arnx — Test your change. Keep the evidence."
+      content="arnx: Test your change. Keep the evidence."
     />
     <link rel="icon" type="image/svg+xml" href="./brand/arnx-favicon.svg" />
     <link rel="stylesheet" href="./assets/styles.css" />
     <script type="module" src="./assets/app.js"></script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header wrap">
-      <a href="#" class="wordmark placeholder-wordmark" aria-label="arnx home"
-        >arnx</a
-      >
-      <nav aria-label="Main navigation">
-        <a href="#how-it-works">How it works</a
-        ><a href="#pilot-results">Pilot results</a><a href="#faq">FAQ</a>
-      </nav>
-      <a class="nav-cta" href="#pilot"
-        >Request a pilot invite <span aria-hidden="true">↗</span></a
-      >
-      <button
-        class="menu-toggle"
-        aria-expanded="false"
-        aria-controls="mobile-nav"
-        aria-label="Open navigation"
-      >
-        ☰
-      </button>
-      <nav
-        id="mobile-nav"
-        class="mobile-nav"
-        aria-label="Mobile navigation"
-        hidden
-      >
-        <a href="#how-it-works">How it works</a
-        ><a href="#pilot-results">Pilot results</a><a href="#faq">FAQ</a
-        ><a href="#pilot">Request a pilot invite</a>
-      </nav>
-    </header>
+    {{HEADER}}
     <main id="main">
       <section class="hero wrap" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow">
-            <span class="status-dot" aria-hidden="true"></span> Private
-            developer pilot
-          </p>
+          <p class="eyebrow">Open-source AI code review</p>
           <h1 id="hero-title">
-            Your agent writes code.<br />arnx puts it<br
-              class="desktop-break"
-            />
-            to the test.
+            Find bugs in AI-generated code. Reproduce them with tests.
           </h1>
-          <p class="descriptor">Test your change. Keep the evidence.</p>
-          <div
-            class="ownership-badges"
-            aria-label="Open source and model choice"
-          >
-            <a href="#open-source">Open source <span>MIT</span></a
-            ><a href="#open-source">BYOM <span>Bring your own model</span></a>
-          </div>
           <p class="hero-description">
-            Before you open or merge a PR, put your change to the test. arnx
-            investigates suspected bugs, runs tests, and gives you evidence to
-            inspect. You decide what matters and keep the useful tests.
+            arnx investigates code changes, generates and runs tests for
+            suspected bugs, and lets you keep confirmed findings as regression
+            checks.
+          </p>
+          <p class="descriptor">
+            Your agent writes the code.<br />arnx checks the behavior.
           </p>
           <div class="actions">
-            <a class="button primary" href="#pilot"
-              >Request a pilot invite <span aria-hidden="true">↗</span></a
-            ><a class="text-link" href="#how-it-works"
-              >See how it works <span aria-hidden="true">↓</span></a
+            <a
+              class="button primary"
+              href="./quickstart.html"
+              data-event="docs_click"
+              >Get started <span aria-hidden="true">↗</span></a
+            ><a
+              class="text-link"
+              href="{{GITHUB_URL}}"
+              data-event="github_click"
+              >View on GitHub <span aria-hidden="true">↗</span></a
             >
           </div>
-          <p class="hero-footnote">
-            Choose supported models. Use your API keys. Pay your providers
-            directly.
-          </p>
+          <div class="ownership-badges">
+            <a href="./license.html"
+              >Apache 2.0 <span>Open-source release</span></a
+            ><a href="./quickstart.html#models"
+              >BYOM <span>Your API keys</span></a
+            >
+          </div>
+          <p class="hero-footnote">{{RELEASE_NOTE}}</p>
         </div>
         <div class="hero-scene">
-          <div class="scene-label">
-            <span aria-hidden="true">⌖</span> A closer look at your change
-          </div>
+          <div class="scene-label">⌖ From a real code review</div>
           <article class="hero-evidence evidence-card failure">
             <div class="card-heading">
               <span class="state-icon" aria-hidden="true">×</span
-              ><strong>Reproducible failure</strong
-              ><span class="example-label">Illustrative</span>
+              ><strong>A failure worth investigating</strong>
             </div>
             <div class="card-content">
-              <p class="file-label">test_discount.py</p>
-              <pre><code><span class="code-purple">def</span> test_discount():
-    total = apply_discount(100, 20)
-    <span class="code-purple">assert</span> total == 80</code></pre>
+              <p class="file-label">Python + Postgres / real review</p>
+              <p class="artifact-claim">
+                A page limit dropped callouts while the polling state advanced.
+              </p>
               <p class="failure-result">
-                Expected <b>80</b> <span aria-hidden="true">→</span> received
-                <b>100</b>
+                The generated tests reproduced the failure. The owner accepted
+                the finding and fixed the code.
+              </p>
+              <a class="text-link" href="./case-study.html"
+                >Read the case study ↗</a
+              >
+              <p class="artifact-caption">
+                Summary of a recorded run; not terminal output.
               </p>
             </div>
           </article>
@@ -148,70 +119,78 @@
               ./brand/mascot-inspecting-960.webp   960w,
               ./brand/mascot-inspecting-1254.webp 1254w
             "
-            sizes="(max-width: 760px) 320px, (max-width: 1059px) 310px, 430px"
+            sizes="(max-width: 360px) 240px, (max-width: 1050px) 280px, 340px"
             decoding="async"
             alt="Curious charcoal mascot examining the evidence through a magnifying glass"
             width="1254"
             height="1254"
             fetchpriority="high"
           />
-          <div class="scene-note">
-            <span aria-hidden="true">↳</span> Show me<br />the evidence.
-          </div>
-          <div class="kept-note">
-            <span aria-hidden="true">✓</span> A useful test stays with you.
-          </div>
+          <div class="scene-note">Show me<br />the evidence.</div>
         </div>
       </section>
       <div class="language-strip wrap">
-        <span class="mono">WORKS WITH YOUR PROJECT</span
+        <span class="mono">SUPPORTED RUNNERS</span
         ><span>Python <small>/ pytest</small></span
         ><span>JavaScript / TypeScript</span
-        ><span>Rust <small>/ cargo-nextest</small></span
-        ><span class="more-languages">More languages to come</span>
+        ><span>Rust <small>/ cargo-nextest · early</small></span
+        ><span>C# / Go <small>/ under construction</small></span>
+        <a href="{{ISSUES_URL}}" data-event="github_click"
+          >Want to see more here? ↗</a
+        >
       </div>
+      <p class="wrap more-languages">
+        Rust is early and our least-tested runner. First setup compiles
+        dependencies and test targets into an image that can take several GB.
+        <a href="{{ISSUES_URL}}" data-event="github_click"
+          >Try your crate and tell us what breaks ↗</a
+        >
+      </p>
       <section
-        class="ownership wrap"
-        id="open-source"
-        aria-labelledby="ownership-title"
+        class="section wrap"
+        id="evidence"
+        aria-labelledby="evidence-title"
       >
-        <div class="ownership-intro">
-          <p class="eyebrow">Open source. Your model. Your call.</p>
-          <h2 id="ownership-title">
-            Read the harness.<br />Choose the models.
-          </h2>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">01 / A real review</p>
+            <h2 id="evidence-title">A finding. A fix.<br />The same tests.</h2>
+          </div>
+          <span class="tag">Python + Postgres</span>
         </div>
-        <div class="ownership-detail">
-          <h3>Open source, MIT.</h3>
-          <p>
-            Inspect how arnx reviews your changes. The review package is MIT
-            software, and accepted tests stay as ordinary files in your
-            repository.
-          </p>
+        <div class="results-layout">
+          <div class="results-story">
+            <p>
+              On a Python pipeline backed by Postgres, generated tests
+              reproduced an inverted calculation, lost callouts beyond a page
+              limit, and stale prices used in evaluation.
+            </p>
+            <p>
+              The owner marked 18 findings real. Their coding agent changed the
+              product code; accepted test files stayed unchanged after
+              acceptance.
+            </p>
+            <a class="text-link" href="./case-study.html"
+              >Read the full case study ↗</a
+            >
+          </div>
+          <div class="results-card">
+            <p class="mono">FINAL ACCEPTED-TEST CHECK</p>
+            <div class="result-numbers">
+              <div><strong>54</strong><span>passed</span></div>
+              <div><strong>0</strong><span>failing</span></div>
+              <div><strong>1</strong><span>skipped</span></div>
+            </div>
+            <div class="results-footer">
+              Recorded results · Python + Postgres
+            </div>
+          </div>
         </div>
-        <div class="ownership-detail">
-          <h3>BYOM — Bring your own model.</h3>
-          <p>
-            Choose from supported models and providers, connect your own API
-            keys, and pay providers directly. Selected code is sent to the
-            providers you configure.
-          </p>
-        </div>
-      </section>
-      <section class="section wrap value" aria-labelledby="value-title">
-        <p class="eyebrow">
-          01 / Test it. Keep the evidence. Bring your own model.
-        </p>
-        <h2 id="value-title">
-          See the failure.<br /><span class="muted-heading"
-            >Check the fix.</span
-          >
-          Keep the test.
-        </h2>
-        <p>
-          Run arnx on your branch before opening a PR, or while reviewing a
-          change before merge. Turn suspected bugs into executable checks,
-          settle unclear intent, and keep accepted tests in your repository.
+        <p class="scope-note">
+          <strong>One owner-run case on a tuned development branch.</strong> Two
+          known issues were missed. The counts describe the final test run, not
+          bug-detection accuracy. Private source and raw execution logs are not
+          published.
         </p>
       </section>
       <section
@@ -219,502 +198,188 @@
         id="how-it-works"
         aria-labelledby="workflow-title"
       >
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">02 / How it works</p>
-            <h2 id="workflow-title">
-              Your judgment.<br />Your agent. A checked fix.
-            </h2>
-          </div>
-          <p>
-            From a change you want to understand<br />to a test worth keeping.
-          </p>
-        </div>
-        <ol class="steps">
+        <p class="eyebrow">02 / How arnx works</p>
+        <h2 id="workflow-title">
+          Investigate the change.<br />Keep the checks that matter.
+        </h2>
+        <ol class="steps beta-steps">
           <li>
             <span class="step-number">01</span>
-            <h3>Set up once</h3>
+            <h3>Setup</h3>
             <p>
-              arnx proposes a Docker environment and runs your existing suite.
-              Inspect the projects, services and exclusions before approval.
+              Understand the project, propose a Docker test environment, and run
+              the existing suite. Inspect the configuration before approval.
             </p>
             <code>arnx setup</code>
           </li>
           <li>
             <span class="step-number">02</span>
-            <h3>Review a change</h3>
+            <h3>Review</h3>
             <p>
-              Inspect failing tests, the second-model assessment, open questions
-              and what was left untested.
+              Investigate the diff, generate targeted tests, and run them. Read
+              the failures, open questions, and coverage gaps.
             </p>
             <code>arnx review</code>
           </li>
           <li>
             <span class="step-number">03</span>
-            <h3>Decide what matters</h3>
+            <h3>Accept</h3>
             <p>
-              Mark findings real, intended or noise. Answer questions about
-              behavior only you can decide.
-            </p>
-            <span class="step-meta">You make the call</span>
-          </li>
-          <li>
-            <span class="step-number">04</span>
-            <h3>Accept useful tests</h3>
-            <p>
-              Keep selected tests before fixing the code. Answers that settle
-              intent can become tests too.
+              Validate meaningful findings and keep their tests. You or your
+              coding agent make the fix.
             </p>
             <code>arnx accept &lt;id&gt;</code>
           </li>
           <li>
-            <span class="step-number">05</span>
-            <h3>Give your agent the fix</h3>
+            <span class="step-number">04</span>
+            <h3>Check</h3>
             <p>
-              Print a handoff with accepted findings, answers and tests. You or
-              your coding agent change the production code.
-            </p>
-            <code>arnx prompt &lt;id&gt;</code>
-          </li>
-          <li>
-            <span class="step-number">06</span>
-            <h3>Check. Then keep.</h3>
-            <p>
-              Run accepted tests in the approved sandbox. Inspect and commit the
-              tests together with the fix.
+              Rerun accepted regression tests in Docker without new model calls.
+              Review and commit the tests with the fix.
             </p>
             <code>arnx check</code>
           </li>
         </ol>
+        <a
+          class="text-link"
+          href="./quickstart.html#workflow"
+          data-event="docs_click"
+          >Read the complete CLI workflow ↗</a
+        >
       </section>
-      <section
-        class="evidence-section"
-        id="evidence"
-        aria-labelledby="evidence-title"
-      >
-        <div class="wrap section">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">03 / Show me the evidence</p>
-              <h2 id="evidence-title">
-                Something you can run.<br />A decision you can make.
-              </h2>
-            </div>
-            <p>Illustrative examples.<br />Not captured arnx output.</p>
-          </div>
-          <div class="evidence-grid">
-            <article class="evidence-card failure">
-              <div class="card-heading">
-                <span class="state-icon" aria-hidden="true">×</span>
-                <h3>A failure to inspect</h3>
-              </div>
-              <div class="card-content">
-                <span class="example-label">Illustrative</span>
-                <p class="file-label">test_discount.py</p>
-                <pre><code>total = apply_discount(100, 20)
-assert total == 80
-
-<span class="error-text">Expected: 80
-Received: 100</span></code></pre>
-                <p>
-                  The discount wasn't applied. Run the test and inspect the
-                  assumption behind it.
-                </p>
-              </div>
+      <section class="evidence-section">
+        <div class="section wrap">
+          <p class="eyebrow">03 / Why executable evidence matters</p>
+          <h2>
+            A suspicion needs a test.<br />A failing test needs your judgment.
+          </h2>
+          <div class="beta-grid">
+            <article>
+              <h3>Inspect the behavior</h3>
+              <p>
+                A review comment identifies a possible problem. An executed test
+                gives you inputs, an expected result, and a failure you can
+                investigate.
+              </p>
             </article>
-            <article class="evidence-card question">
-              <div class="card-heading">
-                <span class="state-icon" aria-hidden="true">?</span>
-                <h3>A question for you</h3>
-              </div>
-              <div class="card-content">
-                <span class="example-label">Illustrative</span>
-                <p class="question-prompt">
-                  What should happen when a promo code has expired?
-                </p>
-                <ul class="choice-examples">
-                  <li>
-                    <span aria-hidden="true">○</span> Reject it with a clear
-                    error.
-                  </li>
-                  <li>
-                    <span aria-hidden="true">○</span> Continue without a
-                    discount.
-                  </li>
-                </ul>
-                <p>
-                  The code alone can't settle the intended behavior. You decide.
-                </p>
-              </div>
+            <article>
+              <h3>Validate the assumption</h3>
+              <p>
+                A test can misunderstand intent, depend on a brittle fixture, or
+                fail at setup. Repetition and a second model do not replace
+                developer review.
+              </p>
             </article>
-            <article class="evidence-card success">
-              <div class="card-heading">
-                <span class="state-icon" aria-hidden="true">✓</span>
-                <h3>A test to keep</h3>
-              </div>
-              <div class="card-content">
-                <span class="example-label">Illustrative · after a fix</span>
-                <p class="file-label">test_discount.py</p>
-                <pre><code>total = apply_discount(100, 20)
-assert total == 80
-
-<span class="success-text">✓ 1 passed</span></code></pre>
-                <p>
-                  Keep the accepted test with the reviewed fix. It stays
-                  ordinary code in your repository.
-                </p>
-              </div>
+            <article>
+              <h3>Check it again</h3>
+              <p>
+                Accepted tests remain local files. Use
+                <code>arnx check</code> after the fix and on later changes, with
+                no additional model inference cost.
+              </p>
             </article>
           </div>
-          <div class="terminal-row">
-            <div class="terminal">
-              <div class="terminal-header">
-                <span class="terminal-dots" aria-hidden="true">● ● ●</span
-                ><span>The workflow / illustrative</span
-                ><button
-                  class="copy-button"
-                  aria-label="Copy workflow commands"
-                >
-                  Copy commands
-                </button>
-              </div>
-              <pre><code id="workflow-code"><span class="terminal-comment"># Inspect findings. Mark what matters. Answer questions.</span>
-<span class="terminal-prompt">$</span> arnx review
-<span class="terminal-prompt">$</span> arnx accept &lt;id&gt;
-<span class="terminal-prompt">$</span> arnx prompt &lt;id&gt;
-
-<span class="terminal-comment"># Give the prompt to your coding agent. Inspect its fix.</span>
-<span class="terminal-prompt">$</span> arnx check</code></pre>
-              <span class="sr-only" id="copy-status" role="status"></span>
-            </div>
-            <div class="terminal-aside">
-              <img
-                src="./brand/mascot-questioning-165.webp"
-                srcset="
-                  ./brand/mascot-questioning-100.webp 100w,
-                  ./brand/mascot-questioning-165.webp 165w,
-                  ./brand/mascot-questioning-200.webp 200w,
-                  ./brand/mascot-questioning-330.webp 330w,
-                  ./brand/mascot-questioning-495.webp 495w
-                "
-                sizes="(max-width: 760px) 100px, 165px"
-                decoding="async"
-                width="1254"
-                height="1254"
-                alt=""
-                loading="lazy"
-              />
-              <p>Questions before<br />assumptions.</p>
-              <span>Confidence should be earned.</span>
-            </div>
-          </div>
+          <a class="text-link" href="./product.html"
+            >Understand the product and its boundaries ↗</a
+          >
         </div>
       </section>
-      <section
-        class="section wrap pilot-results"
-        id="pilot-results"
-        aria-labelledby="results-title"
-      >
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">04 / A real run · October 14, 2026</p>
-            <h2 id="results-title">
-              From a real finding<br />to a checked fix.
-            </h2>
-          </div>
-          <span class="tag">Python + Postgres</span>
-        </div>
-        <div class="results-layout">
-          <div class="results-story">
+      <section class="section wrap" id="open-source">
+        <p class="eyebrow">04 / Choose your setup</p>
+        <h2>Your keys. Our Cloud. Your requirements.</h2>
+        <div class="beta-grid use-options">
+          <article class="path-card">
+            <p class="mono">BYOM · OPEN SOURCE</p>
+            <h3>Bring your own model.</h3>
             <p>
-              On a Python data pipeline backed by Postgres, arnx reproduced
-              problems including an inverted Gini calculation, lost callouts
-              after a page limit, and prices drawn from the wrong point in time.
+              Use supported provider API keys and pay providers directly. Tests
+              run in your local Docker environment.
             </p>
-            <p>
-              The owner marked <strong>18 findings real</strong> and answered
-              questions about intent. Their own coding agent received arnx's fix
-              prompt and changed the product code.
-            </p>
-            <p>
-              The accepted test files stayed unchanged after acceptance and
-              remained in the repository.
-            </p>
-            <a class="text-link" href="./case-study.html"
-              >Read the pilot case study <span aria-hidden="true">↗</span></a
+            <p>{{LICENSE_STATUS}} {{CLI_DISTRIBUTION_STATUS}}</p>
+            <a
+              class="text-link"
+              href="./quickstart.html"
+              data-event="docs_click"
+              >Open-source quickstart ↗</a
             >
-          </div>
-          <div class="results-card">
-            <p class="mono">FINAL ACCEPTED-TEST CHECK</p>
-            <div class="result-numbers">
-              <div>
-                <strong>54</strong
-                ><span
-                  ><i class="result-dot mint" aria-hidden="true"></i>
-                  passed</span
-                >
-              </div>
-              <div><strong>0</strong><span>failing</span></div>
-              <div><strong>1</strong><span>skipped</span></div>
-            </div>
-            <div class="results-footer">
-              <span aria-hidden="true">✓</span> Checked in the approved sandbox,
-              Postgres included.
-            </div>
-          </div>
+          </article>
+          <article class="path-card">
+            <p class="mono">ARNX CLOUD</p>
+            <h3>Let us manage the models.</h3>
+            <p>
+              Managed model access and centralized billing, without bringing
+              your own provider keys. {{CLOUD_DESCRIPTION}}
+            </p>
+            <p>
+              New project: <code>arnx init --cloud</code><br />
+              Already using arnx? <code>arnx cloud on</code>
+            </p>
+            {{CLOUD_ACTION}}
+          </article>
+          <article class="path-card">
+            <p class="mono">ENTERPRISE · LET’S TALK</p>
+            <h3>Need a private setup?</h3>
+            <p>
+              Talk directly with us about private deployment requirements, data
+              boundaries, and dedicated support for your team.
+            </p>
+            <p>
+              We’ll work through your requirements and agree on scope together.
+            </p>
+            <a
+              class="text-link"
+              href="mailto:info@arnx.dev?subject=arnx%20Enterprise"
+              data-event="enterprise_click"
+              >Email us about Enterprise ↗</a
+            >
+          </article>
         </div>
         <p class="scope-note">
-          <strong>One owner-run development case.</strong> Two known issues were
-          missed. These results demonstrate the workflow, not a general accuracy
-          rate.
+          {{CLOUD_DATA_FLOW}}
+          <a href="./security.html">Read the data and execution boundaries.</a>
         </p>
       </section>
-      <section
-        class="section wrap requirements"
-        aria-labelledby="requirements-title"
-      >
-        <div>
-          <p class="eyebrow">05 / Fits your development workflow</p>
-          <h2 id="requirements-title">
-            Your repository.<br />Your tools. Your keys.
-          </h2>
-          <p>
-            Single packages and repositories with multiple projects. We'll check
-            fit during pilot onboarding.
-          </p>
-        </div>
-        <div class="requirements-list">
-          <div>
-            <span class="language-mark">Py</span>
-            <h3>Python</h3>
-            <p>pytest</p>
-          </div>
-          <div>
-            <span class="language-mark">JS</span>
-            <h3>JavaScript / TypeScript</h3>
-            <p>vitest, jest, node:test or bun</p>
-          </div>
-          <div>
-            <span class="language-mark">Rs</span>
-            <h3>Rust</h3>
-            <p>cargo-nextest</p>
-          </div>
-          <p class="language-roadmap">
-            More languages to come. Tell us what you use when requesting a pilot
-            invite.
-          </p>
-          <p class="requirements-note">
-            Docker and your own model-provider API keys are required. Selected
-            code is sent to configured providers. Accepted tests remain ordinary
-            files in your repository.
-          </p>
+      <section class="section wrap community-section">
+        <p class="eyebrow">05 / Built with developers</p>
+        <h2>Bring a reproducible problem.</h2>
+        <p>
+          Report a bug, request framework support, or help make a generated test
+          more useful. A small reproduction and clear expected behavior are a
+          good place to start.
+        </p>
+        <div class="actions">
+          <a class="text-link" href="{{ISSUES_URL}}" data-event="github_click"
+            >GitHub issues ↗</a
+          ><a class="text-link" href="./community.html">Contribution guide ↗</a
+          ><a
+            class="text-link"
+            href="mailto:info@arnx.dev?subject=Guided%20arnx%20pilot"
+            data-event="pilot_click"
+            >Request a guided pilot ↗</a
+          >
         </div>
       </section>
-      <section class="section wrap faq" id="faq" aria-labelledby="faq-title">
-        <div>
-          <p class="eyebrow">06 / A few useful answers</p>
-          <h2 id="faq-title">Before you<br />put it to the test.</h2>
-          <p>
-            Still curious?<br /><a href="mailto:info@arnx.dev"
-              >info@arnx.dev <span aria-hidden="true">↗</span></a
+      <section class="final-cta">
+        <div class="section wrap">
+          <p class="eyebrow">Keep the evidence</p>
+          <h2>Run your first review.<br />Keep the tests that matter.</h2>
+          <div class="actions">
+            <a
+              class="button primary"
+              href="./quickstart.html"
+              data-event="docs_click"
+              >Get started <span aria-hidden="true">↗</span></a
+            ><a
+              class="text-link"
+              href="{{GITHUB_URL}}"
+              data-event="github_click"
+              >View on GitHub <span aria-hidden="true">↗</span></a
             >
-          </p>
-        </div>
-        <div class="faq-list">
-          <details>
-            <summary>Where does arnx fit in a PR workflow?</summary>
-            <p>
-              Run the CLI on your change before opening a PR or during review,
-              before merge. arnx generates and runs tests for suspected bugs.
-              You inspect the evidence, accept useful tests, and hand the fix
-              prompt to your coding agent. Then arnx checks the fix with those
-              tests. The current pilot is a developer-run CLI workflow; it does
-              not post PR comments or provide a hosted GitHub check.
-            </p>
-          </details>
-          <details>
-            <summary>What does “bring your own model” mean?</summary>
-            <p>
-              Configure supported models for arnx's review workflow using your
-              own provider API keys. You pay those providers directly. Model
-              choice depends on the supported provider and role; BYOM does not
-              mean every model or a local model can run in arnx. Selected code
-              is sent to your configured providers.
-            </p>
-          </details>
-          <details>
-            <summary>Is arnx open source?</summary>
-            <p>
-              Yes. The arnx review package is MIT software. You can inspect the
-              harness, and accepted tests remain ordinary, editable files in
-              your repository. Open source does not make model-provider API
-              calls free.
-            </p>
-          </details>
-          <details>
-            <summary>Does arnx fix my code?</summary>
-            <p>
-              You or your coding agent make the fix. arnx retains accepted
-              tests, prepares the fix prompt and runs the tests to help you
-              check the result.
-            </p>
-          </details>
-          <details>
-            <summary>Is a finding always a bug?</summary>
-            <p>
-              No. A repeated failure and a second-model assessment give you
-              evidence to inspect. The test can still make a wrong assumption.
-              You decide whether the behavior is a bug, intended, or noise.
-            </p>
-          </details>
-          <details>
-            <summary>Does a clean result mean the change is correct?</summary>
-            <p>
-              No. Read open questions and coverage gaps. A passing
-              <code>arnx check</code> means the accepted tests passed in that
-              environment. Questions alone can still leave a review with exit
-              code 0.
-            </p>
-          </details>
-          <details>
-            <summary>Where does my code go?</summary>
-            <p>
-              Tests run in local Docker containers. Selected code goes to
-              configured model providers. Recognized secrets are filtered;
-              inspect <code>.arnxignore</code> for repository data and sensitive
-              files. Read accepted tests before running them through your own
-              tooling.
-            </p>
-          </details>
-          <details>
-            <summary>What does it cost?</summary>
-            <p>
-              The arnx package is MIT. You pay your model providers directly. In
-              the documented Opus pilot, setup, review and acceptance totaled
-              $5.36 in reported model spend. The fixing agent's cost was
-              separate and unrecorded. Each
-              <code>arnx check</code> made no model calls. This is one example,
-              not a typical-price estimate. We'll agree a spend cap before your
-              first run.
-            </p>
-          </details>
-          <details>
-            <summary>How do I get it?</summary>
-            <p>
-              Request a pilot invitation below. Selected participants receive
-              instructions for the chosen pre-release build. Docker and model
-              API keys are needed; an existing coding-agent subscription should
-              not be assumed to cover API calls.
-            </p>
-          </details>
-        </div>
-      </section>
-      <section class="pilot-section" id="pilot" aria-labelledby="pilot-title">
-        <div class="wrap pilot-inner">
-          <div class="pilot-copy">
-            <p class="eyebrow">
-              <span class="status-dot" aria-hidden="true"></span> Private
-              developer pilot
-            </p>
-            <h2 id="pilot-title">Bring a change<br />you can judge.</h2>
-            <p>
-              We're preparing a pilot with 5–10 selected developers. Bring a
-              repository and a change you understand. Help shape the first
-              version by using it on work you would actually ship.
-            </p>
-            <ul class="pilot-expectations">
-              <li>Setup support for your repository</li>
-              <li>An agreed model-spend cap before the first run</li>
-              <li>
-                Your feedback on findings, questions and tests worth keeping
-              </li>
-            </ul>
-            <img
-              src="./brand/mascot-greencheck-190.webp"
-              srcset="
-                ./brand/mascot-greencheck-190.webp 190w,
-                ./brand/mascot-greencheck-380.webp 380w,
-                ./brand/mascot-greencheck-570.webp 570w
-              "
-              sizes="190px"
-              decoding="async"
-              alt=""
-              width="1254"
-              height="1254"
-              loading="lazy"
-            />
           </div>
-          <div class="invite-card">
-            <p class="mono">LET'S PUT YOUR NEXT CHANGE TO THE TEST.</p>
-            <h3>Request a pilot invite</h3>
-            <p>
-              Tell us where to reach you. We'll follow up about your project and
-              pilot fit.
-            </p>
-            <form id="pilot-form">
-              <label for="email">Email address</label
-              ><input
-                id="email"
-                name="email"
-                type="email"
-                autocomplete="email"
-                placeholder="you@example.com"
-                maxlength="254"
-                required
-              /><label for="project"
-                >What are you building? <span>(optional)</span></label
-              ><textarea
-                id="project"
-                name="project"
-                rows="3"
-                maxlength="1000"
-                placeholder="A little about your project, language and coding agent…"
-              ></textarea>
-              <div class="honeypot" aria-hidden="true">
-                <label for="website">Leave this blank</label
-                ><input
-                  id="website"
-                  name="website"
-                  tabindex="-1"
-                  autocomplete="off"
-                />
-              </div>
-              <button class="button primary" type="submit">
-                Request a pilot invite <span aria-hidden="true">↗</span>
-              </button>
-              <p id="form-status" role="status" aria-live="polite"></p>
-              <p class="privacy-note">
-                Your email and project note are used to respond about this
-                pilot. Please don't include code, credentials or other sensitive
-                information.
-              </p>
-            </form>
-            <noscript
-              ><p>
-                Email
-                <a href="mailto:info@arnx.dev?subject=arnx%20pilot%20request"
-                  >info@arnx.dev</a
-                >
-                to request a pilot invite.
-              </p></noscript
-            >
-            <p class="direct-email">
-              Prefer email?
-              <a href="mailto:info@arnx.dev?subject=arnx%20pilot%20request"
-                >info@arnx.dev ↗</a
-              >
-            </p>
-          </div>
+          <p class="hero-footnote">{{RELEASE_NOTE}}</p>
         </div>
       </section>
     </main>
-    <footer class="wrap footer">
-      <a href="#" class="wordmark placeholder-wordmark" aria-label="arnx home"
-        >arnx</a
-      >
-      <p>Show me the evidence.</p>
-      <span>Open source · MIT · Bring your own model</span
-      ><a href="mailto:info@arnx.dev">Get in touch ↗</a>
-    </footer>
+    {{FOOTER}}
   </body>
 </html>

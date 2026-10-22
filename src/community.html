@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf8f3" />
+    <title>Contribute: arnx</title>
+    <meta
+      name="description"
+      content="Report reproducible bugs, request framework support, and help improve executable code-review evidence."
+    />
+    <link rel="canonical" href="https://arnx.dev/community.html" />
+    <meta property="og:title" content="Contribute: arnx" />
+    <meta
+      property="og:description"
+      content="Report reproducible bugs, request framework support, and help improve executable code-review evidence."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://arnx.dev/community.html" />
+    <meta property="og:image" content="https://arnx.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Contribute: arnx" />
+    <meta
+      name="twitter:description"
+      content="Report reproducible bugs, request framework support, and help improve executable code-review evidence."
+    />
+    <meta name="twitter:image" content="https://arnx.dev/og.png" />
+    <meta
+      name="twitter:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <link rel="icon" type="image/svg+xml" href="./brand/arnx-favicon.svg" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <script type="module" src="./assets/app.js"></script>
+  </head>
+  <body>
+    {{HEADER}}
+    <main id="main" class="case-article wrap">
+      <p class="eyebrow">Community / Contributing</p>
+      <h1>Help make the evidence useful.</h1>
+      <p class="descriptor">Start with a behavior you can reproduce.</p>
+      <p>
+        {{SOURCE_STATUS}} GitHub issues are open for bug reports, feature
+        requests, and framework-support requests. {{CONTRIBUTING_LINK}}
+        {{DISCUSSIONS_LINK}}
+      </p>
+      <div class="actions">
+        <a
+          class="button primary"
+          href="{{ISSUES_URL}}"
+          data-event="github_click"
+          >Open GitHub issues ↗</a
+        ><a class="text-link" href="{{GITHUB_URL}}" data-event="github_click"
+          >View on GitHub ↗</a
+        >
+      </div>
+      <h2>A useful bug report</h2>
+      <ul>
+        <li>
+          Your arnx version, OS, Docker version, language, and test runner.
+        </li>
+        <li>The command, expected behavior, and actual behavior.</li>
+        <li>A small reproduction you have permission to share.</li>
+        <li>
+          Sanitized setup or review output and whether the failure repeats.
+        </li>
+        <li>
+          For a questionable finding: why the generated test’s expectation
+          differs from intended behavior.
+        </li>
+      </ul>
+      <p>
+        Remove credentials, customer data, private repository names, and
+        confidential code. Do not upload a complete
+        <code>.arnx/</code> directory without reviewing it.
+        <a href="./security.html#reporting"
+          >Security reports belong in a private email</a
+        >.
+      </p>
+      <h2>Request framework support</h2>
+      <p>
+        Name the language, runner, package manager, and required services. A
+        small public example and the command that runs its tests make the
+        request actionable. Explain where setup currently stops.
+      </p>
+      <h2>Contribute code or documentation</h2>
+      <p>
+        Once the source release is published, follow its canonical contribution
+        guide. Start larger changes with an issue describing the problem and
+        proposed behavior. Keep changes focused, include a reproduction for bug
+        fixes, run the repository’s checks, and preserve third-party
+        attribution. {{LICENSE_STATUS}}
+      </p>
+      <h2>Prefer a guided first run?</h2>
+      <p>
+        A guided pilot is optional onboarding and product research.
+        <a
+          href="mailto:info@arnx.dev?subject=Guided%20arnx%20pilot"
+          data-event="pilot_click"
+          >Request a guided pilot by email</a
+        >. Please describe your language and runner; do not send private source
+        or keys.
+      </p>
+    </main>
+    {{FOOTER}}
+  </body>
+</html>

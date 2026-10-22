@@ -14,6 +14,7 @@ export function serve(port = Number(process.env.PORT || 4173)) {
     ".woff2": "font/woff2",
     ".woff": "font/woff",
     ".txt": "text/plain",
+    ".xml": "application/xml",
   };
   const server = createServer(async (req, res) => {
     try {

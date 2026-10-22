@@ -4,90 +4,52 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#faf8f3" />
-    <title>arnx pilot — From a finding to a checked fix</title>
+    <title>A real review, accepted tests, and a checked fix: arnx</title>
     <meta
       name="description"
-      content="Your agent writes code. arnx puts it to the test. Investigate failures, answer questions, check the fix and keep regression tests. Private developer pilot."
+      content="An owner-run Python/Postgres review, developer validation, agent fixes, and 54 passing accepted tests. Includes costs and limitations."
     />
+    <link rel="canonical" href="https://arnx.dev/case-study.html" />
     <meta
       property="og:title"
-      content="arnx pilot — From a finding to a checked fix"
+      content="A real review, accepted tests, and a checked fix: arnx"
     />
     <meta
       property="og:description"
-      content="See the failure. Check the fix. Keep the test. Private developer pilot."
+      content="An owner-run Python/Postgres review, developer validation, agent fixes, and 54 passing accepted tests. Includes costs and limitations."
     />
     <meta property="og:type" content="website" />
-    <link rel="canonical" href="https://arnx.dev/case-study.html" />
     <meta property="og:url" content="https://arnx.dev/case-study.html" />
     <meta property="og:image" content="https://arnx.dev/og.png" />
-    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="arnx — Test your change. Keep the evidence."
+      content="arnx: Test your change. Keep the evidence."
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="arnx pilot — From a finding to a checked fix"
+      content="A real review, accepted tests, and a checked fix: arnx"
     />
     <meta
       name="twitter:description"
-      content="See the failure. Check the fix. Keep the test. Private developer pilot."
+      content="An owner-run Python/Postgres review, developer validation, agent fixes, and 54 passing accepted tests. Includes costs and limitations."
     />
     <meta name="twitter:image" content="https://arnx.dev/og.png" />
     <meta
       name="twitter:image:alt"
-      content="arnx — Test your change. Keep the evidence."
+      content="arnx: Test your change. Keep the evidence."
     />
     <link rel="icon" type="image/svg+xml" href="./brand/arnx-favicon.svg" />
     <link rel="stylesheet" href="./assets/styles.css" />
     <script type="module" src="./assets/app.js"></script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header wrap">
-      <a
-        href="./index.html"
-        class="wordmark placeholder-wordmark"
-        aria-label="arnx home"
-        >arnx</a
-      >
-      <nav aria-label="Main navigation">
-        <a href="./index.html#how-it-works">How it works</a
-        ><a href="./index.html#pilot-results">Pilot results</a
-        ><a href="./index.html#faq">FAQ</a>
-      </nav>
-      <a class="nav-cta" href="./index.html#pilot"
-        >Request a pilot invite <span aria-hidden="true">↗</span></a
-      >
-      <button
-        class="menu-toggle"
-        aria-expanded="false"
-        aria-controls="mobile-nav"
-        aria-label="Open navigation"
-      >
-        ☰
-      </button>
-      <nav
-        id="mobile-nav"
-        class="mobile-nav"
-        aria-label="Mobile navigation"
-        hidden
-      >
-        <a href="./index.html#how-it-works">How it works</a
-        ><a href="./index.html#pilot-results">Pilot results</a
-        ><a href="./index.html#faq">FAQ</a
-        ><a href="./index.html#pilot">Request a pilot invite</a>
-      </nav>
-    </header>
+    {{HEADER}}
     <main id="main" class="case-article wrap">
       <a class="text-link" href="./index.html">← Back to arnx</a>
-      <p class="eyebrow" style="margin-top: 40px">
-        Owner-run pilot / October 14, 2026
-      </p>
+      <p class="eyebrow" style="margin-top: 40px">Owner-run case study</p>
       <h1>From a finding<br />to a checked fix.</h1>
       <p class="descriptor">
         Your agent fixes the code. arnx runs the tests that check it.
@@ -99,18 +61,24 @@
         <strong>54 passed, zero failing and one skipped.</strong> The accepted
         test files stayed unchanged after acceptance.
       </p>
+      <p class="scope-note">
+        This is a summary of a recorded owner-run case, not a public replay
+        bundle. Private source, generated test bodies, and raw execution logs
+        are not published.
+      </p>
       <h2>The change</h2>
       <p>
         A token-callout prediction pipeline spanned 12 commits and 29 files,
         with 3,311 lines added. It involved hourly snapshots, polling, model
         training, live scoring and advisory messages. arnx set up five projects;
-        Postgres was available to the aggregator tests, and the owner approved
-        the environment.
+        Postgres was available to the Pipeline service tests, and the owner
+        approved the environment.
       </p>
       <p>
-        The review used Opus, additional hunters and a second-model assessment
-        with a fallback. A dropped connection was handled by resuming the
-        review.
+        The reviewer was Claude Opus 5.5; part hunters used Claude Haiku 5.5,
+        with gpt-6.1-sol as second hunter. The second opinion used GLM-5.3-Flash
+        via River, with gpt-6.1-sol as fallback. A dropped connection was
+        handled by resuming the review.
       </p>
       <h2>See the failure.</h2>
       <p>
@@ -155,13 +123,13 @@
         </thead>
         <tbody>
           <tr>
-            <th scope="row">solanaworker</th>
+            <th scope="row">API service</th>
             <td>12</td>
             <td>0</td>
             <td>1</td>
           </tr>
           <tr>
-            <th scope="row">aggregator</th>
+            <th scope="row">Pipeline service</th>
             <td>42</td>
             <td>0</td>
             <td>0</td>
@@ -235,28 +203,12 @@
       </p>
       <p>
         <strong>Two known issues were missed.</strong> The owner's marks do not
-        establish a general precision rate. A separate held-out comparison tied
-        the earlier build at 8 of 11 confirmed catches.
+        establish a general precision rate.
       </p>
-      <p>
-        The next step is a controlled pilot with selected developers: repeat the
-        workflow on their changes, measure the effort, and learn whether they
-        keep the tests and come back for another review.
-      </p>
-      <a class="button primary" href="./index.html#pilot"
-        >Request a pilot invite ↗</a
+      <a class="button primary" href="./quickstart.html" data-event="docs_click"
+        >Get started ↗</a
       >
     </main>
-    <footer class="wrap footer">
-      <a
-        href="./index.html"
-        class="wordmark placeholder-wordmark"
-        aria-label="arnx home"
-        >arnx</a
-      >
-      <p>Show me the evidence.</p>
-      <span>MIT CLI · Private developer pilot</span
-      ><a href="mailto:info@arnx.dev">Get in touch ↗</a>
-    </footer>
+    {{FOOTER}}
   </body>
 </html>

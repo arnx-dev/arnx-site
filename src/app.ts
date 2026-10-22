@@ -1,34 +1,39 @@
 import { trackEvent } from "./analytics";
 import { initConsent } from "./consent";
-declare const PILOT_ENDPOINT: string;
 void initConsent();
+// Event names and destinations are curated UI metadata, never URL query strings or user data.
 document.addEventListener("click", (event) => {
   if (!(event.target instanceof Element)) return;
-  const action = event.target.closest<HTMLAnchorElement | HTMLButtonElement>(
-    'a, #pilot-form button[type="submit"]',
-  );
+  const action = event.target.closest<HTMLAnchorElement>("a[data-event]");
   if (!action) return;
-  const href = action.getAttribute("href") || "";
-  const pilotLink = ["#pilot", "./index.html#pilot"].includes(href);
-  const contactLink = href.startsWith("mailto:info@arnx.dev");
-  const pilotSubmit = action.matches('#pilot-form button[type="submit"]');
-  if (!pilotLink && !contactLink && !pilotSubmit) return;
-
+  const name = action.dataset.event;
+  if (
+    name !== "github_click" &&
+    name !== "docs_click" &&
+    name !== "pilot_click" &&
+    name !== "cloud_click" &&
+    name !== "enterprise_click"
+  )
+    return;
   const location = action.closest("header")
     ? "nav"
     : action.closest("footer")
       ? "footer"
       : action.closest(".hero")
         ? "hero"
-        : action.closest("#pilot")
-          ? "pilot_section"
-          : action.closest(".faq")
-            ? "faq"
-            : "case_study";
-  trackEvent("pilot_click", {
+        : action.closest(".final-cta")
+          ? "final_cta"
+          : "content";
+  trackEvent(name, {
     location,
-    destination: contactLink ? "email" : pilotSubmit ? "pilot_form" : href,
-    label: contactLink ? "Contact" : "Request a pilot invite",
+    destination:
+      name === "github_click"
+        ? "github"
+        : name === "docs_click"
+          ? "docs"
+          : name === "cloud_click" && !action.href.startsWith("mailto:")
+            ? "docs"
+            : "email",
   });
 });
 const menu = document.querySelector<HTMLButtonElement>(".menu-toggle");
@@ -63,89 +68,33 @@ document.addEventListener("keydown", (event) => {
   }
 });
 window.matchMedia("(min-width: 761px)").addEventListener("change", closeMenu);
-const copy = document.querySelector<HTMLButtonElement>(".copy-button");
-copy?.addEventListener("click", async () => {
-  const status = document.querySelector("#copy-status");
-  try {
-    await navigator.clipboard.writeText(
-      "arnx review\narnx accept <id>\narnx prompt <id>\n# After your coding agent makes the fix:\narnx check",
+
+for (const button of document.querySelectorAll<HTMLButtonElement>(
+  "[data-copy]",
+)) {
+  button.addEventListener("click", async () => {
+    const code = document.getElementById(button.dataset.copy || "");
+    const install = button.dataset.install === "true";
+    const status = document.querySelector(
+      install ? "#install-status" : "#copy-status",
     );
-    copy.textContent = "Copied";
-    if (status) status.textContent = "Workflow commands copied.";
-  } catch {
-    if (status)
-      status.textContent =
-        "Copy unavailable. Select the commands and copy them manually.";
-  }
-});
-const form = document.querySelector<HTMLFormElement>("#pilot-form");
-const status = document.querySelector<HTMLElement>("#form-status");
-let submissionId = crypto.randomUUID();
-let previousPayload = "";
-form?.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  if (!form.reportValidity() || !status) return;
-  const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
-  if (button.disabled) return;
-  const data = new FormData(form);
-  const email = String(data.get("email") ?? "").trim();
-  const project = String(data.get("project") ?? "").trim();
-  if (!PILOT_ENDPOINT) {
-    status.dataset.state = "info";
-    status.textContent = "Online requests are not connected yet. ";
-    const link = document.createElement("a");
-    link.textContent = "Email your pilot request to info@arnx.dev";
-    link.href = `mailto:info@arnx.dev?subject=${encodeURIComponent("arnx pilot request")}&body=${encodeURIComponent(`Email: ${email}\n\nProject: ${project}`)}`;
-    status.append(link);
-    return;
-  }
-  const payload = JSON.stringify({ email, project });
-  if (previousPayload && payload !== previousPayload)
-    submissionId = crypto.randomUUID();
-  previousPayload = payload;
-  button.disabled = true;
-  button.textContent = "Sending request…";
-  status.textContent = "";
-  status.removeAttribute("data-state");
-  try {
-    const response = await fetch(PILOT_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        project,
-        website: String(data.get("website") ?? ""),
-        submissionId,
-      }),
-      signal: AbortSignal.timeout(15000),
-    });
-    if (!response.ok)
-      throw new Error(
-        response.status === 429
-          ? "Please wait a minute before trying again."
-          : "We couldn’t send your request. Please try again or email info@arnx.dev.",
-      );
-    const result = await response.json();
-    if (result.ok !== true)
-      throw new Error(
-        "We couldn’t confirm your request. Please email info@arnx.dev.",
-      );
-    status.dataset.state = "success";
-    status.textContent =
-      "Request sent. We’ll follow up by email about your project and pilot fit.";
-    form.reset();
-    submissionId = crypto.randomUUID();
-    previousPayload = "";
-  } catch (error) {
-    status.dataset.state = "error";
-    status.textContent =
-      error instanceof Error &&
-      error.name !== "TimeoutError" &&
-      error.name !== "TypeError"
-        ? error.message
-        : "Connection interrupted. Please try again or email info@arnx.dev.";
-  } finally {
-    button.disabled = false;
-    button.textContent = "Request a pilot invite ↗";
-  }
-});
+    if (!code) return;
+    try {
+      await navigator.clipboard.writeText(code.textContent || "");
+      button.textContent = "Copied";
+      if (status)
+        status.textContent = install
+          ? "Install command copied."
+          : "Workflow commands copied.";
+      if (install)
+        trackEvent("install_copy", {
+          location: "quickstart",
+          destination: "clipboard",
+        });
+    } catch {
+      if (status)
+        status.textContent =
+          "Copy unavailable. Select the commands and copy them manually.";
+    }
+  });
+}

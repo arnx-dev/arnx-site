@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf8f3" />
+    <title>Cloud credits: arnx</title>
+    <meta
+      name="description"
+      content="How arnx Cloud credits work: $5 free to start, $25 and $100 packs, signed top-up links from the CLI, receipts and invoices."
+    />
+    <link rel="canonical" href="https://arnx.dev/credits" />
+    <meta property="og:title" content="Cloud credits: arnx" />
+    <meta
+      property="og:description"
+      content="How arnx Cloud credits work: $5 free to start, $25 and $100 packs, signed top-up links from the CLI, receipts and invoices."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://arnx.dev/credits" />
+    <meta property="og:image" content="https://arnx.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cloud credits: arnx" />
+    <meta
+      name="twitter:description"
+      content="How arnx Cloud credits work: $5 free to start, $25 and $100 packs, signed top-up links from the CLI, receipts and invoices."
+    />
+    <meta name="twitter:image" content="https://arnx.dev/og.png" />
+    <meta
+      name="twitter:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <link rel="icon" type="image/svg+xml" href="./brand/arnx-favicon.svg" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <script type="module" src="./assets/app.js"></script>
+  </head>
+  <body>
+    {{HEADER}}
+    <main id="main" class="case-article wrap">
+      <p class="eyebrow">arnx Cloud / Credits</p>
+      <h1>arnx Cloud credits</h1>
+      <p class="descriptor">Prepaid credit. Pay as you go.</p>
+      <p class="release-notice">
+        <strong>Top-ups open soon.</strong> New accounts start with $5 free
+        credit.
+      </p>
+      <h2 id="balance">How credits work</h2>
+      <p>
+        Credits are your prepaid balance for arnx Cloud, in US dollars. Reviews
+        spend credit as they run. A review temporarily reserves some of your
+        balance as a hold. At the end, the hold is released and only what you
+        used is charged.
+      </p>
+      <p>
+        Each review is billed what it used, from your prepaid USD credit. The
+        CLI shows the charge per role so you can see where it went.
+        <code>arnx credits</code> shows your balance and any amount reserved for
+        reviews in progress.
+      </p>
+      <h2 id="execution">What runs where</h2>
+      <p>{{CLOUD_DATA_FLOW}}</p>
+      <h2 id="packs">Credit packs</h2>
+      <ul>
+        <li><strong>$25 pack:</strong> $25 of Cloud credit.</li>
+        <li><strong>$100 pack:</strong> $100 of Cloud credit.</li>
+      </ul>
+      <p>Both packs are sold at face value when paid top-ups open.</p>
+      <h2 id="top-up">How to top up</h2>
+      <p>
+        This page explains the process and takes no payment. When top-ups open,
+        start in your terminal:
+      </p>
+      <div class="terminal">
+        <div class="terminal-header">
+          <span>Balance and your top-up link</span>
+        </div>
+        <pre><code>arnx credits</code></pre>
+      </div>
+      <ol class="guide-steps">
+        <li>
+          The CLI prints your balance and a <strong>Top up:</strong> link signed
+          for your account.
+        </li>
+        <li>
+          Open that link. It leads to
+          <code>api.arnx.dev/billing/topup</code>, where you choose a pack. No
+          browser sign-in is needed.
+        </li>
+        <li>Pay on Stripe Checkout.</li>
+      </ol>
+      <p>
+        The link is valid for one hour. Run <code>arnx credits</code> again any
+        time for a fresh link. Keep it private: it is tied to your account. If
+        an older link brought you here, use the CLI to get a fresh one when
+        top-ups open.
+      </p>
+      <h2 id="invoices">Receipts and invoices</h2>
+      <p>
+        For each purchased pack, Stripe emails a receipt and a paid invoice with
+        a PDF. You can add a business tax ID at checkout.
+      </p>
+      <p>
+        Read the <a href="/terms">Terms of Service</a> for account and payment
+        terms.
+      </p>
+      <p>
+        Need help? Email <a href="mailto:info@arnx.dev">info@arnx.dev</a>. For
+        Cloud setup, read the
+        <a href="./quickstart.html#cloud" data-event="docs_click">quickstart</a
+        >.
+      </p>
+    </main>
+    {{FOOTER}}
+  </body>
+</html>

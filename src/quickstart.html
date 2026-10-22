@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf8f3" />
+    <title>Quickstart: arnx</title>
+    <meta
+      name="description"
+      content="Bring your own API keys or use arnx Cloud, install the coding-agent skill, and run the Docker review, accept, and check workflow."
+    />
+    <link rel="canonical" href="https://arnx.dev/quickstart.html" />
+    <meta property="og:title" content="Quickstart: arnx" />
+    <meta
+      property="og:description"
+      content="Bring your own API keys or use arnx Cloud, install the coding-agent skill, and run the Docker review, accept, and check workflow."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://arnx.dev/quickstart.html" />
+    <meta property="og:image" content="https://arnx.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Quickstart: arnx" />
+    <meta
+      name="twitter:description"
+      content="Bring your own API keys or use arnx Cloud, install the coding-agent skill, and run the Docker review, accept, and check workflow."
+    />
+    <meta name="twitter:image" content="https://arnx.dev/og.png" />
+    <meta
+      name="twitter:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <link rel="icon" type="image/svg+xml" href="./brand/arnx-favicon.svg" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <script type="module" src="./assets/app.js"></script>
+  </head>
+  <body>
+    {{HEADER}}
+    <main id="main" class="case-article wrap">
+      <p class="eyebrow">Docs / Quickstart</p>
+      <h1>From your first review to tests you keep.</h1>
+      <p class="descriptor">
+        The CLI workflow, with its costs and boundaries visible.
+      </p>
+      <section
+        class="release-notice"
+        id="installation"
+        aria-labelledby="install-title"
+      >
+        <h2 id="install-title">Install arnx</h2>
+        {{INSTALLATION}}
+      </section>
+      <p>This guide covers arnx 0.1.0. {{CANONICAL_DOCS}}</p>
+      <nav class="article-toc" aria-label="On this page">
+        <a href="#prerequisites">Prerequisites</a><a href="#byom">BYOM</a
+        ><a href="#cloud">Cloud</a><a href="#skill">Coding-agent skill</a
+        ><a href="#workflow">Workflow</a
+        ><a href="#retained-tests">Retained tests</a
+        ><a href="#troubleshooting">Troubleshooting</a>
+      </nav>
+      <h2 id="prerequisites">1. Prepare your environment</h2>
+      <ul>
+        <li>
+          A Git repository and a change whose intended behavior you can judge.
+        </li>
+        <li>
+          Docker installed and running, with permission to create containers and
+          build images.
+        </li>
+        <li>
+          Node.js 20 or later for the npm package. Standalone binaries do not
+          need Node.
+        </li>
+        <li>
+          macOS or Linux. On Windows, use WSL 2 with Docker Desktop’s WSL
+          integration.
+        </li>
+        <li>
+          A supported model-provider API key with provider billing enabled for
+          BYOM, or an arnx Cloud account.
+        </li>
+      </ul>
+      <p>
+        Supported test runners: Python with pytest; JavaScript / TypeScript with
+        vitest, jest, node:test or bun; Rust with cargo-nextest (early). Single
+        packages and multi-project repositories are supported, but setup is not
+        guaranteed for every framework or dependency.
+      </p>
+      <p>
+        C# and Go runners are under construction.
+        <a href="{{ISSUES_URL}}" data-event="github_click"
+          >Want to see more here? ↗</a
+        >
+      </p>
+      <p>
+        <strong>Rust is early and the least-tested runner.</strong> First setup
+        compiles dependencies and test targets into the Docker image. It can
+        take minutes on a small crate, much longer on a large workspace, and
+        several GB of disk space. Generated integration tests exercise the
+        crate’s public API. Try it, have fun, and
+        <a href="{{ISSUES_URL}}" data-event="github_click"
+          >open an issue with what worked or broke</a
+        >.
+      </p>
+      <h2 id="models">2. Bring your own keys, or use Cloud</h2>
+      <p>
+        Bring your own supported provider keys, or let arnx Cloud manage model
+        access.
+      </p>
+      <h3 id="byom">BYOM: your provider keys</h3>
+      <p>
+        The default model configuration uses Anthropic. Set
+        <code>ANTHROPIC_API_KEY</code> in your shell or secret manager; do not
+        commit it. OpenAI roles use <code>OPENAI_API_KEY</code>.
+        <code>arnx init</code> writes model choices and budgets in
+        <code>.arnx/config.toml</code>. Review them before starting paid work.
+      </p>
+      <p>
+        Built-in provider support includes Anthropic Messages and OpenAI
+        Responses. Have a favorite compatible endpoint? Try it out! Custom
+        endpoints need configuration and testing. We’d love to hear what works,
+        what breaks, and what you want to try next.
+        <a href="{{ISSUES_URL}}" data-event="github_click"
+          >Share your experiments on GitHub ↗</a
+        >
+      </p>
+      <p>
+        Open source means you can make it yours. Swap models, mix providers, or
+        edit
+        <a
+          href="https://github.com/arnx-dev/arnx/blob/main/src/prompts.ts"
+          data-event="github_click"
+          ><code>src/prompts.ts</code></a
+        >
+        and rebuild with your own prompts. Have fun! The
+        <a
+          href="https://github.com/arnx-dev/arnx/blob/main/DEVELOPING.md"
+          data-event="github_click"
+          >development guide</a
+        >
+        explains how to build your version.
+      </p>
+      <h3 id="cloud">arnx cloud</h3>
+      <p>
+        If you don’t want to manage multiple providers and API keys, use our
+        arnx Cloud. New accounts start with <strong>$5 in Cloud credit</strong>.
+        With the CLI installed, run the commands for your project from its
+        repository directory.
+      </p>
+      <div class="terminal">
+        <div class="terminal-header"><span>Cloud / new arnx project</span></div>
+        <pre><code># New project
+arnx init --cloud
+arnx login</code></pre>
+      </div>
+      <div class="terminal">
+        <div class="terminal-header">
+          <span>Cloud / existing arnx project</span>
+        </div>
+        <pre><code># Switch an initialized project to Cloud
+arnx cloud on --yes
+arnx login</code></pre>
+      </div>
+      <p>
+        <code>--yes</code> records your consent to send code to arnx Cloud
+        without an interactive prompt. Omit it to read and answer the prompt.
+        <code>arnx init --cloud</code> selects Cloud but leaves consent to the
+        first command that sends code, normally <code>arnx setup</code>.
+      </p>
+      <p>
+        <code>arnx login</code> starts a GitHub device sign-in in your browser;
+        complete it yourself. The CLI stores the token locally in
+        <code>~/.config/arnx/credentials.json</code>.
+      </p>
+      <div class="terminal">
+        <div class="terminal-header">
+          <span>Check your account and configuration</span>
+        </div>
+        <pre><code>arnx credits
+arnx doctor</code></pre>
+      </div>
+      <p>
+        <code>arnx credits</code> shows your balance and top-up link. See
+        <a href="/credits">credit packs and top-up availability</a>.
+        <code>arnx doctor</code> reports which models are active and checks your
+        environment. {{CLOUD_DATA_FLOW}} Use <code>arnx cloud off</code> to
+        switch back to your own keys. <code>arnx logout</code> removes the local
+        sign-in token.
+      </p>
+      <p>
+        <code>arnx doctor</code> checks Docker, provider keys, and
+        configuration. CLI usage telemetry is off by default.
+        <code>arnx init</code> writes <code>telemetry = false</code>; set
+        <code>telemetry = true</code> to opt in. To turn it off, set
+        <code>telemetry = false</code> at the top level of
+        <code>.arnx/config.toml</code>, or use <code>ARNX_TELEMETRY=0</code> or
+        <code>DO_NOT_TRACK=1</code> to disable sending regardless of repository
+        configuration.
+        <a href="./privacy.html#telemetry">What telemetry contains</a>.
+      </p>
+      <h2 id="skill">3. Let your favorite coding agent handle it</h2>
+      <p>
+        Don’t want to handle reviews in the terminal? No worries. Your favorite
+        coding agent can take the wheel. arnx was built for that! Install the
+        arnx skill so Claude Code and other agents that read Agent Skills can
+        review and fix code after finishing a change.
+      </p>
+      <div class="terminal">
+        <div class="terminal-header">
+          <span>Install in this repository</span>
+        </div>
+        <pre><code>arnx skill install</code></pre>
+      </div>
+      <p>
+        This writes <code>.agents/skills/arnx/</code> and
+        <code>.claude/skills/arnx/</code>, including the skill’s references.
+        Commit these directories to share the workflow with your team.
+        Alternatively, <code>arnx skill install --user</code> installs them
+        under your home directory for use across repositories.
+      </p>
+      <p>
+        An identical installed copy is left unchanged. To replace an older or
+        edited copy, inspect your changes first, then use
+        <code>arnx skill install --force</code> (add <code>--user</code> for the
+        user-wide copy).
+      </p>
+      <p>
+        The skill instructs the agent to explain the review budget, run one
+        review per finished change, fix code behind confirmed findings, and
+        verify fixes with <code>arnx check --review</code> before checking
+        accepted regression tests. It reports unresolved findings and questions
+        back to you. Initialization, sign-in, consent, environment approval,
+        triage, and <code>arnx accept</code> remain yours to perform; the skill
+        instructs the agent never to edit accepted tests.
+      </p>
+      <h2 id="workflow">4. Run the workflow</h2>
+      <p>
+        The first command that sends code, normally <code>arnx setup</code>,
+        asks for consent per repository and destination. Read it before
+        approving. In non-interactive sessions, record explicit consent with
+        <code>arnx consent --yes</code> (add <code>--cloud</code> for Cloud).
+      </p>
+      <p>
+        For BYOM, follow the sequence below. If you already initialized with
+        Cloud or BYOM above, start at <code>arnx setup</code>. Run commands
+        individually and inspect each result. If you use the skill, complete
+        <code>arnx setup</code> yourself before handing a change to your agent.
+      </p>
+      <div class="terminal">
+        <div class="terminal-header">
+          <span class="terminal-dots" aria-hidden="true">● ● ●</span
+          ><span>CLI workflow / no sample output</span
+          ><button
+            class="copy-button"
+            data-copy="workflow-code"
+            aria-label="Copy workflow commands"
+          >
+            Copy commands
+          </button>
+        </div>
+        <pre><code id="workflow-code">arnx init
+arnx setup
+arnx review
+arnx triage
+arnx accept
+arnx prompt
+# Make and inspect the product-code fix, then:
+arnx check</code></pre>
+        <span class="sr-only" id="copy-status" role="status"></span>
+      </div>
+      <ol class="guide-steps">
+        <li>
+          <strong>Setup:</strong> inspect the proposed Docker images,
+          dependency-install commands, services, test commands, and excluded
+          paths before approval. Image builds have network access; test runs
+          have no external network, or an internal network for configured
+          services. Docker shares the host kernel and is not a guarantee against
+          malicious code.
+        </li>
+        <li>
+          <strong>Review:</strong> on a branch, the default includes commits
+          since its base plus tracked uncommitted changes. Use
+          <code>arnx review --range A..B</code> for an explicit span. On the
+          default branch, it reviews tracked uncommitted work, or the last
+          commit when clean.
+        </li>
+        <li>
+          <strong>Accept:</strong> replace <code>&lt;id&gt;</code> with the
+          review ID, or omit it for the latest review. Read the generated tests
+          and use <code>arnx triage</code> to validate marks; some findings
+          arrive pre-marked real. Acceptance can call a model to turn your
+          answers into tests. <code>arnx accept --no-answers</code> skips that
+          step.
+        </li>
+        <li>
+          <strong>Check:</strong> fix production code, then rerun accepted tests
+          with <code>arnx check</code>. No model inference is needed. Local
+          Docker execution still consumes resources. Review and commit the fix,
+          tests, and acceptance record.
+        </li>
+      </ol>
+      <p>
+        Untracked files are excluded from setup and review by default in
+        repositories with commits. <code>--untracked</code> or
+        <code>[review] untracked = true</code> includes them;
+        <code>--no-untracked</code> overrides the setting.
+        <strong>Exception:</strong> with no commits yet, non-ignored files form
+        the initial change. Inspect <code>.arnxignore</code> and the reported
+        scope before sending code. Secret filtering is not exhaustive.
+      </p>
+      <h2 id="retained-tests">5. Keep the useful tests</h2>
+      <p>
+        <code>arnx accept &lt;id&gt;</code> keeps tests for findings marked
+        real, then runs the accepted tests so you can see what still fails. Fix
+        the code and run <code>arnx check</code> until they pass. Acceptance
+        does not change your product code or commit anything.
+      </p>
+      <p>
+        Reviews live in <code>.arnx/reviews/&lt;id&gt;/</code>. Accepted tests
+        normally live under each project’s <code>tests/arnx/r&lt;id&gt;/</code>.
+        With the default setting, TypeScript uses
+        <code>__tests__/arnx/r&lt;id&gt;/</code>; Rust places integration tests
+        at <code>tests/arnx_&lt;id&gt;_&lt;name&gt;.rs</code>. Check
+        <code>[review] accepted_tests_dir</code> in
+        <code>.arnx/config.toml</code> for overrides.
+      </p>
+      <p>
+        Once <code>arnx check</code> passes, review and commit the fix, accepted
+        tests, and <code>.arnx/accepted-tests.json</code> together. Keep the
+        approved <code>.arnx/config.toml</code>, <code>.arnx/review.yaml</code>,
+        and <code>.arnx/.gitignore</code> in version control too. The tests can
+        then guard against the same bugs in your own test runner.
+      </p>
+      <p>
+        Review artifacts, run/setup files, and usage logs stay local and are
+        ignored by Git. So does <code>.arnx/precision.jsonl</code>, your log of
+        review marks. <code>arnx init</code> includes its ignore rule;
+        <code>arnx accept</code> adds the rule to an older
+        <code>.arnx/.gitignore</code> when missing. Ignore rules do not untrack
+        files already in Git.
+      </p>
+      <p>
+        Accepted tests are pinned by their hashes in
+        <code>.arnx/accepted-tests.json</code>. If a test or its record changes
+        unexpectedly, <code>arnx check</code> stops with exit 4.
+        <code>arnx accept --again &lt;id&gt;</code> restores the review’s tests,
+        overwriting edits. For an intentional change you have reviewed,
+        <code>arnx accept --keep-edits</code> records the current tests.
+      </p>
+      <h2 id="costs">Costs and billing</h2>
+      <p>
+        With your own keys, you pay providers directly. Setup, review, and
+        answer-to-test generation can incur model costs. Review your configured
+        budgets; cost varies with model, change size, retries, and environment
+        complexity. The CLI reports usage and writes
+        <code>.arnx/usage.jsonl</code>. Reported case-study costs are
+        observations, not prices or promises.
+      </p>
+      <p>
+        Expect a few cents to a few dollars per review. Our own reviews ranged
+        from $0.17 to $3.19. Set <code>review_usd</code> under
+        <code>[budget]</code> to control spending (default $3.00); the review
+        stops writing tests when it reaches the cap and reports that it did.
+      </p>
+      <p>
+        <code>arnx check</code> and <code>arnx check --review</code> do not call
+        models. {{CLOUD_DESCRIPTION}}
+        <a href="/credits">How Cloud credit is billed</a>.
+      </p>
+      <h2 id="troubleshooting">Common failures</h2>
+      <dl class="troubleshooting">
+        <dt>Cloud needs sign-in, consent, or credits</dt>
+        <dd>
+          Run <code>arnx login</code> for missing or expired authentication. For
+          missing Cloud consent, run <code>arnx consent --cloud</code>, or
+          <code>arnx consent --cloud --yes</code> to explicitly agree without a
+          prompt. Check <code>arnx credits</code> if your balance cannot cover a
+          review. <code>arnx next</code> names the next step.
+        </dd>
+        <dt>Docker or a provider key is missing</dt>
+        <dd>
+          Run <code>arnx doctor</code>. Start Docker, check daemon permissions,
+          and verify the configured key variable without posting its value.
+        </dd>
+        <dt>Image build or dependency download fails</dt>
+        <dd>
+          Read the setup log and proposed commands. Check registry connectivity
+          and project dependency versions. Image builds need network access.
+        </dd>
+        <dt>Setup cannot establish a working suite</dt>
+        <dd>
+          Check the test command, fixtures, service readiness, and excluded
+          projects. Do not treat an unapproved or incomplete environment as a
+          clean review. <code>arnx next</code> reports the current state.
+        </dd>
+        <dt>A review is interrupted</dt>
+        <dd>
+          Inspect its report and use <code>arnx review --resume</code> when
+          appropriate. An incomplete run is not evidence that the change has no
+          bugs.
+        </dd>
+        <dt>Check says a test changed</dt>
+        <dd>
+          Exit 4 indicates an edited or missing accepted file or record. Restore
+          unintended changes. Use <code>arnx accept --keep-edits</code> only
+          after deliberately reviewing a test change.
+        </dd>
+        <dt>Nothing was accepted</dt>
+        <dd>
+          <code>arnx check</code> exits 3 when there are no accepted tests.
+          Validate findings and run accept first.
+        </dd>
+      </dl>
+      <p>
+        Review exit codes: 0 no confirmed findings, 1 confirmed findings, 2
+        incomplete, 3 setup needed. Check exit codes: 0 passed, 1 failed, 2
+        incomplete reporting, 3 nothing accepted, 4 accepted-test integrity
+        changed. A 0 is not a correctness guarantee.
+      </p>
+      <p>
+        <a href="./community.html">Report a reproducible issue</a> with the
+        version, OS, runner, command, expected behavior, and sanitized output.
+        <a href="./security.html#reporting">Report security issues privately</a
+        >.
+      </p>
+    </main>
+    {{FOOTER}}
+  </body>
+</html>
