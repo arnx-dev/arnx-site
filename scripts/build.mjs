@@ -1,5 +1,6 @@
 import { build } from "esbuild";
 import { mkdir, rm, copyFile, readFile, writeFile } from "node:fs/promises";
+import { renderPage, release, validateRelease } from "./release.mjs";
 export const publicAssets = [
   ...[320, 430, 640, 860, 960, 1254].map(
     (width) => `mascot-inspecting-${width}.webp`,
@@ -11,14 +12,30 @@ export const publicAssets = [
   "arnx-favicon.svg",
 ];
 // Each page is served at /<name>.html and, on GitHub Pages, at /<name> too
-// (the arnx CLI links to https://arnx.dev/terms and https://arnx.dev/privacy).
+// (the arnx CLI uses the clean terms, privacy, and credits URLs).
 export const pages = [
   "index.html",
   "case-study.html",
   "terms.html",
   "privacy.html",
+  "credits.html",
+  "product.html",
+  "quickstart.html",
+  "community.html",
+  "license.html",
+  "security.html",
 ];
 export async function buildSite() {
+  validateRelease(release);
+  const theme = await build({
+    entryPoints: ["src/theme.ts"],
+    bundle: true,
+    minify: true,
+    write: false,
+    format: "iife",
+    target: "es2022",
+  });
+  const themeScript = `<script>${theme.outputFiles[0].text.replaceAll("</script", "<\\/script")}</script>`;
   const measurementId = process.env.GA_MEASUREMENT_ID || "G-MMZS9QVW5F";
   if (!/^G-[A-Z0-9]+$/.test(measurementId))
     throw new Error("GA_MEASUREMENT_ID must be a GA4 measurement ID (G-...)");
@@ -74,16 +91,35 @@ export async function buildSite() {
     target: "es2022",
   });
   for (const page of pages) {
-    const html = await readFile(`src/${page}`, "utf8");
+    const html = await renderPage(await readFile(`src/${page}`, "utf8"));
+    const canonical = html.match(/rel="canonical" href="([^"]+)"/)[1];
+    const structuredData = `<script type="application/ld+json">${JSON.stringify(
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        url: canonical,
+        name: html.match(/<title>([^<]+)<\/title>/)[1],
+        isPartOf: {
+          "@type": "WebSite",
+          name: "arnx",
+          url: "https://arnx.dev/",
+        },
+      },
+    ).replaceAll("<", "\\u003c")}</script>`;
     await writeFile(
       `dist/${page}`,
-      html.replace("<head>", `<head>${googleTag}`),
+      html.replace(
+        "<head>",
+        `<head>${themeScript}${googleTag}${structuredData}`,
+      ),
     );
   }
   for (const asset of publicAssets)
     await copyFile(`public/brand/${asset}`, `dist/brand/${asset}`);
   await copyFile("public/og.png", "dist/og.png");
   await mkdir("dist/licenses", { recursive: true });
+  await copyFile("LICENSE", "dist/licenses/Apache-2.0.txt");
+  await copyFile("NOTICE", "dist/licenses/NOTICE.txt");
   for (const [pkg, name] of [
     ["inter", "Inter"],
     ["jetbrains-mono", "JetBrains-Mono"],
@@ -94,6 +130,18 @@ export async function buildSite() {
     );
   await writeFile("dist/.nojekyll", "");
   await copyFile("CNAME", "dist/CNAME");
+  const urls = pages.map(
+    (page) =>
+      `https://arnx.dev/${page === "index.html" ? "" : ["privacy.html", "terms.html", "credits.html"].includes(page) ? page.replace(".html", "") : page}`,
+  );
+  await writeFile(
+    "dist/sitemap.xml",
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((url) => `<url><loc>${url}</loc></url>`).join("")}</urlset>\n`,
+  );
+  await writeFile(
+    "dist/robots.txt",
+    "User-agent: *\nAllow: /\nSitemap: https://arnx.dev/sitemap.xml\n",
+  );
   console.log(
     `Built dist/: ${pages.length} pages, responsive brand assets, bundled fonts, CSS and JS. No internal documents.`,
   );

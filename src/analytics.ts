@@ -1,5 +1,10 @@
 type AnalyticsEvent =
-  "github_click" | "docs_click" | "install_copy" | "pilot_click";
+  | "github_click"
+  | "docs_click"
+  | "install_copy"
+  | "pilot_click"
+  | "cloud_click"
+  | "enterprise_click";
 type EventParams = {
   location?: string;
   destination?: string;

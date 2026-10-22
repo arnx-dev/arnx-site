@@ -1,390 +1,180 @@
 <!doctype html>
-<!--
-  DRAFT: not reviewed by a lawyer. Owner answers filled in on 2026-10-20.
-  Facts on this page were checked against arnx-pilot (src/cli.ts,
-  src/telemetry.ts, src/secrets.ts, src/ignore.ts, src/change.ts,
-  src/sandbox.ts) and arnx-cloud (packages/api, packages/brain,
-  deploy/MANUAL.md). Re-check them when that code changes.
--->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#faf8f3" />
-    <title>Privacy Policy — arnx</title>
+    <title>Privacy Policy: arnx</title>
     <meta
       name="description"
-      content="What arnx sends, what arnx cloud keeps, and opt-in telemetry, in plain English."
+      content="What the arnx CLI sends to providers, local retained data, and website analytics."
     />
-    <meta property="og:title" content="Privacy Policy — arnx" />
+    <link rel="canonical" href="https://arnx.dev/privacy" />
+    <meta property="og:title" content="Privacy Policy: arnx" />
     <meta
       property="og:description"
-      content="What arnx sends, what arnx cloud keeps, and opt-in telemetry, in plain English."
+      content="What the arnx CLI sends to providers, local retained data, and website analytics."
     />
     <meta property="og:type" content="website" />
-    <link rel="canonical" href="https://arnx.dev/privacy" />
-    <meta name="robots" content="noindex" />
     <meta property="og:url" content="https://arnx.dev/privacy" />
     <meta property="og:image" content="https://arnx.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Privacy Policy: arnx" />
+    <meta
+      name="twitter:description"
+      content="What the arnx CLI sends to providers, local retained data, and website analytics."
+    />
+    <meta name="twitter:image" content="https://arnx.dev/og.png" />
+    <meta
+      name="twitter:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
     <link rel="icon" type="image/svg+xml" href="./brand/arnx-favicon.svg" />
     <link rel="stylesheet" href="./assets/styles.css" />
     <script type="module" src="./assets/app.js"></script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header wrap">
-      <a
-        href="./index.html"
-        class="wordmark placeholder-wordmark"
-        aria-label="arnx home"
-        >arnx</a
-      >
-      <nav aria-label="Main navigation">
-        <a href="./index.html#how-it-works">How it works</a
-        ><a href="./index.html#pilot-results">Pilot results</a
-        ><a href="./index.html#faq">FAQ</a>
-      </nav>
-      <a class="nav-cta" href="./index.html#pilot"
-        >Request a pilot invite <span aria-hidden="true">↗</span></a
-      >
-      <button
-        class="menu-toggle"
-        aria-expanded="false"
-        aria-controls="mobile-nav"
-        aria-label="Open navigation"
-      >
-        ☰
-      </button>
-      <nav
-        id="mobile-nav"
-        class="mobile-nav"
-        aria-label="Mobile navigation"
-        hidden
-      >
-        <a href="./index.html#how-it-works">How it works</a
-        ><a href="./index.html#pilot-results">Pilot results</a
-        ><a href="./index.html#faq">FAQ</a
-        ><a href="./index.html#pilot">Request a pilot invite</a>
-      </nav>
-    </header>
-    <main id="main" class="case-article legal-article wrap">
-      <a class="text-link" href="./index.html">← Back to arnx</a>
-      <p class="eyebrow" style="margin-top: 40px">
-        Last updated 20 October 2026
-      </p>
+    {{HEADER}}
+    <main id="main" class="case-article wrap">
+      <p class="eyebrow">Privacy / Updated October 22, 2026</p>
       <h1>Privacy Policy</h1>
-      <p class="descriptor">What arnx sends, what we keep, and for how long.</p>
-      <p>
-        This policy is from ARNX (“arnx”, “we”, “us”). It covers the arnx
-        command-line tool, arnx cloud and this website. Our
-        <a href="./terms.html">Terms of Service</a> cover the rest.
+      <p class="descriptor">
+        What leaves your machine, and what stays in your repository.
       </p>
-
-      <h2 id="two-ways">Two ways to use arnx</h2>
-      <ul>
-        <li>
-          <strong>With your own keys.</strong> The open-source arnx tool runs on
-          your machine. Your code goes from your machine straight to the model
-          providers named in <code>.arnx/config.toml</code> (Anthropic, OpenAI,
-          River or Z.ai), under your key and that provider’s terms.
-          <strong>We receive none of it.</strong>
-        </li>
-        <li>
-          <strong>With arnx cloud (“arnx models”).</strong> Your code goes to
-          our server at <code>https://api.arnx.dev</code>. Our server calls the
-          model providers with our keys. arnx cloud is in an early pilot.
-        </li>
-      </ul>
-
-      <h2 id="what-is-sent">What arnx sends to a model</h2>
-      <p>Either way, a review sends:</p>
-      <ul>
-        <li>the change you are reviewing (its diff);</li>
-        <li>the files the reviewer reads to understand it;</li>
-        <li>the tests arnx writes, and their results.</li>
-      </ul>
-      <p>arnx does not send:</p>
-      <ul>
-        <li>
-          files that usually hold secrets, such as <code>.env</code> files, key
-          files and credential files;
-        </li>
-        <li>
-          text that looks like a key, unless you allow the file that holds it
-          with <code>arnx allow-secret</code> (for example, test fixtures);
-        </li>
-        <li>paths you list in <code>.arnxignore</code>;</li>
-        <li>
-          untracked files, unless you opt in (<code>--untracked</code>) or the
-          repository has no commits yet.
-        </li>
-      </ul>
       <p>
-        Tests run in Docker on your own machine, on a copy of your code. They
-        get none of your environment variables (only ones you declare for the
-        tests), and no network access beyond the services you set up for them.
-        With arnx cloud, your model keys are not needed and never sent.
+        This policy describes the arnx CLI, arnx cloud, and this website,
+        reviewed on October 22, 2026. {{CLI_DISTRIBUTION_STATUS}} ARNX is the
+        operator of arnx.dev; contact
+        <a href="mailto:info@arnx.dev">info@arnx.dev</a> about privacy or data
+        requests.
       </p>
-
-      <h2 id="arnx-cloud">What arnx cloud keeps</h2>
+      <h2 id="two-ways">Your own keys and arnx Cloud</h2>
+      <p>
+        With your own API keys, inference requests go from the CLI to the
+        providers configured in <code>.arnx/config.toml</code>. Those providers
+        receive the request content under your account and their API terms. BYOM
+        does not mean all processing stays on your machine.
+      </p>
+      <p>
+        {{CLOUD_DESCRIPTION}} {{CLOUD_DATA_FLOW}} Read the
+        <a href="./terms.html">Cloud service terms</a> before sharing code.
+        Contact <a href="mailto:info@arnx.dev">info@arnx.dev</a> for provider,
+        retention, or data-handling questions specific to your use.
+      </p>
+      <h2 id="cloud-accounts">arnx cloud accounts</h2>
+      <p>
+        Sign-in goes through GitHub. We receive your GitHub account ID, login,
+        and email address if shared. Your credit balance and its ledger are kept
+        per account.
+      </p>
+      <p>
+        Payments are processed by Stripe, which sends receipts and invoices by
+        email. Card numbers go directly to Stripe; arnx never sees them.
+        <a href="/credits">Top-ups open soon</a>.
+      </p>
+      <p>
+        Review content passes through arnx cloud to its model providers. After a
+        review, arnx cloud keeps account-linked review records, including
+        status, timestamps, and billed usage by role, alongside the credit
+        ledger. For questions about review-content retention, backups, or model
+        providers’ handling of your data, contact
+        <a href="mailto:info@arnx.dev">info@arnx.dev</a>.
+      </p>
+      <h2 id="what-is-sent">What can be submitted to a model</h2>
       <ul>
+        <li>The diff selected for review.</li>
+        <li>Source files the reviewer reads to understand the change.</li>
+        <li>Generated tests and their execution output.</li>
         <li>
-          <strong>Your account.</strong> From GitHub sign-in: your GitHub user
-          id, your username, and your primary verified email (if GitHub shares
-          one). GitHub’s access token is used once and never stored. At sign-in
-          the arnx tool also sends your computer’s name and the arnx version; we
-          keep them with your sign-in.
-        </li>
-        <li>
-          <strong>Secrets as hashes only.</strong> Sign-in tokens and device
-          codes are stored only as hashes, never in readable form.
-        </li>
-        <li>
-          <strong>Credits and usage.</strong> A ledger of credits, charges and
-          refunds. For each review: its effort level, status, times, and cost
-          per role (for example, the reviewer or the second opinion).
-        </li>
-        <li>
-          <strong>Review content, only while a review runs.</strong> So a server
-          restart does not lose your review (or a setup run), we keep its state
-          encrypted in our database. It is deleted when the review finishes, and
-          in any case after one hour without activity.
-        </li>
-        <li>
-          <strong>Daily totals</strong> of model calls, tokens and cost per
-          provider and model, with no account, code or prompt in them. We use
-          them to check our bills.
-        </li>
-        <li>
-          <strong>No code in logs.</strong> Our server logs record ids, counts,
-          sizes and amounts. They never contain your prompts or code.
-        </li>
-        <li>
-          <strong>Backups.</strong> The database is backed up nightly. Backups
-          are kept for 14 days, then deleted.
+          Answers you supply about intended behavior, when used to generate
+          tests.
         </li>
       </ul>
       <p>
-        Account and ledger data are kept while your account is open, and then
-        for 180 days, unless the law requires us to keep payment records longer.
-        The ledger is a financial record, so its entries are never edited.
-      </p>
-
-      <h2 id="payments">Payments</h2>
-      <p>
-        When you buy credits, Stripe handles the payment. We send Stripe your
-        account id and email. Your card details go to Stripe, not to us. Paid
-        credits are not switched on yet.
-      </p>
-
-      <h2 id="telemetry">Telemetry (optional)</h2>
-      <p>
-        Telemetry is off unless you say yes. The current arnx release does not
-        collect it yet: it does not ask and sends nothing. Once it is switched
-        on, it works like this.
-      </p>
-      <ul>
-        <li>
-          arnx asks once per machine. Your answer is stored in
-          <code>~/.config/arnx/telemetry.json</code> (or under
-          <code>$XDG_CONFIG_HOME</code>), never in your repository. A teammate
-          who clones the repository sends nothing because of your answer.
-        </li>
-        <li>
-          If you say yes, arnx makes a random install id. If you say no, or turn
-          it off later, the id is deleted.
-        </li>
-        <li>
-          <code>arnx telemetry</code> shows what would be sent.
-          <code>arnx telemetry off</code> stops it. Setting
-          <code>ARNX_TELEMETRY=0</code> or <code>DO_NOT_TRACK=1</code> turns it
-          off whatever you chose.
-        </li>
-        <li>
-          Sending never slows or breaks a command: one short try, and errors are
-          ignored.
-        </li>
-      </ul>
-      <p>
-        After setup, review, accept and check, arnx sends one line to
-        <code>https://api.arnx.dev/v1/telemetry</code> with:
-      </p>
-      <ul>
-        <li>
-          the random install id, the arnx version, your OS and CPU type, the
-          command, and the time;
-        </li>
-        <li>how many projects, and their languages;</li>
-        <li>how many files changed, and the size of the diff;</li>
-        <li>the effort level;</li>
-        <li>the model providers used (not the models);</li>
-        <li>
-          how many findings and suspects, the second opinion’s verdicts, and the
-          before/after results;
-        </li>
-        <li>
-          how many tests were written, passed, flaky or erroring, and how many
-          you kept;
-        </li>
-        <li>
-          your marks as counts (real, intended, noise, unmarked; chosen or left
-          as they came);
-        </li>
-        <li>how many questions you answered;</li>
-        <li>cost, duration and the exit code.</li>
-      </ul>
-      <p>Never sent:</p>
-      <ul>
-        <li>code or diffs;</li>
-        <li>file names or paths;</li>
-        <li>test names or test content;</li>
-        <li>messages;</li>
-        <li>the questions, or your answers;</li>
-        <li>repository names or remotes;</li>
-        <li>user names;</li>
-        <li>environment variables;</li>
-        <li>keys.</li>
-      </ul>
-      <p>
-        Our server refuses any field not on that list. It does not keep your IP
-        address or request headers, and does not link telemetry to an arnx cloud
-        account. Raw events are deleted after 90 days. Before that, each week is
-        rolled into totals with no install id, and those totals are kept.
+        <code>.arnxignore</code> and secret-file/content filters exclude
+        recognized sensitive material. Filtering is not exhaustive.
+        <code>arnx allow-secret</code> can allow particular key-shaped content;
+        do not use it to expose real secrets.
       </p>
       <p>
-        Saying yes or no changes nothing else: arnx and arnx cloud work the same
-        either way.
+        Setup and review normally omit untracked files in repositories with
+        commits. <code>--untracked</code> or
+        <code>[review] untracked = true</code> includes them, and
+        <code>--no-untracked</code> overrides that setting.
+        <strong
+          >With no commits yet, non-ignored files form the initial
+          change.</strong
+        >
+        Inspect the scope before proceeding.
       </p>
-
+      <h2 id="local-data">What remains local</h2>
+      <p>
+        Tests execute in Docker against a repository copy. Image builds can use
+        the network; test runs have no external network, or an internal network
+        for configured services. The CLI stores configuration, reviews,
+        generated tests, acceptance records, and usage logs under
+        <code>.arnx/</code>. Accepted tests are copied into project test
+        directories. You control their retention and whether to commit them.
+      </p>
+      <p>
+        These reports can contain code and provider responses. Sanitize them
+        before sharing.
+        <a href="./security.html">Read the execution boundaries</a>.
+      </p>
       <h2 id="website">This website</h2>
       <ul>
         <li>
-          arnx.dev is hosted on GitHub Pages and served through Cloudflare. Like
-          any web host, they process your IP address to deliver the pages.
+          Light mode is the default. If you switch themes, this website saves
+          your choice in your browser’s local storage so it persists between
+          visits.
         </li>
         <li>
-          The website uses Google Analytics 4. It sets cookies and tells Google
-          which pages you view, your browser and device type, and your
-          approximate location. It also counts clicks on “Request a pilot
-          invite” and contact links, with where the link sits on the page. It
-          never receives what you type into a form. Google’s advertising
-          features are off.
+          arnx.dev is hosted on GitHub Pages and served through Cloudflare,
+          which process connection information to deliver pages.
         </li>
         <li>
-          <strong>In the EU, the EEA and the UK</strong>, Google Analytics loads
-          only after you click Accept in the cookie banner. Until then, nothing
-          is sent to Google and no analytics cookies are set. To find out where
-          you are, the site asks Cloudflare for your country; it is not stored.
-          Your choice is kept in your browser only. Change it any time with
-          “Cookies” at the bottom of the page; Reject also deletes the analytics
-          cookies.
+          The site uses Google Analytics 4 for page views and curated clicks on
+          GitHub, docs, guided-pilot links, and successful install-command
+          copies when installation is available. Event fields describe UI
+          locations and actions; they do not include form content, repository
+          source, private repository identifiers, or email-link contents.
+          Advertising features are disabled.
         </li>
         <li>
-          Elsewhere, Google Analytics loads after the page. You can block it
-          with a browser extension or Google’s opt-out add-on.
+          For visitors in the EU, EEA, UK, or an unknown location, the analytics
+          script loads only after Accept. A Cloudflare trace request determines
+          the country; the site does not store the country. Your cookie choice
+          is kept in this browser.
         </li>
         <li>
-          <strong>The arnx tool never uses Google Analytics.</strong> Its only
-          usage data is the opt-in telemetry described above.
+          Outside those regions, analytics loads after the page. A browser
+          content blocker can prevent it. Where the consent controls are shown,
+          use Cookies in the footer to change your choice; Reject also removes
+          analytics cookies.
         </li>
         <li>
-          If you email us or request a pilot invite (by email), we get your
-          email address and what you wrote, and use them only to reply.
+          If you email us, we receive your address and message and use them to
+          respond. Do not include private code or credentials.
         </li>
       </ul>
-
-      <h2 id="third-parties">Who else handles data</h2>
-      <ul>
-        <li>
-          <strong>Model providers</strong>: with arnx cloud, Anthropic, OpenAI
-          and River, under their API terms. With your own keys, the providers
-          you chose, under your own agreement with them. For arnx cloud we use
-          only provider terms that do not let the provider train models on your
-          code.
-        </li>
-        <li>
-          <strong>inet.ws</strong>: hosts arnx cloud, on a server in New York,
-          USA.
-        </li>
-        <li>
-          <strong>GitHub</strong>: sign-in for arnx cloud, and website hosting.
-        </li>
-        <li><strong>Stripe</strong>: payments.</li>
-        <li>
-          <strong>Cloudflare</strong>: DNS for arnx.dev, and delivery of this
-          website. Traffic to api.arnx.dev does not pass through Cloudflare.
-        </li>
-        <li>
-          <strong>Google</strong>: Google Analytics, on this website only.
-        </li>
-      </ul>
+      <h2 id="your-rights">Privacy requests</h2>
       <p>
-        We do not sell or share your data for advertising. Data is processed in
-        the USA and in the countries where these providers operate. When data
-        moves from the EU, the EEA or the UK to those countries, we rely on the
-        European Commission’s Standard Contractual Clauses (with the UK
-        Addendum) or on the EU–US Data Privacy Framework, as each provider
-        offers.
+        Contact <a href="mailto:info@arnx.dev">info@arnx.dev</a> to request
+        access, correction, export, or deletion of personal data held by ARNX.
+        For data held under your own model-provider account, contact that
+        provider. We do not sell your data or use it for advertising. Processing
+        by hosting, analytics, and model providers can occur outside your
+        country.
       </p>
-
-      <h2 id="your-rights">Your choices and rights</h2>
-      <p>
-        You can ask us to show, correct, export or delete your data, or to close
-        your account. Email
-        <a href="mailto:info@arnx.dev">info@arnx.dev</a> and we will reply
-        within one week.
-      </p>
-      <p>Why we use your data (the legal bases under the GDPR and the LGPD):</p>
-      <ul>
-        <li>
-          <strong>To provide arnx cloud</strong> (your account, reviews and
-          credits): our contract with you.
-        </li>
-        <li>
-          <strong
-            >Website analytics in the EU, the EEA and the UK, and telemetry
-            everywhere</strong
-          >: your consent, which you can withdraw at any time.
-        </li>
-        <li>
-          <strong>Security, abuse prevention and checking our bills</strong>:
-          our legitimate interest in running a safe service.
-        </li>
-        <li><strong>Payment records</strong>: legal obligations.</li>
-      </ul>
-      <p>
-        If you are in the EU, the EEA, the UK or Brazil, you can also restrict
-        or object to our use of your data, and complain to your data protection
-        authority (in the UK, the ICO; in Brazil, the ANPD). If you are in
-        California, you can ask what we hold, and ask us to correct or delete
-        it; we do not sell or share personal information.
-      </p>
-      <p>arnx is not meant for anyone under 16.</p>
-
-      <h2 id="changes">Changes to this policy</h2>
-      <p>
-        We will post changes here and update the date at the top. For important
-        changes we will give 30 days’ notice, by email if you have an account.
-      </p>
-
       <h2 id="contact">Contact</h2>
-      <p>
-        ARNX<br />
-        <a href="mailto:info@arnx.dev">info@arnx.dev</a>
-      </p>
+      <p>ARNX<br /><a href="mailto:info@arnx.dev">info@arnx.dev</a></p>
     </main>
-    <footer class="wrap footer">
-      <a
-        href="./index.html"
-        class="wordmark placeholder-wordmark"
-        aria-label="arnx home"
-        >arnx</a
-      >
-      <p>Show me the evidence.</p>
-      <span
-        >MIT CLI · <a href="./terms.html">Terms</a> ·
-        <a href="./privacy.html">Privacy</a></span
-      ><a href="mailto:info@arnx.dev">Get in touch ↗</a>
-    </footer>
+    {{FOOTER}}
   </body>
 </html>

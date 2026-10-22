@@ -155,14 +155,14 @@ function showBanner(win: Window, opener?: HTMLElement): void {
 /** A "Cookies" button in the footer, to change the choice later. */
 function addReopen(win: Window): void {
   const doc = win.document;
-  const place = doc.querySelector("footer > span");
+  const place = doc.querySelector("footer nav");
   if (!place || place.querySelector(".consent-reopen")) return;
   const button = doc.createElement("button");
   button.type = "button";
   button.className = "consent-reopen";
   button.textContent = "Cookies";
   button.addEventListener("click", () => showBanner(win, button));
-  place.append(" · ", button);
+  place.append(button);
 }
 
 export async function initConsent(

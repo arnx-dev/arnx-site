@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf8f3" />
+    <title>Product: arnx open-source AI code review</title>
+    <meta
+      name="description"
+      content="How arnx turns suspected bugs into tests, lets developers validate findings, and reruns accepted regression checks without model calls."
+    />
+    <link rel="canonical" href="https://arnx.dev/product.html" />
+    <meta
+      property="og:title"
+      content="Product: arnx open-source AI code review"
+    />
+    <meta
+      property="og:description"
+      content="How arnx turns suspected bugs into tests, lets developers validate findings, and reruns accepted regression checks without model calls."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://arnx.dev/product.html" />
+    <meta property="og:image" content="https://arnx.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Product: arnx open-source AI code review"
+    />
+    <meta
+      name="twitter:description"
+      content="How arnx turns suspected bugs into tests, lets developers validate findings, and reruns accepted regression checks without model calls."
+    />
+    <meta name="twitter:image" content="https://arnx.dev/og.png" />
+    <meta
+      name="twitter:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <link rel="icon" type="image/svg+xml" href="./brand/arnx-favicon.svg" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <script type="module" src="./assets/app.js"></script>
+  </head>
+  <body>
+    {{HEADER}}
+    <main id="main" class="case-article wrap">
+      <p class="eyebrow">Open-source AI code review</p>
+      <h1>Your agent writes the code. arnx checks the behavior.</h1>
+      <p class="descriptor">
+        A CLI for investigating changes with executable evidence.
+      </p>
+      <p>
+        arnx reads a code change, investigates suspected bugs, and generates and
+        runs targeted tests in Docker. A failure is evidence to inspect. You
+        decide whether the behavior is wrong and which tests to keep.
+      </p>
+      <h2>From a change to a regression check</h2>
+      <p>
+        <code>arnx setup</code> understands the project and proposes its test
+        environment. <code>arnx review</code> investigates the selected change
+        and runs generated tests. Use <code>arnx triage</code> to review
+        findings and answer questions, then
+        <code>arnx accept &lt;id&gt;</code> to retain meaningful tests.
+      </p>
+      <p>
+        You or your coding agent change the production code.
+        <code>arnx prompt</code> provides a handoff;
+        <code>arnx check</code> runs accepted tests on the working tree, without
+        new model calls.
+      </p>
+      <h2>What a result means</h2>
+      <p>
+        A passing check means the accepted tests passed in that environment. It
+        does not establish that the entire change is correct. Read the review’s
+        coverage gaps, untested files, unresolved questions, and incomplete
+        runs.
+      </p>
+      <p>
+        Generated tests can be wrong or fragile. Developer validation matters
+        even when a failure repeats and another model agrees. Accepted files are
+        pinned so editing a test to make it pass is detected; inspect deliberate
+        test changes before accepting them again.
+      </p>
+      <h2>Local execution, external inference</h2>
+      <p>
+        Tests run in local Docker containers. Diffs, selected files, generated
+        tests, and test output can go to model providers. Bring your own
+        supported API keys; your coding-agent subscription should not be assumed
+        to cover these calls.
+      </p>
+      <h2 id="options">BYOM, Cloud, or Enterprise</h2>
+      <ul>
+        <li>
+          <strong>BYOM:</strong> use the Apache License 2.0 CLI with supported
+          provider API keys. Pay providers directly and run tests in local
+          Docker. {{CLI_DISTRIBUTION_STATUS}}
+        </li>
+        <li>
+          <strong>arnx cloud:</strong> optional managed model access and
+          centralized billing. {{CLOUD_DESCRIPTION}} The open-source license
+          does not cover proprietary Cloud infrastructure.
+        </li>
+        <li>
+          <strong>Enterprise:</strong> discuss private deployment requirements,
+          data boundaries, and dedicated support. Scope and availability are
+          agreed directly with your team.
+          <a
+            href="mailto:info@arnx.dev?subject=arnx%20Enterprise"
+            data-event="enterprise_click"
+            >Email us about Enterprise</a
+          >.
+        </li>
+      </ul>
+      <p>{{CLOUD_DATA_FLOW}}</p>
+      <p>{{CLOUD_ACTION}}</p>
+      <h2>Where it fits</h2>
+      <p>
+        Run the CLI before opening a pull request or while reviewing a change.
+        It complements your existing tests and human review. Current runners
+        cover Python/pytest, JavaScript and TypeScript with vitest, jest,
+        node:test or bun, and Rust with cargo-nextest (early). Environment setup
+        still needs validation for your repository.
+      </p>
+      <p>
+        Rust is the least-tested runner. First setup is slow because the image
+        compiles dependencies and test targets, and it can take several GB. Try
+        it on your crate, swap models, and
+        <a href="{{ISSUES_URL}}" data-event="github_click"
+          >tell us what breaks</a
+        >.
+      </p>
+      <p>
+        More languages are planned.
+        <a href="{{ISSUES_URL}}" data-event="github_click"
+          >Want to see more here? ↗</a
+        >
+      </p>
+      <p>
+        <a href="./quickstart.html" data-event="docs_click"
+          >Read the quickstart</a
+        >
+        · <a href="./case-study.html">Read the case study</a> ·
+        <a href="./security.html">Understand the boundaries</a>
+      </p>
+    </main>
+    {{FOOTER}}
+  </body>
+</html>

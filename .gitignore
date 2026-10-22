@@ -19,3 +19,7 @@ public/brand/*
 !public/brand/mascot-inspecting-*.webp
 !public/brand/mascot-questioning-*.webp
 !public/brand/mascot-greencheck-*.webp
+
+# Private editorial drafts must never be committed.
+docs/deferred-evidence/
+docs/internal/

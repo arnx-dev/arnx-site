@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { buildSite, pages, publicAssets } from "../scripts/build.mjs";
 import { serve } from "../scripts/serve.mjs";
-test("build only includes public allowlist, not internal docs, reference boards or secrets", async () => {
+
+test("public build: metadata, licensing, real destinations, and all internal fragments resolve", async () => {
   await buildSite();
   assert.equal((await readFile("dist/CNAME", "utf8")).trim(), "arnx.dev");
   const files = await readdir("dist", { recursive: true });
@@ -16,81 +17,125 @@ test("build only includes public allowlist, not internal docs, reference boards 
     (await readdir("dist/brand")).sort(),
     [...publicAssets].sort(),
   );
-  for (const page of ["index.html", "case-study.html"]) {
+  const sitemap = await readFile("dist/sitemap.xml", "utf8");
+  assert.match(
+    await readFile("dist/robots.txt", "utf8"),
+    /Sitemap: https:\/\/arnx.dev\/sitemap.xml/,
+  );
+  for (const page of pages) {
     const html = await readFile(`dist/${page}`, "utf8");
-    const head = html.match(/<head>([\s\S]*?)<\/head>/)[1];
+    assert.equal((html.match(/<h1(?:\s[^>]*)?>/g) || []).length, 1, page);
+    assert(
+      !/\{\{[A-Z_]+\}\}|\bMIT\b|Private developer pilot|Request a pilot invite|noindex/.test(
+        html,
+      ),
+      page,
+    );
+    assert(
+      html.includes('href="./privacy.html"') &&
+        html.includes('href="./security.html"') &&
+        html.includes('href="./license.html"'),
+      page,
+    );
+    assert(
+      html.includes('name="twitter:card"') &&
+        html.includes('property="og:image"'),
+      page,
+    );
+    const canonical = html.match(/rel="canonical" href="([^"]+)"/)[1];
+    const title = html.match(/<title>([^<]+)<\/title>/)[1];
+    assert(sitemap.includes(`<loc>${canonical}</loc>`), page);
+    const schema = JSON.parse(
+      html.match(/type="application\/ld\+json">([^<]+)<\/script>/)[1],
+    );
+    assert.equal(schema.url, canonical);
+    assert.equal(schema.name, title);
+    assert.equal(schema["@type"], "WebPage");
+    assert(!schema.aggregateRating && !schema.offers);
     const measurementId = process.env.GA_MEASUREMENT_ID || "G-MMZS9QVW5F";
     assert.equal(
       [...html.matchAll(/https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=/g)]
         .length,
       1,
+      page,
     );
-    assert(head.includes(`gtag/js?id=${measurementId}`));
-    assert(head.includes(`gtag('config', '${measurementId}')`));
-    assert(head.includes("window.dataLayer = window.dataLayer || []"));
-    // The tag only loads when src/consent.ts calls window.arnxAnalytics.load().
-    assert(head.includes(`id: '${measurementId}'`));
-    assert.match(head, /load: function \(\) \{/);
-    assert(head.includes("ad_storage: 'denied'"));
-    assert(!html.includes("gtm.js"));
-    assert(!html.includes("../docs"));
-    assert.match(html, /54/);
-    for (const match of html.matchAll(
-      /(?:href|src)="(\.\/[^"#]+)(?:#[^"]*)?"/g,
-    )) {
-      await readFile(`dist/${match[1].slice(2)}`);
+    assert(html.includes(`gtag('config', '${measurementId}')`));
+    assert(html.includes("ad_storage: 'denied'"));
+    for (const [, href] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
+      if (/^(https?:|mailto:)/.test(href)) continue;
+      const target = new URL(href, `https://arnx.dev/${page}`);
+      let filename =
+        target.pathname === "/" ? "index.html" : target.pathname.slice(1);
+      if (pages.includes(`${filename}.html`)) filename += ".html";
+      const content = await readFile(`dist/${filename}`, "utf8");
+      if (target.hash)
+        assert(
+          content.includes(`id="${target.hash.slice(1)}"`),
+          `${page}: broken ${href}`,
+        );
     }
   }
+  assert.equal(
+    await readFile("dist/licenses/Apache-2.0.txt", "utf8"),
+    await readFile("LICENSE", "utf8"),
+  );
+  assert.match(
+    await readFile("LICENSE", "utf8"),
+    /Apache License[\s\S]+Version 2.0, January 2004/,
+  );
+  assert.equal(
+    JSON.parse(await readFile("package.json", "utf8")).license,
+    "Apache-2.0",
+  );
+  assert.equal(
+    JSON.parse(await readFile("package-lock.json", "utf8")).packages[""]
+      .license,
+    "Apache-2.0",
+  );
+  const quickstart = await readFile("dist/quickstart.html", "utf8");
+  assert(
+    quickstart.includes('id="install-code">npm install -g @arnx-dev/arnx'),
+  );
+  assert(
+    quickstart.includes("https://github.com/arnx-dev/arnx/releases/latest"),
+  );
+  assert(quickstart.includes("SHA256SUMS"));
+  assert(!quickstart.includes("Public CLI distribution is pending"));
+  for (const name of [
+    "privacy",
+    "security",
+    "product",
+    "credits",
+    "quickstart",
+  ]) {
+    const content = await readFile(`dist/${name}.html`, "utf8");
+    assert(
+      content.includes("Tool calls, Docker tests, the before/after check"),
+      `${name}: local execution`,
+    );
+    assert(
+      content.includes("then passes them to its model providers"),
+      `${name}: Cloud data flow`,
+    );
+  }
+  const credits = await readFile("dist/credits.html", "utf8");
+  assert(credits.includes('rel="canonical" href="https://arnx.dev/credits"'));
+  assert(credits.includes("<title>Cloud credits: arnx</title>"));
+  assert(!sitemap.includes("https://arnx.dev/credits.html"));
+  assert(credits.includes('href="/terms"'));
+  assert(!/<form\b|<iframe\b/i.test(credits), "credits is informational only");
+  assert(
+    !/href="[^"]*(?:billing\/topup|checkout\.stripe\.com)/i.test(credits),
+    "top-ups must use the user's signed CLI link",
+  );
+  assert.deepEqual(
+    [...credits.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map((m) => m[1]),
+    ["./assets/app.js"],
+    "credits uses only the shared application script",
+  );
 });
 
-// The arnx CLI links to https://arnx.dev/terms, https://arnx.dev/privacy and
-// https://arnx.dev/privacy#telemetry: those paths and that anchor must work.
-test("terms and privacy pages are built, filled in, unlinked and not indexed", async () => {
-  await buildSite();
-  assert(pages.includes("terms.html") && pages.includes("privacy.html"));
-  for (const page of ["terms.html", "privacy.html"]) {
-    const html = await readFile(`dist/${page}`, "utf8");
-    const name = page.replace(".html", "");
-    assert.match(html, /^<!doctype html>\s*<!--\s*DRAFT:/);
-    assert.equal(html.match(/<h1>/g).length, 1);
-    assert(
-      html.includes(`<link rel="canonical" href="https://arnx.dev/${name}"`),
-    );
-    assert(html.includes("gtag/js?id="));
-    // Every owner blank is filled.
-    assert.deepEqual(
-      html.replace(/<!--[\s\S]*?-->/g, "").match(/\[[A-Z][^\]]*\]/g),
-      null,
-      `${page} has a blank left`,
-    );
-    assert(html.includes("ARNX<br />"), `${page} lacks the contact block`);
-    assert(html.includes('href="mailto:info@arnx.dev"'));
-    for (const match of html.matchAll(
-      /(?:href|src)="(\.\/[^"#]+)(?:#[^"]*)?"/g,
-    ))
-      await readFile(`dist/${match[1].slice(2)}`);
-  }
-  const privacy = await readFile("dist/privacy.html", "utf8");
-  assert.equal(privacy.match(/id="telemetry"/g).length, 1);
-  // Drafts: reached only by the CLI's direct links, so no page links them and search engines skip them.
-  for (const page of ["terms.html", "privacy.html"]) {
-    const html = await readFile(`dist/${page}`, "utf8");
-    assert(
-      html.includes('<meta name="robots" content="noindex" />'),
-      `${page} lacks noindex`,
-    );
-  }
-  for (const page of ["index.html", "case-study.html"]) {
-    const html = await readFile(`dist/${page}`, "utf8");
-    assert(
-      !html.includes("terms.html") && !html.includes("privacy.html"),
-      `${page} links a draft`,
-    );
-  }
-});
-
-test("local preview serves /terms and /privacy without the .html, as GitHub Pages does", async () => {
-  await buildSite();
+test("extensionless CLI links work and missing pages return 404", async () => {
   const server = serve(0);
   await new Promise((resolve) =>
     server.listening ? resolve() : server.once("listening", resolve),
@@ -100,6 +145,8 @@ test("local preview serves /terms and /privacy without the .html, as GitHub Page
     for (const [path, heading] of [
       ["/terms", "Terms of Service"],
       ["/privacy", "Privacy Policy"],
+      ["/credits", "arnx Cloud credits"],
+      ["/credits.html", "arnx Cloud credits"],
       ["/terms.html", "Terms of Service"],
     ]) {
       const response = await fetch(base + path);

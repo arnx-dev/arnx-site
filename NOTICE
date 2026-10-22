@@ -1,0 +1,9 @@
+arnx website
+Copyright 2026 the arnx authors
+
+This website includes Inter and JetBrains Mono fonts, distributed under
+the SIL Open Font License 1.1. Their original notices are distributed in
+licenses/Inter.txt and licenses/JetBrains-Mono.txt in the built site.
+
+Third-party dependencies retain their respective licenses. This notice
+does not license proprietary arnx Cloud software or service infrastructure.

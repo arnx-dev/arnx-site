@@ -1,79 +1,64 @@
 <!doctype html>
-<!--
-  DRAFT: not reviewed by a lawyer. Owner answers filled in on 2026-10-20.
--->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#faf8f3" />
-    <title>Terms of Service — arnx</title>
+    <title>Terms of Service: arnx</title>
     <meta
       name="description"
-      content="The terms for arnx cloud and the arnx.dev website, in plain English."
+      content="Terms for the arnx.dev website and Cloud service, separate from the open-source software license."
     />
-    <meta property="og:title" content="Terms of Service — arnx" />
+    <link rel="canonical" href="https://arnx.dev/terms" />
+    <meta property="og:title" content="Terms of Service: arnx" />
     <meta
       property="og:description"
-      content="The terms for arnx cloud and the arnx.dev website, in plain English."
+      content="Terms for the arnx.dev website and Cloud service, separate from the open-source software license."
     />
     <meta property="og:type" content="website" />
-    <link rel="canonical" href="https://arnx.dev/terms" />
-    <meta name="robots" content="noindex" />
     <meta property="og:url" content="https://arnx.dev/terms" />
     <meta property="og:image" content="https://arnx.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Terms of Service: arnx" />
+    <meta
+      name="twitter:description"
+      content="Terms for the arnx.dev website and Cloud service, separate from the open-source software license."
+    />
+    <meta name="twitter:image" content="https://arnx.dev/og.png" />
+    <meta
+      name="twitter:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
     <link rel="icon" type="image/svg+xml" href="./brand/arnx-favicon.svg" />
     <link rel="stylesheet" href="./assets/styles.css" />
     <script type="module" src="./assets/app.js"></script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header wrap">
-      <a
-        href="./index.html"
-        class="wordmark placeholder-wordmark"
-        aria-label="arnx home"
-        >arnx</a
-      >
-      <nav aria-label="Main navigation">
-        <a href="./index.html#how-it-works">How it works</a
-        ><a href="./index.html#pilot-results">Pilot results</a
-        ><a href="./index.html#faq">FAQ</a>
-      </nav>
-      <a class="nav-cta" href="./index.html#pilot"
-        >Request a pilot invite <span aria-hidden="true">↗</span></a
-      >
-      <button
-        class="menu-toggle"
-        aria-expanded="false"
-        aria-controls="mobile-nav"
-        aria-label="Open navigation"
-      >
-        ☰
-      </button>
-      <nav
-        id="mobile-nav"
-        class="mobile-nav"
-        aria-label="Mobile navigation"
-        hidden
-      >
-        <a href="./index.html#how-it-works">How it works</a
-        ><a href="./index.html#pilot-results">Pilot results</a
-        ><a href="./index.html#faq">FAQ</a
-        ><a href="./index.html#pilot">Request a pilot invite</a>
-      </nav>
-    </header>
-    <main id="main" class="case-article legal-article wrap">
+    {{HEADER}}
+    <main id="main" class="case-article wrap">
       <a class="text-link" href="./index.html">← Back to arnx</a>
       <p class="eyebrow" style="margin-top: 40px">
-        Last updated 20 October 2026
+        Last updated 21 October 2026
       </p>
       <h1>Terms of Service</h1>
-      <p class="descriptor">The short, plain rules for using arnx.</p>
+      <p class="descriptor">
+        Terms for this website and the optional managed service.
+      </p>
+      <p class="release-notice">
+        {{CLOUD_DESCRIPTION}} The open-source license governs the software
+        distributed under it; these service terms cover Cloud.
+      </p>
       <p>
         These terms are an agreement between you and ARNX (“arnx”, “we”, “us”).
-        By using arnx cloud or this website, you agree to them. If you use arnx
-        for a company, you agree for that company too. Our
+        By using this website or arnx Cloud, you agree to the applicable
+        provisions. If you use arnx for a company, you agree for that company
+        too. Our
         <a href="./privacy.html">Privacy Policy</a> explains what data we
         handle.
       </p>
@@ -86,20 +71,21 @@
         </li>
         <li><strong>This website</strong>, arnx.dev.</li>
       </ul>
+      <p>{{CLOUD_DATA_FLOW}}</p>
       <p>
-        The arnx command-line tool is open source under the MIT License. Your
-        use of the tool itself is covered by that license, not by these terms.
-        When you run it with your own model keys, your code goes straight to the
-        model provider you chose, under your account and that provider’s terms.
+        {{LICENSE_STATUS}} Your use of the tool itself is covered by that
+        license, not by these terms. When you run it with your own model keys,
+        your code goes straight to the model provider you chose, under your
+        account and that provider’s terms.
       </p>
 
-      <h2 id="pilot">A pilot service, provided as is</h2>
+      <h2 id="pilot">Service availability</h2>
       <p>
-        arnx cloud is in an early pilot. Features, models, limits and prices
-        will change. We may pause or end the service, and we will give 30 days’
-        notice before ending it when we can. Reviews can be wrong or incomplete:
-        arnx helps you test a change, and you decide what to trust and what to
-        ship.
+        arnx Cloud provides managed model access through the CLI. Features,
+        models, limits and prices may change. We may pause or end the service,
+        and we will give 30 days’ notice before ending it when we can. Reviews
+        can be wrong or incomplete: arnx helps you test a change, and you decide
+        what to trust and what to ship.
       </p>
 
       <h2 id="account">Your account</h2>
@@ -122,8 +108,9 @@
           employer or a client owns.
         </li>
         <li>
-          You own your code. You also own the tests arnx writes for you. Keep,
-          edit or delete them as you like.
+          You retain your rights in your code. Generated tests remain files you
+          can inspect, retain, edit, or delete, subject to applicable
+          third-party rights and provider terms.
         </li>
         <li>
           You let us process your code only to run the reviews you ask for. We
@@ -153,22 +140,20 @@
       </p>
 
       <h2 id="credits">Credits and payment</h2>
+      <p>
+        See <a href="/credits">Cloud credits</a> for packs, top-up availability,
+        and how to get your personal payment link from the CLI.
+      </p>
       <ul>
+        <li>New accounts receive $5 in Cloud credit to start.</li>
         <li>
-          arnx cloud runs on prepaid credits, in US dollars. A review uses
-          credits for the model calls it makes, at our prices.
+          arnx cloud runs on prepaid credits, in US dollars. Each review is
+          billed what it used, and the CLI shows the charge per role.
         </li>
-        <li>
-          New accounts get a free credit of $5. The free credit has no cash
-          value.
-        </li>
+
         <li>
           Payments are processed by Stripe. We never see or store your card
           details.
-        </li>
-        <li>
-          Refunds: we refund paid credits you have not used, on request. Email
-          <a href="mailto:info@arnx.dev">info@arnx.dev</a>.
         </li>
         <li>Unused credits never expire.</li>
         <li>
@@ -187,8 +172,7 @@
         service or other users at risk. When we can, we will tell you why first
         and give you a chance to fix it. You can stop using arnx at any time and
         ask us to close your account at
-        <a href="mailto:info@arnx.dev">info@arnx.dev</a>. When an account
-        closes, we refund the paid credits you have not used.
+        <a href="mailto:info@arnx.dev">info@arnx.dev</a>.
       </p>
 
       <h2 id="no-warranty">No warranty</h2>
@@ -218,9 +202,9 @@
 
       <h2 id="law">Governing law</h2>
       <p>
-        These terms are governed by the laws of Brazil, and disputes go to the
-        courts of Brazil. If you are a consumer, you keep the protections of the
-        law where you live, and you can also bring a claim in your local courts.
+        These terms are governed by the laws of Brazil. If you are a consumer,
+        you keep the protections of the law where you live, and you can also
+        bring a claim in your local courts.
       </p>
 
       <h2 id="contact">Contact</h2>
@@ -229,18 +213,6 @@
         <a href="mailto:info@arnx.dev">info@arnx.dev</a>
       </p>
     </main>
-    <footer class="wrap footer">
-      <a
-        href="./index.html"
-        class="wordmark placeholder-wordmark"
-        aria-label="arnx home"
-        >arnx</a
-      >
-      <p>Show me the evidence.</p>
-      <span
-        >MIT CLI · <a href="./terms.html">Terms</a> ·
-        <a href="./privacy.html">Privacy</a></span
-      ><a href="mailto:info@arnx.dev">Get in touch ↗</a>
-    </footer>
+    {{FOOTER}}
   </body>
 </html>

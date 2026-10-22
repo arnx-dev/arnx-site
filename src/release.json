@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-22",
+  "repository": {
+    "url": "https://github.com/arnx-dev/arnx",
+    "publicSource": true,
+    "issuesUrl": "https://github.com/arnx-dev/arnx/issues",
+    "discussionsUrl": null,
+    "licenseUrl": "https://github.com/arnx-dev/arnx/blob/main/LICENSE",
+    "docsUrl": "https://github.com/arnx-dev/arnx#readme",
+    "contributingUrl": "https://github.com/arnx-dev/arnx/blob/main/CONTRIBUTING.md"
+  },
+  "cli": {
+    "available": true,
+    "version": "0.1.0",
+    "installCommand": "npm install -g @arnx-dev/arnx",
+    "verifiedAt": null,
+    "verificationRecord": null,
+    "readinessRecord": "docs/public-release.md"
+  },
+  "cloud": {
+    "available": true,
+    "pilot": false,
+    "verifiedAt": "2026-10-21",
+    "verificationRecord": "Owner confirmed Cloud is working and available, activated with arnx init --cloud or arnx cloud on, with $5 starting credit. Commands and default grant checked against CLI and Cloud source."
+  }
+}

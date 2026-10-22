@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf8f3" />
+    <title>Security and execution boundaries: arnx</title>
+    <meta
+      name="description"
+      content="What arnx reads, what goes to model providers, how Docker test execution is restricted, and how to report a security issue."
+    />
+    <link rel="canonical" href="https://arnx.dev/security.html" />
+    <meta
+      property="og:title"
+      content="Security and execution boundaries: arnx"
+    />
+    <meta
+      property="og:description"
+      content="What arnx reads, what goes to model providers, how Docker test execution is restricted, and how to report a security issue."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://arnx.dev/security.html" />
+    <meta property="og:image" content="https://arnx.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Security and execution boundaries: arnx"
+    />
+    <meta
+      name="twitter:description"
+      content="What arnx reads, what goes to model providers, how Docker test execution is restricted, and how to report a security issue."
+    />
+    <meta name="twitter:image" content="https://arnx.dev/og.png" />
+    <meta
+      name="twitter:image:alt"
+      content="arnx: Test your change. Keep the evidence."
+    />
+    <link rel="icon" type="image/svg+xml" href="./brand/arnx-favicon.svg" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <script type="module" src="./assets/app.js"></script>
+  </head>
+  <body>
+    {{HEADER}}
+    <main id="main" class="case-article wrap">
+      <p class="eyebrow">Trust / Security</p>
+      <h1>Know what runs.<br />Know what leaves.</h1>
+      <p class="descriptor">
+        Docker execution and external model inference are separate.
+      </p>
+      <h2>Code and provider access</h2>
+      <p>
+        The CLI can submit the selected diff, files read during investigation,
+        generated tests, and test output to configured providers. With your own
+        keys, inference requests go directly to those providers under your
+        account. Their data handling and billing terms apply.
+      </p>
+      <p>
+        <code>.arnxignore</code> and secret-file/content filters reduce what is
+        included. They are not a complete detector for confidential information.
+        Inspect exclusions and scope. <code>arnx allow-secret</code> can allow
+        particular key-shaped content, such as a fixture; do not use it for real
+        credentials.
+      </p>
+      <p>
+        Setup and review exclude untracked files by default when the repository
+        has commits. <code>--untracked</code> or
+        <code>[review] untracked = true</code> opts them in;
+        <code>--no-untracked</code> overrides the setting. With no commits,
+        non-ignored files form the initial change. Stage and review files
+        deliberately.
+      </p>
+      <h2>Docker boundaries</h2>
+      <p>
+        Tests execute against a copy of the repository. Test containers have
+        CPU, memory, and process limits; capabilities are dropped and
+        no-new-privileges is set. Runs use no network or an internal network for
+        configured services. The test environment receives explicitly configured
+        variables rather than the host’s entire environment.
+      </p>
+      <p>
+        <strong>Image builds have network access</strong> for dependency
+        installation. Setup commands, service images, test code, and declared
+        variables still need inspection. Docker shares the host kernel; it is
+        not a perfect boundary for hostile code. The CLI itself also needs
+        access to your repository, provider credentials, and Docker daemon.
+      </p>
+      <h2>Retained tests and reports</h2>
+      <p>
+        Review reports and generated tests are stored locally under
+        <code>.arnx/</code>; accepted tests are copied into project test
+        directories. <code>.arnx/accepted-tests.json</code> records their
+        hashes. Review them before committing or running them outside the arnx
+        environment.
+      </p>
+      <h2>arnx cloud</h2>
+      <p>
+        {{CLOUD_DESCRIPTION}} {{CLOUD_DATA_FLOW}} The service is separate from
+        the open-source software and requires its own service and privacy terms.
+      </p>
+      <h2>Private deployment requirements</h2>
+      <p>
+        For Enterprise, contact us to discuss your required deployment location,
+        model access, data retention, and support. Deployment and data
+        boundaries depend on the agreed setup; using local Docker alone does not
+        keep inference requests local.
+        <a
+          href="mailto:info@arnx.dev?subject=arnx%20Enterprise"
+          data-event="enterprise_click"
+          >Discuss Enterprise requirements</a
+        >.
+      </p>
+      <h2 id="reporting">Report a security issue privately</h2>
+      <p>
+        Email
+        <a href="mailto:info@arnx.dev?subject=arnx%20security%20report"
+          >info@arnx.dev</a
+        >
+        with “arnx security report” in the subject. See the
+        <a
+          href="https://github.com/arnx-dev/arnx/blob/main/SECURITY.md"
+          data-event="github_click"
+          >repository security policy</a
+        >. Include affected versions, impact, and a minimal reproduction you can
+        safely share. Do not put credentials or exploitable private details in a
+        public issue. We do not currently publish a guaranteed response time or
+        a bug-bounty program.
+      </p>
+    </main>
+    {{FOOTER}}
+  </body>
+</html>
