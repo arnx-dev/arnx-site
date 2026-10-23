@@ -28,6 +28,7 @@ jobs:
         env:
           PILOT_ENDPOINT: ${{ vars.PILOT_ENDPOINT }}
           GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
+      - run: npm run verify:discovery
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

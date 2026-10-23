@@ -1,6 +1,7 @@
 import { build } from "esbuild";
 import { mkdir, rm, copyFile, readFile, writeFile } from "node:fs/promises";
 import { renderPage, release, validateRelease } from "./release.mjs";
+import { origin, robots, softwareApplication, llms } from "./discovery.mjs";
 export const publicAssets = [
   ...[320, 430, 640, 860, 960, 1254].map(
     (width) => `mascot-inspecting-${width}.webp`,
@@ -90,9 +91,17 @@ export async function buildSite() {
     define: { PILOT_ENDPOINT: JSON.stringify(endpoint) },
     target: "es2022",
   });
+  const urls = [];
   for (const page of pages) {
     const html = await renderPage(await readFile(`src/${page}`, "utf8"));
     const canonical = html.match(/rel="canonical" href="([^"]+)"/)[1];
+    if (new URL(canonical).origin !== origin || urls.includes(canonical))
+      throw new Error("Invalid or duplicate canonical");
+    urls.push(canonical);
+    const application =
+      page === "index.html" || page === "product.html"
+        ? `<script type="application/ld+json">${JSON.stringify(softwareApplication(release)).replaceAll("<", "\\u003c")}</script>`
+        : "";
     const structuredData = `<script type="application/ld+json">${JSON.stringify(
       {
         "@context": "https://schema.org",
@@ -110,7 +119,7 @@ export async function buildSite() {
       `dist/${page}`,
       html.replace(
         "<head>",
-        `<head>${themeScript}${googleTag}${structuredData}`,
+        `<head>${themeScript}${googleTag}${structuredData}${application}`,
       ),
     );
   }
@@ -130,18 +139,12 @@ export async function buildSite() {
     );
   await writeFile("dist/.nojekyll", "");
   await copyFile("CNAME", "dist/CNAME");
-  const urls = pages.map(
-    (page) =>
-      `https://arnx.dev/${page === "index.html" ? "" : ["privacy.html", "terms.html", "credits.html"].includes(page) ? page.replace(".html", "") : page}`,
-  );
   await writeFile(
     "dist/sitemap.xml",
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((url) => `<url><loc>${url}</loc></url>`).join("")}</urlset>\n`,
   );
-  await writeFile(
-    "dist/robots.txt",
-    "User-agent: *\nAllow: /\nSitemap: https://arnx.dev/sitemap.xml\n",
-  );
+  await writeFile("dist/robots.txt", robots());
+  await writeFile("dist/llms.txt", llms(release));
   console.log(
     `Built dist/: ${pages.length} pages, responsive brand assets, bundled fonts, CSS and JS. No internal documents.`,
   );

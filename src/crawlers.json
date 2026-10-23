@@ -1,0 +1,6 @@
+{
+  "GPTBot": "allow",
+  "ClaudeBot": "allow",
+  "Google-Extended": "allow",
+  "CCBot": "allow"
+}
