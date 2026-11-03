@@ -61,17 +61,24 @@
         account. Their data handling and billing terms apply.
       </p>
       <p>
-        <code>.arnxignore</code> and secret-file/content filters reduce what is
-        included. They are not a complete detector for confidential information.
-        Inspect exclusions and scope. <code>arnx allow-secret</code> can allow
-        particular key-shaped content, such as a fixture; do not use it for real
-        credentials.
+        Values that may be secrets are replaced by stand-ins: fakes of the same
+        shape in the snapshot, used by the tests too. A password in a connection
+        address counts. A private key with a body cannot get a stand-in, so its
+        file is left out. <code>[review] stand_ins = false</code> turns
+        stand-ins off. The filter is a heuristic: extend
+        <code>.arnxignore</code> for anything else private.
+      </p>
+      <p>
+        When setup needs a file excluded by <code>.arnxignore</code>, it may
+        copy it into the sandbox as <code>sandbox_only</code>. It is scrubbed
+        the same way, never sent to a model, and arnx says so. Test output may
+        still quote it. <code>arnx allow-secret PATH</code> allows pinned
+        key-shaped test fixtures, not real credentials.
       </p>
       <p>
         Setup and review exclude untracked files by default when the repository
         has commits. <code>--untracked</code> or
-        <code>[review] untracked = true</code> opts them in;
-        <code>--no-untracked</code> overrides the setting. With no commits,
+        <code>[review] untracked = true</code> opts them in. With no commits,
         non-ignored files form the initial change. Stage and review files
         deliberately.
       </p>
@@ -85,18 +92,29 @@
       </p>
       <p>
         <strong>Image builds have network access</strong> for dependency
-        installation. Setup commands, service images, test code, and declared
-        variables still need inspection. Docker shares the host kernel; it is
-        not a perfect boundary for hostile code. The CLI itself also needs
-        access to your repository, provider credentials, and Docker daemon.
+        installation. Install steps are written by the setup agent. Downloads
+        from outside package registries are listed under “Worth a look”. Inspect
+        service images, test code and declared variables too. Docker shares the
+        host kernel; it is not a perfect boundary for hostile code. The CLI
+        itself also needs access to your repository, provider credentials, and
+        Docker daemon.
       </p>
       <h2>Retained tests and reports</h2>
       <p>
-        Review reports and generated tests are stored locally under
-        <code>.arnx/</code>; accepted tests are copied into project test
-        directories. <code>.arnx/accepted-tests.json</code> records their
-        hashes. Review them before committing or running them outside the arnx
-        environment.
+        Review reports stay under <code>.arnx/</code>. Accepted tests live in
+        <code>.arnx/tests/</code>, pinned by sha256 in
+        <code>.arnx/accepted-tests.json</code>. Your own test run never collects
+        them. Only <code>arnx check</code> runs them, in a throwaway copy. Read
+        this model-written code before committing it. arnx never edits your code
+        or your tests.
+      </p>
+      <h2>Consent</h2>
+      <p>
+        With your own keys nothing is asked; the first send names the providers
+        once. arnx cloud asks once per repository, and
+        <code>arnx cloud on</code> asks too. Without a terminal, arnx exits 3
+        and sends nothing. Use <code>arnx consent --cloud</code>, with
+        <code>--yes</code> in scripts, to record it.
       </p>
       <h2>arnx cloud</h2>
       <p>

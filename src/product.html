@@ -60,11 +60,13 @@
       </p>
       <h2>From a change to a regression check</h2>
       <p>
-        <code>arnx setup</code> understands the project and proposes its test
-        environment. <code>arnx review</code> investigates the selected change
-        and runs generated tests. Use <code>arnx triage</code> to review
-        findings and answer questions, then
-        <code>arnx accept &lt;id&gt;</code> to retain meaningful tests.
+        <code
+          >arnx init → arnx review → arnx triage → arnx accept → arnx prompt →
+          arnx check</code
+        >. Init is required. The first review sets up only the projects the
+        change touches in a few minutes (it stops at 10), with no separate setup
+        step. <code>arnx setup</code> optionally runs the whole repository’s
+        suites.
       </p>
       <p>
         You or your coding agent change the production code.
@@ -72,7 +74,64 @@
         <code>arnx check</code> runs accepted tests on the working tree, without
         new model calls.
       </p>
-      <h2>What a result means</h2>
+      <h2>What a finding means</h2>
+      <p>
+        arnx runs each test 3 times, reruns failures on the code before the
+        change, and has a second model confirm or dispute it. A failing test
+        shows an assertion fails, not that the code is wrong. Model replies
+        vary: two reviews of one change can differ.
+      </p>
+      <p>
+        Before/after outcomes are regression, pre-existing, new-code, changed or
+        unknown. Only regression is evidence about the change: the test passes
+        before and fails after, if its expectation is right.
+      </p>
+      <p>
+        Findings with one cause are grouped into an issue, most severe first,
+        explained as input, actual, expected and why it matters. Issues backed
+        by a confirmed test come pre-marked real; change what you disagree with.
+        Marks are real, intended, noise or rewrite.
+      </p>
+      <p>
+        Tests that pass after the change but fail before it appear under “The
+        change fixes”. Changed code no test touched is listed by name, and the
+        review says “partly covered”. A passing check covers only the accepted
+        tests.
+      </p>
+      <h2>arnx reviewing its own arnx remove command</h2>
+      <p>
+        From the README’s recorded review, before 0.1: a test for paths escaping
+        the repository, followed by the report excerpt. Quoted exactly.
+      </p>
+      <div class="terminal">
+        <pre><code>test("S2 accepted-test paths escaping the repository are never deleted", async () =&gt; {
+  const { base, repo, env } = setup();
+  const victim = join(base, "victim.txt");
+  put(victim, "keep me");
+  put(join(repo, ".arnx", "accepted-tests.json"), record({ "../victim.txt": {} }));
+  const cli = new Cli({ cwd: repo, env });
+  await withDocker("/nonexistent/docker", () =&gt; cli.run("remove", "--yes", "--tests"));
+  expect(existsSync(victim)).toBe(true);
+});</code></pre>
+      </div>
+      <div class="terminal">
+        <pre><code>### Issue 1 · remove --yes can delete files outside the repository
+- Actual: In S2, `../victim.txt` outside the repository was deleted. …
+- Failing tests: F2, F4
+
+### F2 · regression · confirmed by the second opinion
+- Failure: `expect(received).toBe(expected)`
+- Before the change (regression): passes on the code before the change (3 runs): the change broke it
+- Second opinion: planRemove takes accepted-tests.json keys verbatim and applyRemove rmSync's join(repo, p), …</code></pre>
+      </div>
+      <p>
+        The test failed in all 3 runs, passed before the change, and the second
+        model agreed. We marked it real, kept it with arnx accept, fixed the
+        code from the fix prompt and saw it pass in arnx check. Not every
+        finding is like this one: in our own reviews, some confirmed issues
+        tested behaviour we intended.
+      </p>
+      <h2>What a check means</h2>
       <p>
         A passing check means the accepted tests passed in that environment. It
         does not establish that the entire change is correct. Read the review’s
@@ -84,6 +143,12 @@
         even when a failure repeats and another model agrees. Accepted files are
         pinned so editing a test to make it pass is detected; inspect deliberate
         test changes before accepting them again.
+      </p>
+      <p>
+        Accepted tests live in <code>.arnx/tests/</code>, pinned by sha256 in
+        <code>.arnx/accepted-tests.json</code>. Your own test run never collects
+        them; only <code>arnx check</code> runs them in a throwaway copy. Read
+        this model-written code first. arnx never edits your code or your tests.
       </p>
       <h2>Local execution, external inference</h2>
       <p>

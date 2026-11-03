@@ -12,13 +12,13 @@ Checks: `npm run lint`, `npm run typecheck`, `npm test`, `npm run format:check`,
 
 `src/release.json` is the single source for GitHub links, public-source availability, CLI installation, canonical release docs, and Cloud availability. `scripts/release.mjs` validates it and expands shared HTML partials at build time. No release state is fetched at runtime.
 
-This branch is prepared for arnx 0.1.0. Source and CLI presentation flags are enabled, so the local build displays the public repository and installation command. **Do not deploy until the owner confirms the repository, npm package, and release binaries are public.** The metadata describes the intended release, not a claim that the package was installed from npm. `cli.verifiedAt` and `cli.verificationRecord` stay null until that check actually happens. `cli.readinessRecord` points to [the publication handoff](docs/public-release.md).
+The site documents arnx 0.1.7, checked on 2026-11-03 against tag v0.1.7 (source commit 7572415). Installation from npm as `@arnx-dev/arnx@0.1.7` and one end-to-end `arnx review` with arnx cloud were verified. This is not a full setup/accept/check smoke test. See [the release handoff](docs/public-release.md).
 
-Before deployment, install 0.1.0 without private registry credentials, verify `arnx --version` and `arnx --help`, and complete a Docker setup/review/accept/check smoke test. Check the LICENSE, CONTRIBUTING, SECURITY, release binaries and SHA256SUMS links. Record installation verification afterward. The build checks metadata completeness; it does not prove publication or service readiness.
+Home and quickstart lead with install → init → review. The first review sets up only touched projects; whole-repository setup is optional. Product explains before/after evidence and includes the CLI README’s own remove-command example. Accepted tests live outside the project suite, pinned under `.arnx/`; security describes stand-ins and Cloud-only consent.
 
 Cloud activation is documented through the CLI. New accounts start with $5 credit. Paid top-ups remain labeled “Top-ups open soon” until the owner confirms live payments. The credits page describes prepaid USD credit and per-role usage charges. GitHub Discussions remains omitted until enabled and verified.
 
-The quickstart and privacy/security copy follow the public CLI README. The site no longer documents CLI telemetry. Cloud processing is described separately from local tool calls, tests, before/after checks, and report generation. The CLI license does not cover proprietary Cloud infrastructure.
+The quickstart and security copy follow v0.1.7 docs and code; docs/CLOUD.md wins where sources disagree. Cloud processing is described separately from local tool calls, tests, before/after checks, and report generation. The CLI license does not cover proprietary Cloud infrastructure.
 
 The homepage presents BYOM, Cloud, and Enterprise. Enterprise is an email inquiry for private deployment requirements and dedicated support, with scope agreed directly; it does not promise an existing self-hosted Cloud package, local inference, or an SLA. Cloud and Enterprise CTA events contain only curated action/location metadata.
 

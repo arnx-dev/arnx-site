@@ -82,6 +82,30 @@
               >BYOM <span>Your API keys</span></a
             >
           </div>
+          <p>
+            Docker, plus your own model key or arnx cloud with $5 of starting
+            credit.
+          </p>
+          {{INSTALL_COMMAND}}
+          <div class="terminal">
+            <div class="terminal-header">
+              <span>First review / after a code change</span
+              ><button
+                class="copy-button"
+                data-copy="first-review-code"
+                aria-label="Copy first review commands"
+              >
+                Copy commands
+              </button>
+            </div>
+            <pre><code id="first-review-code">arnx init
+arnx review</code></pre>
+          </div>
+          <p id="copy-status" role="status"></p>
+          <p>
+            The first review sets up what it needs in a few minutes (it stops at
+            10). No separate setup step.
+          </p>
           <p class="hero-footnote">{{RELEASE_NOTE}}</p>
         </div>
         <div class="hero-scene">
@@ -205,12 +229,13 @@
         <ol class="steps beta-steps">
           <li>
             <span class="step-number">01</span>
-            <h3>Setup</h3>
+            <h3>Init</h3>
             <p>
-              Understand the project, propose a Docker test environment, and run
-              the existing suite. Inspect the configuration before approval.
+              Initialize the repository. The first review sets up only the
+              projects the change touches; another project is set up when a
+              later change touches it.
             </p>
-            <code>arnx setup</code>
+            <code>arnx init</code>
           </li>
           <li>
             <span class="step-number">02</span>
@@ -225,10 +250,10 @@
             <span class="step-number">03</span>
             <h3>Accept</h3>
             <p>
-              Validate meaningful findings and keep their tests. You or your
-              coding agent make the fix.
+              Triage real / intended / noise / rewrite, then accept useful
+              tests. Use arnx prompt to hand the fix to your coding agent.
             </p>
-            <code>arnx accept &lt;id&gt;</code>
+            <code>arnx triage → arnx accept → arnx prompt</code>
           </li>
           <li>
             <span class="step-number">04</span>
@@ -273,7 +298,10 @@
             <article>
               <h3>Check it again</h3>
               <p>
-                Accepted tests remain local files. Use
+                Accepted tests live in <code>.arnx/tests/</code>, pinned by
+                sha256 in <code>.arnx/accepted-tests.json</code>. Your own suite
+                never collects them; only arnx check runs them in a throwaway
+                copy. Read this model-written code first. Use
                 <code>arnx check</code> after the fix and on later changes, with
                 no additional model inference cost.
               </p>
@@ -283,6 +311,66 @@
             >Understand the product and its boundaries ↗</a
           >
         </div>
+      </section>
+      <section class="section wrap">
+        <h2>What a finding means</h2>
+        <p>
+          arnx runs each test 3 times, reruns failures on the code before the
+          change, and has a second model confirm or dispute it. A failing test
+          shows an assertion fails, not that the code is wrong. Model replies
+          vary: two reviews of one change can differ.
+        </p>
+        <p>
+          Before/after outcomes are regression, pre-existing, new-code, changed
+          or unknown. Only regression is evidence about the change: the test
+          passes before and fails after, if its expectation is right.
+        </p>
+        <p>
+          Findings with one cause are grouped into an issue, most severe first,
+          explained as input, actual, expected and why it matters. Issues backed
+          by a confirmed test come pre-marked real; change what you disagree
+          with. Marks are real, intended, noise or rewrite.
+        </p>
+        <p>
+          Tests that pass after the change but fail before it appear under “The
+          change fixes”. Changed code no test touched is listed by name, and the
+          review says “partly covered”. A passing check covers only the accepted
+          tests.
+        </p>
+        <h2>arnx reviewing its own arnx remove command</h2>
+        <p>
+          From the README’s recorded review, before 0.1: a test for paths
+          escaping the repository, followed by the report excerpt. Quoted
+          exactly.
+        </p>
+        <div class="terminal">
+          <pre><code>test("S2 accepted-test paths escaping the repository are never deleted", async () =&gt; {
+  const { base, repo, env } = setup();
+  const victim = join(base, "victim.txt");
+  put(victim, "keep me");
+  put(join(repo, ".arnx", "accepted-tests.json"), record({ "../victim.txt": {} }));
+  const cli = new Cli({ cwd: repo, env });
+  await withDocker("/nonexistent/docker", () =&gt; cli.run("remove", "--yes", "--tests"));
+  expect(existsSync(victim)).toBe(true);
+});</code></pre>
+        </div>
+        <div class="terminal">
+          <pre><code>### Issue 1 · remove --yes can delete files outside the repository
+- Actual: In S2, `../victim.txt` outside the repository was deleted. …
+- Failing tests: F2, F4
+
+### F2 · regression · confirmed by the second opinion
+- Failure: `expect(received).toBe(expected)`
+- Before the change (regression): passes on the code before the change (3 runs): the change broke it
+- Second opinion: planRemove takes accepted-tests.json keys verbatim and applyRemove rmSync's join(repo, p), …</code></pre>
+        </div>
+        <p>
+          The test failed in all 3 runs, passed before the change, and the
+          second model agreed. We marked it real, kept it with arnx accept,
+          fixed the code from the fix prompt and saw it pass in arnx check. Not
+          every finding is like this one: in our own reviews, some confirmed
+          issues tested behaviour we intended.
+        </p>
       </section>
       <section class="section wrap" id="open-source">
         <p class="eyebrow">04 / Choose your setup</p>

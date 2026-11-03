@@ -73,12 +73,13 @@ test("a verified release enables its exact command and canonical source links sa
 
 test("public release presents versioned instructions without inventing installation verification", () => {
   const tokens = releaseTokens();
-  assert.equal(release.cli.version, "0.1.0");
+  assert.equal(release.cli.version, "0.1.7");
   assert(tokens.INSTALLATION.includes("npm install -g @arnx-dev/arnx"));
   assert(!tokens.INSTALLATION.includes("Verified"));
   assert(tokens.REPOSITORY_LICENSE.includes("/blob/main/LICENSE"));
   assert(tokens.CONTRIBUTING_LINK.includes("/blob/main/CONTRIBUTING.md"));
   const config = structuredClone(release);
-  config.cli.verifiedAt = "2026-10-22";
+  config.cli.verifiedAt = "2026-11-03";
+  config.cli.verificationRecord = null;
   assert.throws(() => validateRelease(config), /both a date and record/);
 });

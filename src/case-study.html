@@ -66,6 +66,11 @@
         bundle. Private source, generated test bodies, and raw execution logs
         are not published.
       </p>
+      <p class="scope-note">
+        Recorded on a development build before the first public release;
+        defaults, the setup flow and where accepted tests live have changed
+        since. See the <a href="./quickstart.html">quickstart</a>.
+      </p>
       <h2>The change</h2>
       <p>
         A token-callout prediction pipeline spanned 12 commits and 29 files,
@@ -152,8 +157,10 @@
       <p>
         The product fix was accompanied by regression tests in the repository.
         The tests used to expose the accepted failures helped check the changes.
-        These remain ordinary, editable test files, ready to run as the project
-        evolves.
+        Today, accepted tests live in <code>.arnx/tests/</code>, pinned by
+        sha256 in <code>.arnx/accepted-tests.json</code>. Only
+        <code>arnx check</code> runs them, in a throwaway copy; your own suite
+        never collects them.
       </p>
       <h2>Time and cost in this run</h2>
       <table>

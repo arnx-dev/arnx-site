@@ -205,7 +205,7 @@ try {
   await page.locator('[data-copy="workflow-code"]').click();
   assert.match(
     await page.evaluate(() => navigator.clipboard.readText()),
-    /arnx init[\s\S]+arnx setup[\s\S]+arnx accept[\s\S]+arnx check/,
+    /arnx init[\s\S]+arnx review[\s\S]+arnx triage[\s\S]+arnx accept[\s\S]+arnx check/,
   );
   assert.match(await page.locator("#copy-status").innerText(), /copied/);
   await page.evaluate(() => {
