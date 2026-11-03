@@ -2134,3 +2134,39 @@ details[open] > summary::after {
     margin-left: 0;
   }
 }
+
+/* Runnable commands use the same terminal treatment in both themes. */
+.terminal .shell-commands {
+  color: #a7f3d0;
+}
+.beta-steps li {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.beta-steps p {
+  flex: 1;
+}
+.workflow-command {
+  margin-top: 20px;
+  padding: 14px;
+  min-height: 100px;
+  border-radius: 8px;
+  background: #0f1115;
+  color: #a7f3d0;
+}
+.beta-steps .workflow-command code,
+:root[data-theme="dark"] .beta-steps .workflow-command code {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font: 12px/1.9 var(--font-mono);
+}
+.command-line {
+  display: block;
+}
+.shell-prompt {
+  color: #bac0c9;
+}

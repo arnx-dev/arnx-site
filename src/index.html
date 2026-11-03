@@ -150,7 +150,7 @@
                   Copy commands
                 </button>
               </div>
-              <pre><code id="first-review-code">arnx init
+              <pre><code id="first-review-code" class="shell-commands">arnx init
 arnx review</code></pre>
             </div>
             <p id="copy-status" role="status"></p>
@@ -243,7 +243,9 @@ arnx review</code></pre>
               projects the change touches; another project is set up when a
               later change touches it.
             </p>
-            <code>arnx init</code>
+            <pre
+              class="workflow-command"
+            ><code><span class="command-line"><span class="shell-prompt" aria-hidden="true">$ </span>arnx init</span></code></pre>
           </li>
           <li>
             <span class="step-number">02</span>
@@ -252,7 +254,9 @@ arnx review</code></pre>
               Investigate the diff, generate targeted tests, and run them. Read
               the failures, open questions, and coverage gaps.
             </p>
-            <code>arnx review</code>
+            <pre
+              class="workflow-command"
+            ><code><span class="command-line"><span class="shell-prompt" aria-hidden="true">$ </span>arnx review</span></code></pre>
           </li>
           <li>
             <span class="step-number">03</span>
@@ -261,7 +265,11 @@ arnx review</code></pre>
               Triage real / intended / noise / rewrite, then accept useful
               tests. Use arnx prompt to hand the fix to your coding agent.
             </p>
-            <code>arnx triage → arnx accept → arnx prompt</code>
+            <pre
+              class="workflow-command"
+            ><code><span class="command-line"><span class="shell-prompt" aria-hidden="true">$ </span>arnx triage</span>
+<span class="command-line"><span class="shell-prompt" aria-hidden="true">$ </span>arnx accept</span>
+<span class="command-line"><span class="shell-prompt" aria-hidden="true">$ </span>arnx prompt</span></code></pre>
           </li>
           <li>
             <span class="step-number">04</span>
@@ -270,7 +278,9 @@ arnx review</code></pre>
               Rerun accepted regression tests in Docker without new model calls.
               Review and commit the tests with the fix.
             </p>
-            <code>arnx check</code>
+            <pre
+              class="workflow-command"
+            ><code><span class="command-line"><span class="shell-prompt" aria-hidden="true">$ </span>arnx check</span></code></pre>
           </li>
         </ol>
         <a
