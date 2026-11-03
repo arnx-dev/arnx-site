@@ -312,65 +312,87 @@ arnx review</code></pre>
           >
         </div>
       </section>
-      <section class="section wrap">
-        <h2>What a finding means</h2>
-        <p>
-          arnx runs each test 3 times, reruns failures on the code before the
-          change, and has a second model confirm or dispute it. A failing test
-          shows an assertion fails, not that the code is wrong. Model replies
-          vary: two reviews of one change can differ.
+      <section class="section wrap" aria-labelledby="finding-title">
+        <h2 id="finding-title">What a finding means</h2>
+        <div class="beta-grid two">
+          <article class="path-card">
+            <h3>Repeat the failure</h3>
+            <p>
+              arnx runs each test 3 times, reruns failures on the code before
+              the change, and has a second model confirm or dispute it. A
+              failing test shows an assertion fails, not that the code is wrong.
+              Model replies vary: two reviews of one change can differ.
+            </p>
+          </article>
+          <article class="path-card">
+            <h3>Compare before and after</h3>
+            <p>
+              Before/after outcomes are regression, pre-existing, new-code,
+              changed or unknown. Only regression is evidence about the change:
+              the test passes before and fails after, if its expectation is
+              right.
+            </p>
+          </article>
+          <article class="path-card">
+            <h3>Make your decision</h3>
+            <p>
+              Findings with one cause are grouped into an issue, most severe
+              first, explained as input, actual, expected and why it matters.
+              Issues backed by a confirmed test come pre-marked real; change
+              what you disagree with. Marks are real, intended, noise or
+              rewrite.
+            </p>
+          </article>
+          <article class="path-card">
+            <h3>Read the coverage gaps</h3>
+            <p>
+              Tests that pass after the change but fail before it appear under
+              “The change fixes”. Changed code no test touched is listed by
+              name, and the review says “partly covered”. A passing check covers
+              only the accepted tests.
+            </p>
+          </article>
+        </div>
+        <h3>A test from arnx’s own review</h3>
+        <p class="scope-note">
+          arnx reviewing its own <code>arnx remove</code> command, before 0.1.
+          The test checks whether a recorded path can escape the repository.
+          Test and report quoted exactly from the README.
         </p>
-        <p>
-          Before/after outcomes are regression, pre-existing, new-code, changed
-          or unknown. Only regression is evidence about the change: the test
-          passes before and fails after, if its expectation is right.
-        </p>
-        <p>
-          Findings with one cause are grouped into an issue, most severe first,
-          explained as input, actual, expected and why it matters. Issues backed
-          by a confirmed test come pre-marked real; change what you disagree
-          with. Marks are real, intended, noise or rewrite.
-        </p>
-        <p>
-          Tests that pass after the change but fail before it appear under “The
-          change fixes”. Changed code no test touched is listed by name, and the
-          review says “partly covered”. A passing check covers only the accepted
-          tests.
-        </p>
-        <h2>arnx reviewing its own arnx remove command</h2>
-        <p>
-          From the README’s recorded review, before 0.1: a test for paths
-          escaping the repository, followed by the report excerpt. Quoted
-          exactly.
-        </p>
-        <div class="terminal">
-          <pre><code>test("S2 accepted-test paths escaping the repository are never deleted", async () =&gt; {
-  const { base, repo, env } = setup();
-  const victim = join(base, "victim.txt");
-  put(victim, "keep me");
-  put(join(repo, ".arnx", "accepted-tests.json"), record({ "../victim.txt": {} }));
-  const cli = new Cli({ cwd: repo, env });
-  await withDocker("/nonexistent/docker", () =&gt; cli.run("remove", "--yes", "--tests"));
-  expect(existsSync(victim)).toBe(true);
+        <div class="beta-grid two">
+          <div class="terminal">
+            <div class="terminal-header"><span>Generated test</span></div>
+            <pre><code><span class="syntax-call">test</span>(<span class="syntax-string">"S2 accepted-test paths escaping the repository are never deleted"</span>, <span class="syntax-keyword">async</span> () =&gt; {
+  <span class="syntax-keyword">const</span> { base, repo, env } = <span class="syntax-call">setup</span>();
+  <span class="syntax-keyword">const</span> victim = <span class="syntax-call">join</span>(base, <span class="syntax-string">"victim.txt"</span>);
+  <span class="syntax-call">put</span>(victim, <span class="syntax-string">"keep me"</span>);
+  <span class="syntax-call">put</span>(<span class="syntax-call">join</span>(repo, <span class="syntax-string">".arnx"</span>, <span class="syntax-string">"accepted-tests.json"</span>), <span class="syntax-call">record</span>({ <span class="syntax-string">"../victim.txt"</span>: {} }));
+  <span class="syntax-keyword">const</span> cli = new <span class="syntax-call">Cli</span>({ cwd: repo, env });
+  <span class="syntax-keyword">await</span> <span class="syntax-call">withDocker</span>(<span class="syntax-string">"/nonexistent/docker"</span>, () =&gt; cli.run(<span class="syntax-string">"remove"</span>, <span class="syntax-string">"--yes"</span>, <span class="syntax-string">"--tests"</span>));
+  <span class="syntax-call">expect</span>(<span class="syntax-call">existsSync</span>(victim)).<span class="syntax-call">toBe</span>(<span class="syntax-keyword">true</span>);
 });</code></pre>
-        </div>
-        <div class="terminal">
-          <pre><code>### Issue 1 · remove --yes can delete files outside the repository
-- Actual: In S2, `../victim.txt` outside the repository was deleted. …
-- Failing tests: F2, F4
+          </div>
+          <div class="terminal">
+            <div class="terminal-header"><span>Report excerpt</span></div>
+            <pre><code><span class="syntax-heading">### Issue 1 · remove --yes can delete files outside the repository</span>
+- <span class="syntax-call">Actual:</span> In S2, `<span class="syntax-string">../victim.txt</span>` outside the repository was deleted. …
+- <span class="syntax-call">Failing tests:</span> F2, F4
 
-### F2 · regression · confirmed by the second opinion
-- Failure: `expect(received).toBe(expected)`
-- Before the change (regression): passes on the code before the change (3 runs): the change broke it
-- Second opinion: planRemove takes accepted-tests.json keys verbatim and applyRemove rmSync's join(repo, p), …</code></pre>
+<span class="syntax-heading">### F2 · regression · confirmed by the second opinion</span>
+- <span class="syntax-call">Failure:</span> `<span class="syntax-string">expect(received).toBe(expected)</span>`
+- <span class="syntax-call">Before the change (regression):</span> passes on the code before the change (3 runs): the change broke it
+- <span class="syntax-call">Second opinion:</span> planRemove takes accepted-tests.json keys verbatim and applyRemove rmSync's join(repo, p), …</code></pre>
+          </div>
         </div>
-        <p>
-          The test failed in all 3 runs, passed before the change, and the
-          second model agreed. We marked it real, kept it with arnx accept,
-          fixed the code from the fix prompt and saw it pass in arnx check. Not
-          every finding is like this one: in our own reviews, some confirmed
-          issues tested behaviour we intended.
-        </p>
+        <div class="results-story">
+          <p>
+            The test failed in all 3 runs, passed before the change, and the
+            second model agreed. We marked it real, kept it with arnx accept,
+            fixed the code from the fix prompt and saw it pass in arnx check.
+            Not every finding is like this one: in our own reviews, some
+            confirmed issues tested behaviour we intended.
+          </p>
+        </div>
       </section>
       <section class="section wrap" id="open-source">
         <p class="eyebrow">04 / Choose your setup</p>

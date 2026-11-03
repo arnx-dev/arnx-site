@@ -586,6 +586,19 @@ pre code {
 .terminal pre {
   padding: 25px;
 }
+/* Evidence excerpts keep their source text; color only helps scan it. */
+.terminal .syntax-keyword {
+  color: #c4b5fd;
+}
+.terminal .syntax-string {
+  color: #a7f3d0;
+}
+.terminal .syntax-call {
+  color: #93c5fd;
+}
+.terminal .syntax-heading {
+  color: #fcd08b;
+}
 .terminal-comment {
   color: #b0b7c1;
 }
