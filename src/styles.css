@@ -1714,6 +1714,7 @@ details[open] > summary::after {
 }
 .hero-scene {
   height: 640px;
+  align-self: start;
 }
 .hero-evidence {
   transform: none;
