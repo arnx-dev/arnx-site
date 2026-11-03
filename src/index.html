@@ -82,30 +82,6 @@
               >BYOM <span>Your API keys</span></a
             >
           </div>
-          <p>
-            Docker, plus your own model key or arnx cloud with $5 of starting
-            credit.
-          </p>
-          {{INSTALL_COMMAND}}
-          <div class="terminal">
-            <div class="terminal-header">
-              <span>First review / after a code change</span
-              ><button
-                class="copy-button"
-                data-copy="first-review-code"
-                aria-label="Copy first review commands"
-              >
-                Copy commands
-              </button>
-            </div>
-            <pre><code id="first-review-code">arnx init
-arnx review</code></pre>
-          </div>
-          <p id="copy-status" role="status"></p>
-          <p>
-            The first review sets up what it needs in a few minutes (it stops at
-            10). No separate setup step.
-          </p>
           <p class="hero-footnote">{{RELEASE_NOTE}}</p>
         </div>
         <div class="hero-scene">
@@ -152,6 +128,38 @@ arnx review</code></pre>
           />
           <div class="scene-note">Show me<br />the evidence.</div>
         </div>
+      </section>
+      <section class="wrap results-story" aria-labelledby="first-review-title">
+        <h2 id="first-review-title">Your first review</h2>
+        <p>
+          Docker, plus your own model key or arnx cloud with $5 of starting
+          credit.
+        </p>
+        <div class="beta-grid two">
+          <div>{{INSTALL_COMMAND}}</div>
+          <div>
+            <p>Then, in your repository after a code change:</p>
+            <div class="terminal">
+              <div class="terminal-header">
+                <span>First review / after a code change</span
+                ><button
+                  class="copy-button"
+                  data-copy="first-review-code"
+                  aria-label="Copy first review commands"
+                >
+                  Copy commands
+                </button>
+              </div>
+              <pre><code id="first-review-code">arnx init
+arnx review</code></pre>
+            </div>
+            <p id="copy-status" role="status"></p>
+          </div>
+        </div>
+        <p>
+          The first review sets up what it needs in a few minutes (it stops at
+          10). No separate setup step.
+        </p>
       </section>
       <div class="language-strip wrap">
         <span class="mono">SUPPORTED RUNNERS</span
