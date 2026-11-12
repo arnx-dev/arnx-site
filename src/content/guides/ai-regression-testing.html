@@ -1,0 +1,197 @@
+<!--meta
+{
+  "title": "Keeping regression tests from AI code review findings",
+  "description": "How to turn a confirmed AI review finding into a regression test you keep: what to check before committing it, where it should live, and how to stop it being edited.",
+  "summary": "Turning a confirmed finding into a retained regression test: what to read first, where the test lives, and how edits are detected.",
+  "crumb": "Regression tests",
+  "listTitle": "Keeping regression tests from AI review findings",
+  "kind": "article",
+  "order": 6,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Guide / Regression tests</p>
+<h1>Keeping regression tests from AI review findings.</h1>
+<p class="descriptor">A finding you fixed should stay fixed.</p>
+<p>
+  When an AI review produces a test that exposes a real bug, keep the test. It
+  already fails on the bug and passes on the fix, which is what a regression
+  test is. Before you keep it, read it, make sure it tests behavior you intend,
+  and put it somewhere it cannot be quietly edited until it passes.
+</p>
+<p>
+  That last point matters most with coding agents. An agent asked to make a
+  failing test pass has two ways to do it: fix the code or change the test. A
+  test changed until it passes shows nothing.
+</p>
+<nav class="article-toc" aria-label="On this page">
+  <a href="#worth">Worth keeping?</a><a href="#where">Where it lives</a
+  ><a href="#workflow">Workflow</a><a href="#edits">Edits</a
+  ><a href="#own">Your own suite</a><a href="#limits">Limits</a>
+</nav>
+
+<h2 id="worth">Is this test worth keeping?</h2>
+<p>A model wrote it. Read it as you would read a stranger's code.</p>
+<ul>
+  <li>
+    <strong>Does it assert intended behavior?</strong> If the expectation is
+    wrong, the test will hold a bug in place.
+  </li>
+  <li>
+    <strong>Does it reach the code through a real path?</strong> A test that
+    calls a private helper with inputs the program never produces guards
+    nothing.
+  </li>
+  <li>
+    <strong>Is it deterministic?</strong> No clock, network, ordering or shared
+    state it does not control.
+  </li>
+  <li>
+    <strong>Does it check behavior, not wording?</strong> An assertion on an
+    exact error string breaks on the next rewording.
+  </li>
+  <li>
+    <strong>Is it the smallest test for this bug?</strong> One cause, one test,
+    is easier to trust later.
+  </li>
+</ul>
+<p>
+  If the bug is real but the test is wrong, say so and have it rewritten. Do not
+  keep it as it is.
+</p>
+
+<h2 id="where">Where a retained test should live</h2>
+<p>
+  There are two reasonable homes. Your own test folders, where your runner
+  collects it with everything else. Or a separate, pinned place that only a
+  dedicated command runs. arnx uses the second:
+</p>
+<ul>
+  <li>
+    Accepted tests are kept in <code>.arnx/tests/</code>. Your project's own
+    test run never collects them.
+  </li>
+  <li>
+    Each file's sha256 is pinned in
+    <code>.arnx/accepted-tests.json</code>.
+  </li>
+  <li>
+    Only <code>arnx check</code> runs them, in Docker, in a throwaway copy of
+    the repository with the tests put in place.
+  </li>
+  <li>arnx never edits your code or your tests.</li>
+</ul>
+<p>
+  The trade-off: your suite's layout and conventions stay untouched and
+  model-written code is clearly marked as such, but you have a second command to
+  run. If you prefer the test in your own suite, copy it there by hand after
+  review. It is then yours to maintain.
+</p>
+
+<h2 id="workflow">From finding to kept test</h2>
+<div class="terminal">
+  <div class="terminal-header"><span>After arnx review</span></div>
+  <pre><code>arnx triage
+arnx accept
+arnx check
+arnx prompt
+# fix the code under test, never the tests
+arnx check
+git add .arnx/tests .arnx/accepted-tests.json</code></pre>
+</div>
+<ol class="guide-steps">
+  <li>
+    <strong>Triage.</strong> Mark each issue real, intended, noise or rewrite.
+    Issues backed by a confirmed test come marked real. Change what you disagree
+    with. <q>Rewrite</q> means the bug is real and the test is wrong; add what
+    it should check.
+  </li>
+  <li>
+    <strong>Accept.</strong> Tests of issues marked real are kept. Tests of
+    everything else are left out. Your answers to arnx's questions can become
+    tests too; <code>arnx accept --no-answers</code> skips that model call.
+  </li>
+  <li>
+    <strong>Check, and expect red.</strong> The tests of the bugs you just
+    accepted fail. That is the list to fix.
+  </li>
+  <li>
+    <strong>Fix and check again.</strong> <code>arnx prompt</code> gives your
+    coding agent the failing tests and your answers. Green means the accepted
+    tests pass now.
+  </li>
+  <li>
+    <strong>Commit the tests with the fix.</strong>
+    <code>.arnx/tests/</code>, <code>.arnx/accepted-tests.json</code>, and
+    <code>.arnx/answer-watch.json</code> when there is one.
+  </li>
+</ol>
+<p>
+  From then on, <code>arnx check</code> on a later change reruns every kept test
+  with no model calls. One such test still guards arnx's own code: see
+  <a href="/case-studies/arnx-self-review/">the path escape in arnx remove</a>.
+  In the <a href="/case-studies/beets/">beets</a> and
+  <a href="/case-studies/hummingbot/">Hummingbot</a> cases, the test went
+  upstream inside the pull request, in the project's own suite.
+</p>
+
+<h2 id="edits">When a kept test is edited</h2>
+<p>
+  If an accepted test file, or its entry in
+  <code>.arnx/accepted-tests.json</code>, changes after accept,
+  <code>arnx check</code> runs nothing and exits 4. You then choose:
+</p>
+<ul>
+  <li>
+    <code>arnx accept --again &lt;id&gt;</code> restores the review's tests and
+    overwrites the edit.
+  </li>
+  <li>
+    <code>arnx accept --keep-edits</code> records the current files, after you
+    have read and agreed with the change.
+  </li>
+</ul>
+<p>
+  Both are the developer's to run. The arnx skill tells coding agents never to
+  touch accepted tests or run <code>arnx accept</code>.
+</p>
+
+<h2 id="own">Your own suite still matters</h2>
+<p>
+  A passing <code>arnx check</code> covers only the accepted tests. Run each
+  touched project's full suite after the fix as well. Kept tests are a net under
+  specific bugs you have seen. They are not coverage.
+</p>
+
+<h2 id="limits">Limits and trade-offs</h2>
+<ul>
+  <li>
+    Kept tests are model-written code in your repository. Budget time to read
+    them. Unread, they are a liability.
+  </li>
+  <li>
+    A kept test with a wrong expectation blocks correct changes later. In our
+    grading, many confirmed findings tested intended behavior, so this is a real
+    risk:
+    <a href="/research/unfamiliar-repositories/">the counts</a>.
+  </li>
+  <li>
+    <code>arnx check</code> needs Docker and the environment in
+    <code>.arnx/review.yaml</code>. It is not as light as your unit tests.
+  </li>
+  <li>
+    Tests outside your suite do not show up in your coverage or your runner's
+    reports.
+  </li>
+  <li>
+    Rust is early: generated tests are integration tests that see the crate's
+    public API only.
+  </li>
+</ul>
+<p>
+  To see a test go from finding to kept check, run the
+  <a href="https://github.com/arnx-dev/checkout-demo">checkout demo</a>
+  through <code>arnx accept</code> and <code>arnx check</code>. The reference is
+  <a href="/quickstart.html#retained-tests">keep the useful tests</a>
+  in the quickstart.
+</p>

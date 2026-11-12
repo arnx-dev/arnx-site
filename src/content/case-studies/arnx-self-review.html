@@ -1,0 +1,182 @@
+<!--meta
+{
+  "title": "arnx self-review: remove could delete files outside the repo",
+  "description": "arnx reviewed its own remove command and wrote a test showing a recorded path could escape the repository and be deleted. The fix and the test are public.",
+  "summary": "arnx reviewing its own code: a generated test showed arnx remove would delete a file outside the repository. The test still guards that behavior in the public source.",
+  "crumb": "arnx self-review",
+  "listTitle": "arnx self-review: remove could delete files outside the repository",
+  "kind": "article",
+  "order": 4,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Case study / arnx</p>
+<h1>arnx remove could delete a file outside the repository.</h1>
+<p class="descriptor">arnx reviewing its own code, before the first release.</p>
+<p>
+  Before 0.1, arnx reviewed the change that added its own
+  <code>arnx remove</code> command. It wrote a test showing that a path recorded
+  in <code>.arnx/accepted-tests.json</code> could point outside the repository,
+  and that <code>remove</code> would delete the file there. The test, the
+  failure, the fix and the retained regression test are all in the
+  <a href="https://github.com/arnx-dev/arnx" data-event="github_click"
+    >public source</a
+  >.
+</p>
+<p class="scope-note">
+  <strong>Conflict of interest:</strong> this is arnx's authors using arnx on
+  arnx. We chose the example and we judged the finding. Read the
+  <a href="/case-studies/sqlfluff/">SQLFluff</a> and
+  <a href="/case-studies/beets/">beets</a> pages for code we did not write.
+</p>
+
+<h2>1. Repository and reviewed commit</h2>
+<p>
+  <a href="https://github.com/arnx-dev/arnx" data-event="github_click"
+    >arnx-dev/arnx</a
+  >, review <code>20261022-227eb7</code>, on 2026-10-22, of the change that
+  added <code>arnx remove</code>. The command lists what arnx put in a
+  repository and, with <code>--yes</code>, deletes it. With
+  <code>--tests</code> it also deletes accepted tests that an older arnx kept in
+  the project's own test folders.
+</p>
+
+<h2>2. Expected behavior</h2>
+<p>
+  <code>arnx remove</code> deletes only files inside the repository it runs in,
+  whatever <code>.arnx/accepted-tests.json</code> says. That file is committed
+  and shared, so its contents can come from anyone with write access to the
+  repository.
+</p>
+
+<h2>3. Actual behavior</h2>
+<p>
+  With a record that listed <code>../victim.txt</code>,
+  <code>arnx remove --yes --tests</code> deleted <code>victim.txt</code> in the
+  parent directory.
+</p>
+
+<h2>4. Suspected defect</h2>
+<p>
+  arnx suspected that <code>remove</code> trusted the paths recorded in
+  <code>.arnx/accepted-tests.json</code>: it read the keys as written and joined
+  each one to the repository path before deleting.
+</p>
+
+<h2>5. Generated test</h2>
+<div class="terminal">
+  <div class="terminal-header">
+    <span>Written by arnx, quoted from the README</span>
+  </div>
+  <pre><code><span class="syntax-call">test</span>(<span class="syntax-string">"S2 accepted-test paths escaping the repository are never deleted"</span>, <span class="syntax-keyword">async</span> () =&gt; {
+  <span class="syntax-keyword">const</span> { base, repo, env } = <span class="syntax-call">setup</span>();
+  <span class="syntax-keyword">const</span> victim = <span class="syntax-call">join</span>(base, <span class="syntax-string">"victim.txt"</span>);
+  <span class="syntax-call">put</span>(victim, <span class="syntax-string">"keep me"</span>);
+  <span class="syntax-call">put</span>(<span class="syntax-call">join</span>(repo, <span class="syntax-string">".arnx"</span>, <span class="syntax-string">"accepted-tests.json"</span>), <span class="syntax-call">record</span>({ <span class="syntax-string">"../victim.txt"</span>: {} }));
+  <span class="syntax-keyword">const</span> cli = new <span class="syntax-call">Cli</span>({ cwd: repo, env });
+  <span class="syntax-keyword">await</span> <span class="syntax-call">withDocker</span>(<span class="syntax-string">"/nonexistent/docker"</span>, () =&gt; cli.run(<span class="syntax-string">"remove"</span>, <span class="syntax-string">"--yes"</span>, <span class="syntax-string">"--tests"</span>));
+  <span class="syntax-call">expect</span>(<span class="syntax-call">existsSync</span>(victim)).<span class="syntax-call">toBe</span>(<span class="syntax-keyword">true</span>);
+});</code></pre>
+</div>
+
+<h2>6. Execution result</h2>
+<div class="terminal">
+  <div class="terminal-header">
+    <span>From the review's report, quoted from the README</span>
+  </div>
+  <pre><code><span class="syntax-heading">### Issue 1 · remove --yes can delete files outside the repository</span>
+- <span class="syntax-call">Actual:</span> In S2, `<span class="syntax-string">../victim.txt</span>` outside the repository was deleted. …
+- <span class="syntax-call">Failing tests:</span> F2, F4
+
+<span class="syntax-heading">### F2 · regression · confirmed by the second opinion</span>
+- <span class="syntax-call">Failure:</span> `<span class="syntax-string">expect(received).toBe(expected)</span>`
+- <span class="syntax-call">Before the change (regression):</span> passes on the code before the change (3 runs), fails with it
+- <span class="syntax-call">Second opinion:</span> planRemove takes accepted-tests.json keys verbatim and applyRemove rmSync's join(repo, p), …</code></pre>
+</div>
+<p>
+  The test failed in all 3 runs and passed on the code before the change. The
+  second model agreed with the explanation. The excerpt is shortened in the
+  README, and so here. We do not publish the cost or duration of this review.
+</p>
+
+<h2>7. Correction</h2>
+<p>
+  We marked the issue real and <code>arnx accept</code> kept the test. A coding
+  agent fixed <code>remove</code> from arnx's fix prompt. In the released
+  source, the fix is in two places in
+  <a
+    href="https://github.com/arnx-dev/arnx/blob/main/src/remove.ts"
+    data-event="github_click"
+    >src/remove.ts</a
+  >:
+</p>
+<ul>
+  <li>
+    When the accepted-tests record is read, paths that would leave the
+    repository are dropped. The plan of what to delete never contains them.
+  </li>
+  <li>
+    The step that deletes checks each path again and skips any that is not
+    inside the repository.
+  </li>
+</ul>
+
+<h2>8. Verification result</h2>
+<p>
+  <code>arnx check</code> showed the accepted test passing after the fix. The
+  test is still in the public repository, as accepted, in
+  <a
+    href="https://github.com/arnx-dev/arnx/blob/main/tests/remove-safety.test.ts"
+    data-event="github_click"
+    >tests/remove-safety.test.ts</a
+  >, next to the other tests arnx wrote in the same review. It runs with the
+  rest of arnx's suite.
+</p>
+
+<h2>9. Upstream references</h2>
+<ul>
+  <li>
+    <a
+      href="https://github.com/arnx-dev/arnx#what-a-finding-looks-like"
+      data-event="github_click"
+      >README: What a finding looks like</a
+    >, with the test and report excerpt.
+  </li>
+  <li>
+    <a
+      href="https://github.com/arnx-dev/arnx/blob/main/tests/remove-safety.test.ts"
+      data-event="github_click"
+      >tests/remove-safety.test.ts</a
+    >, the retained regression tests.
+  </li>
+  <li>
+    <a
+      href="https://github.com/arnx-dev/arnx/blob/main/src/remove.ts"
+      data-event="github_click"
+      >src/remove.ts</a
+    >, the corrected code.
+  </li>
+</ul>
+
+<h2>10. Limitations and observations</h2>
+<ul>
+  <li>
+    <strong>The defect never shipped.</strong> The review ran before the first
+    public release, on a change that was still in development. No released
+    version of arnx had it.
+  </li>
+  <li>
+    <strong>We picked this example because it is a clean one.</strong>
+    The README says so too: in our own reviews, some confirmed issues tested
+    behavior we intended. Deciding is the developer's part.
+  </li>
+  <li>
+    The review record itself is not published, only the excerpts in the README.
+    The test and the fixed code are public and can be read and run.
+  </li>
+  <li>
+    Reaching the defect needed a crafted record file in the repository. That is
+    a realistic input for a file teams commit, and still a narrower case than a
+    crash on ordinary use.
+  </li>
+</ul>

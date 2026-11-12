@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 export function serve(port = Number(process.env.PORT || 4173)) {
@@ -26,6 +26,18 @@ export function serve(port = Number(process.env.PORT || 4173)) {
         "." + (path.endsWith("/") ? path + "index.html" : path),
       );
       if (!file.startsWith(root + sep)) throw new Error("Not found");
+      // Like GitHub Pages: /agents redirects to /agents/ when it is a directory.
+      if (
+        !path.endsWith("/") &&
+        (await stat(file).then(
+          (entry) => entry.isDirectory(),
+          () => false,
+        ))
+      ) {
+        res.writeHead(301, { Location: `${path}/` });
+        res.end();
+        return;
+      }
       // Like GitHub Pages: /terms serves terms.html when there is no file "terms".
       const data = await readFile(file).catch(async (error) => {
         if (extname(file)) throw error;

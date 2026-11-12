@@ -73,7 +73,8 @@ test("a verified release enables its exact command and canonical source links sa
 
 test("public release presents versioned instructions without inventing installation verification", () => {
   const tokens = releaseTokens();
-  assert.equal(release.cli.version, "0.1.7");
+  assert.match(release.cli.version, /^\d+\.\d+\.\d+$/);
+  assert.equal(tokens.CLI_VERSION, release.cli.version);
   assert(tokens.INSTALLATION.includes("npm install -g @arnx-dev/arnx"));
   assert(!tokens.INSTALLATION.includes("Verified"));
   assert(tokens.REPOSITORY_LICENSE.includes("/blob/main/LICENSE"));

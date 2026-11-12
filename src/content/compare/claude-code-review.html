@@ -1,0 +1,360 @@
+<!--meta
+{
+  "title": "arnx vs Claude Code's native review: a second, executed check",
+  "description": "How arnx differs from Claude Code's /code-review, ultrareview and managed Code Review: output, test execution, cost and limits, with sources, and how to use both.",
+  "summary": "Claude Code's own review reads the change and reports findings in the same tool that wrote it. arnx is a separate tool that proves suspected bugs with tests it runs.",
+  "crumb": "arnx vs Claude Code's native review",
+  "listTitle": "arnx vs Claude Code's native review",
+  "kind": "article",
+  "order": 3,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Compare / Claude Code</p>
+<h1>arnx and Claude Code's own review work together.</h1>
+<p class="descriptor">
+  One is built into the agent. One checks the agent's work from outside.
+</p>
+<p>
+  Claude Code ships its own review: the <code>/code-review</code> command in the
+  session, a deeper cloud run called ultrareview, and a managed Code Review
+  service that comments on GitHub pull requests. They read the change and report
+  findings, with no extra tool to install. arnx is a separate open-source CLI.
+  It writes tests for what looks broken, runs them in Docker, reruns each
+  failure on the code before the change, and reports the tests that failed.
+</p>
+<p>
+  arnx is built to be run by Claude Code, through the
+  <a href="/agents/">arnx skill</a>, so this is not either-or. Use the native
+  review for a fast read of a change in any language. Add arnx when you want the
+  suspected bugs reproduced by tests, from models you choose, with the tests
+  kept for later. The
+  <a href="/guides/claude-code-review/">Claude Code guide</a> shows the steps.
+</p>
+<nav class="article-toc" aria-label="On this page">
+  <a href="#table">Side by side</a
+  ><a href="#other">When the native review fits better</a
+  ><a href="#arnx">When arnx fits better</a><a href="#both">Using both</a
+  ><a href="#limits">arnx limits</a><a href="#sources">Sources</a>
+</nav>
+<h2 id="table">Side by side</h2>
+<div class="table-scroll">
+  <table>
+    <caption>
+      arnx 0.1.11 and Claude Code's native review, from each product's own
+      documentation on 2026-11-12
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col"></th>
+        <th scope="col">arnx</th>
+        <th scope="col">Claude Code's native review</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Where review happens</th>
+        <td>
+          On the developer's machine, after a change is finished and before the
+          commit or pull request. Run by the developer or by their coding agent.
+        </td>
+        <td>
+          Three places.
+          <a href="https://code.claude.com/docs/en/code-review-local"
+            ><code>/code-review</code></a
+          >
+          <q>is a command you type at the Claude Code prompt</q>.
+          <a href="https://code.claude.com/docs/en/ultrareview">Ultrareview</a>
+          (<code>/code-review ultra</code>, a research preview)
+          <q>launches a fleet of reviewer agents in a cloud sandbox</q>. Managed
+          <a href="https://code.claude.com/docs/en/code-review">Code Review</a>
+          comments on GitHub pull requests for Team and Enterprise plans.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Installation</th>
+        <td>
+          <code>npm install -g @arnx-dev/arnx</code> or a standalone binary,
+          then <code>arnx init</code>. Needs Docker. No code-host app.
+        </td>
+        <td>
+          Nothing extra for the local command:
+          <q>The command works on any plan.</q> For managed Code Review an owner
+          <a href="https://code.claude.com/docs/en/code-review-setup"
+            >turns it on and installs the Claude GitHub App</a
+          >.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Output</th>
+        <td>
+          A local report, <code>review.md</code>, where each finding is a test
+          file you can run, with its failure output. arnx posts no pull request
+          comments.
+        </td>
+        <td>
+          Findings as text in the session; <code>--fix</code>
+          <q>also asks Claude to apply the findings to your working tree</q>,
+          and <code>--comment</code> posts them on a pull request. Managed Code
+          Review posts inline comments:
+          <q>A review never approves or blocks the pull request</q>.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Test generation and execution</th>
+        <td>
+          Always. It writes tests for what looks broken and runs each one 3
+          times in a local Docker sandbox with no network.
+        </td>
+        <td>
+          Managed Code Review:
+          <a href="https://code.claude.com/docs/en/code-review"
+            ><q
+              >a review works from reading the diff and the surrounding code,
+              without building or running your code.</q
+            ></a
+          >
+          Ultrareview says
+          <q>every reported finding is independently reproduced and verified</q
+          >; we did not find in their documentation whether that means running
+          code or tests. For the local command, we did not find test generation
+          or execution in their documentation. Claude Code itself can write and
+          run tests when you ask it to.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Before and after comparison by running code</th>
+        <td>
+          Yes. Each failing test is rerun on the code before the change. The
+          report says whether it is a regression, was already failing, or covers
+          new code.
+        </td>
+        <td>We did not find this in their documentation.</td>
+      </tr>
+      <tr>
+        <th scope="row">Developer triage</th>
+        <td>
+          <code>arnx triage</code>: mark each issue real, intended, noise or
+          rewrite, and answer arnx's questions. A second model confirms or
+          disputes each finding first.
+        </td>
+        <td>
+          On pull requests, per the
+          <a href="https://code.claude.com/docs/en/code-review-pull-requests"
+            >pull request page</a
+          >:
+          <q
+            >Dismiss it without a code change: resolve the thread yourself on
+            GitHub. Replying alone doesn't dismiss a finding.</q
+          >
+          Recurring findings are tuned with a rule in <code>REVIEW.md</code>.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Keeping regression tests</th>
+        <td>
+          <code>arnx accept</code> keeps the tests of real issues in
+          <code>.arnx/tests/</code>, pinned by sha256.
+          <code>arnx check</code> reruns them with no model calls.
+        </td>
+        <td>
+          Review rules in
+          <a href="https://code.claude.com/docs/en/code-review-customize"
+            ><code>REVIEW.md</code> and <code>CLAUDE.md</code></a
+          >. We did not find in their documentation a way to keep a finding as a
+          pinned regression test.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Languages and platforms</th>
+        <td>
+          Python (pytest), JavaScript and TypeScript (vitest, jest, node:test,
+          bun), Rust (cargo-nextest, early). macOS and Linux; Windows through
+          WSL 2. Any Git repository, no code host needed.
+        </td>
+        <td>
+          We did not find a language list in their documentation. Managed Code
+          Review covers repositories hosted on GitHub, including GitHub
+          Enterprise Server. The local command works in any repository Claude
+          Code runs in.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Where code is processed</th>
+        <td>
+          Tests and tool calls run locally. The diff, the files the reviewer
+          reads, the tests and their output go to your own model providers, or
+          to arnx Cloud if you choose it.
+        </td>
+        <td>
+          The local command <q>runs in your own session</q>. Managed Code Review
+          runs <q>on Anthropic infrastructure, in a managed environment</q>.
+          Ultrareview
+          <q>bundles the repository state and uploads it to a cloud sandbox</q>.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Cost model</th>
+        <td>
+          Open source (Apache-2.0) with your own model keys: you pay providers
+          per review, capped by <code>review_usd</code> ($3.00 by default). Our
+          own reviews ranged from $0.17 to $3.19. Or prepaid arnx Cloud credit.
+        </td>
+        <td>
+          The local command
+          <q>counts toward your plan's usage or API billing</q>. Ultrareview:
+          <q>3 free runs</q> on some plans, then
+          <a href="https://code.claude.com/docs/en/ultrareview"
+            ><q
+              >typically $5 to $25 in usage credits depending on the size of the
+              change</q
+            ></a
+          >. Managed Code Review
+          <a href="https://code.claude.com/docs/en/code-review-costs"
+            ><q>has no flat per-review price</q></a
+          >
+          and is billed on token usage through usage credits.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<h2 id="other">When Claude Code's native review is the better choice</h2>
+<ul>
+  <li>
+    You want a review now, in the session you are already in, with nothing to
+    install and no Docker.
+  </li>
+  <li>
+    Your code is in a language arnx does not cover, or the project has no test
+    suite arnx can use.
+  </li>
+  <li>
+    You want findings applied straight away: <code>--fix</code> edits the
+    working tree in the same tool.
+  </li>
+  <li>
+    You want pull requests reviewed for a team on GitHub, with inline comments
+    and a check run. That is managed Code Review.
+  </li>
+  <li>
+    You want a deep review of a large change without using your own machine.
+    Ultrareview runs in a cloud sandbox.
+  </li>
+  <li>
+    The change is documentation, configuration or design, where there is no
+    behavior for a test to check.
+  </li>
+</ul>
+<h2 id="arnx">When arnx is the better choice</h2>
+<ul>
+  <li>
+    You want a finding you can run: a test, its failure, and whether it passed
+    before the change.
+  </li>
+  <li>
+    You want the check to come from outside the session that wrote the code.
+    arnx's default models include a second hunter from another vendor when you
+    set that key, and a second model challenges each finding.
+  </li>
+  <li>
+    You want the fix verified against fixed tests. The agent fixes the code
+    until <code>arnx check</code> passes, and arnx refuses to run if an accepted
+    test was edited.
+  </li>
+  <li>
+    You want to keep the tests in the repository as regression checks, rerun
+    with no model calls.
+  </li>
+  <li>
+    You use more than one coding agent. The same skill installs for Codex and
+    other agents that read Agent Skills.
+  </li>
+</ul>
+<h2 id="both">Using both</h2>
+<p>
+  A workable order: let Claude Code finish the change, run
+  <code>/code-review</code> for a quick read, then have it run
+  <code>arnx review</code> once. You triage and accept. Claude Code fixes the
+  code from <code>arnx prompt</code> until <code>arnx check</code>
+  passes. At the pull request, managed Code Review or another reviewer can still
+  comment. arnx calls models through API keys or arnx Cloud: your Claude
+  subscription does not cover those calls.
+</p>
+<h2 id="limits">What arnx does not do</h2>
+<ul>
+  <li>
+    Three languages only: Python, JavaScript and TypeScript, and Rust (early).
+    It works best on single-package Python and TypeScript repositories.
+  </li>
+  <li>
+    It needs Docker and a project with an existing test suite. Code in no such
+    project is reported as not reviewed. Tests that run only in a browser are
+    not run.
+  </li>
+  <li>
+    A review takes minutes, not seconds, and the first one also sets up the test
+    environment (it stops at 10 minutes). Changes over 200 KB are refused;
+    review a long branch in parts.
+  </li>
+  <li>It posts nothing to a pull request. The report is a local file.</li>
+  <li>
+    Findings can be wrong. A failing generated test shows an assertion fails,
+    not that the code is wrong, and the second model can agree with a wrong
+    test. Our own counts are in
+    <a href="/research/unfamiliar-repositories/"
+      >AI code review findings on unfamiliar repositories</a
+    >. Deciding stays with the developer.
+  </li>
+</ul>
+<h2 id="sources">Sources</h2>
+<p>
+  Last reviewed 2026-11-12. Every statement about the other product comes from
+  its own pages below, as they read that day. Products and prices change: check
+  the vendor's pages before you decide. Found an error?
+  <a href="{{ISSUES_URL}}" data-event="github_click">Open an issue</a>
+  and we will correct it.
+</p>
+<ul>
+  <li>
+    <a href="https://code.claude.com/docs/en/code-review-local"
+      >Claude Code: /code-review</a
+    >
+  </li>
+  <li>
+    <a href="https://code.claude.com/docs/en/ultrareview"
+      >Claude Code: ultrareview</a
+    >
+  </li>
+  <li>
+    <a href="https://code.claude.com/docs/en/code-review"
+      >Claude Code: Code Review</a
+    >
+  </li>
+  <li>
+    <a href="https://code.claude.com/docs/en/code-review-setup"
+      >Claude Code: Code Review setup</a
+    >
+  </li>
+  <li>
+    <a href="https://code.claude.com/docs/en/code-review-pull-requests"
+      >Claude Code: Code Review on pull requests</a
+    >
+  </li>
+  <li>
+    <a href="https://code.claude.com/docs/en/code-review-customize"
+      >Claude Code: customizing Code Review</a
+    >
+  </li>
+  <li>
+    <a href="https://code.claude.com/docs/en/code-review-costs"
+      >Claude Code: Code Review costs</a
+    >
+  </li>
+  <li>
+    <a href="/quickstart.html">arnx quickstart</a> and
+    <a href="{{GITHUB_URL}}" data-event="github_click"
+      >arnx source and release documentation</a
+    >
+  </li>
+</ul>

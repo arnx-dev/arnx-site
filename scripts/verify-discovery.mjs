@@ -2,13 +2,14 @@ import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { pages } from "./build.mjs";
 import { origin, robots } from "./discovery.mjs";
+import { content } from "./content.mjs";
 import { serve } from "./serve.mjs";
 
 const attrs = (tag) =>
   Object.fromEntries(
-    [...tag.matchAll(/([\w:-]+)\s*=\s*["']([^"']*)["']/g)].map((m) => [
+    [...tag.matchAll(/([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)].map((m) => [
       m[1].toLowerCase(),
-      m[2],
+      m[2] ?? m[3],
     ]),
   );
 export function inspectHtml(html, canonical) {
@@ -116,10 +117,13 @@ export async function verify(base) {
   const urls = [...sitemap.text.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
     (m) => m[1],
   );
-  const expected = pages.map(
-    (p) =>
-      `${origin}/${p === "index.html" ? "" : ["privacy.html", "terms.html", "credits.html"].includes(p) ? p.replace(".html", "") : p}`,
-  );
+  const expected = [
+    ...pages.map(
+      (p) =>
+        `${origin}/${p === "index.html" ? "" : ["privacy.html", "terms.html", "credits.html"].includes(p) ? p.replace(".html", "") : p}`,
+    ),
+    ...content.map((page) => page.canonical),
+  ];
   assert.deepEqual(
     [...urls].sort(),
     expected.sort(),
@@ -144,6 +148,9 @@ export async function verify(base) {
       "OAI-SearchBot",
       "Claude-SearchBot",
       "PerplexityBot",
+      "ChatGPT-User",
+      "Claude-User",
+      "Perplexity-User",
     ]) {
       const crawled = await get(path, 200, agent);
       inspectHtml(crawled.text, url);
@@ -171,12 +178,33 @@ export async function verify(base) {
     assert.equal(response.status, 200, `${alias}: broken alias/redirect`);
     inspectHtml(await response.text(), canonical);
   }
+  for (const page of content) {
+    // GitHub Pages redirects /agents to /agents/; both must reach the page.
+    const response = await fetch(new URL(page.path.slice(0, -1), base), {
+      signal: AbortSignal.timeout(20000),
+    });
+    assert.equal(response.status, 200, `${page.path}: no-slash form`);
+    const html = await response.text();
+    inspectHtml(html, page.canonical);
+    assert(html.includes('"@type":"BreadcrumbList"'), page.path);
+    if (page.kind === "article")
+      assert(html.includes('"@type":"TechArticle"'), page.path);
+  }
   const overview = await get("/llms.txt");
   assert.match(overview.type, /text\/plain/);
+  assert.match(overview.text, /^# arnx\n\n> /, "llms.txt: H1 then blockquote");
+  for (const page of content)
+    if (page.kind !== "index")
+      assert(overview.text.includes(`(${page.canonical})`), page.path);
+  const fullText = await get("/llms-full.txt");
+  assert.match(fullText.type, /text\/plain/);
+  assert(fullText.text.length > 20000, "llms-full.txt: too short");
   for (const link of [
     "https://github.com/arnx-dev/arnx",
     "/quickstart.html",
     "/case-study.html",
+    "/agents/",
+    "/llms-full.txt",
     "#readme",
   ])
     assert(overview.text.includes(link));

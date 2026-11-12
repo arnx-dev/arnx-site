@@ -1,0 +1,207 @@
+<!--meta
+{
+  "title": "How to verify AI-generated code before you trust it",
+  "description": "A checklist for verifying code a coding agent wrote, and four levels of evidence: a failing assertion, reproducible behavior, a regression, and a violation of intent.",
+  "summary": "A verification checklist for agent-written code and the four levels of evidence, from a failing assertion to a violation of intended behavior.",
+  "crumb": "Verify AI-generated code",
+  "listTitle": "How to verify AI-generated code",
+  "kind": "article",
+  "order": 5,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Guide / Verification</p>
+<h1>How to verify AI-generated code before you trust it.</h1>
+<p class="descriptor">A checklist, and four levels of evidence.</p>
+<p>
+  Verify agent-written code the way you would verify a stranger's pull request:
+  do not take the author's word that it works. Run the existing tests and type
+  checks, have someone other than the author read the diff, reproduce any
+  suspected problem as something executable, compare against the code before the
+  change, and then decide yourself whether the behavior is what you intended.
+</p>
+<p>
+  The last step cannot be automated. An agent saying <q>all tests pass</q>
+  tells you about the tests it chose to run. A tool reporting a failing test
+  tells you an assertion fails. Only you know what the code is for.
+</p>
+<nav class="article-toc" aria-label="On this page">
+  <a href="#checklist">Checklist</a><a href="#levels">Four levels</a
+  ><a href="#workflow">Doing it with arnx</a
+  ><a href="#agent">Asking the agent</a><a href="#limits">Limits</a>
+</nav>
+
+<h2 id="checklist">A verification checklist</h2>
+<ol class="guide-steps">
+  <li>
+    <strong>Run the project's own suite yourself.</strong> Not the agent's
+    summary of it. Check that no test was deleted, skipped or loosened in the
+    same change.
+  </li>
+  <li>
+    <strong>Run the type checker and linter.</strong> They are cheap and catch a
+    class of errors models still make.
+  </li>
+  <li>
+    <strong>Read the diff with a second reader.</strong> A person, a fresh agent
+    session, or a different model. The author's session shares the author's
+    assumptions.
+  </li>
+  <li>
+    <strong>Turn each suspicion into something that runs.</strong> A test, a
+    script, a command with its output. A suspicion you cannot reproduce stays a
+    suspicion.
+  </li>
+  <li>
+    <strong>Run the reproduction on the code before the change.</strong>
+    If it fails there too, the change did not cause it.
+  </li>
+  <li>
+    <strong>Decide against intent.</strong> Is the failing behavior wrong, or is
+    the test's expectation wrong?
+  </li>
+  <li>
+    <strong>Note what nobody checked.</strong> Files no test touched are
+    unknown, not fine.
+  </li>
+  <li>
+    <strong>Keep the tests that mattered.</strong> They guard the fix against
+    the next change. See
+    <a href="/guides/ai-regression-testing/"
+      >keeping regression tests from findings</a
+    >.
+  </li>
+</ol>
+
+<h2 id="levels">Four levels of evidence</h2>
+<p>
+  These are easy to confuse, and each is weaker than it sounds until the next
+  one is established.
+</p>
+<div class="table-scroll">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Level</th>
+        <th scope="col">What it shows</th>
+        <th scope="col">What it does not show</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">1. A failing assertion</th>
+        <td>One run of one test did not get the value it expected</td>
+        <td>That it will fail again, or that the expectation is right</td>
+      </tr>
+      <tr>
+        <th scope="row">2. Reproducible behavior</th>
+        <td>The same failure on every run, in a clean environment</td>
+        <td>That the change caused it</td>
+      </tr>
+      <tr>
+        <th scope="row">3. A regression</th>
+        <td>The test passes before the change and fails after</td>
+        <td>That the old behavior was the intended one</td>
+      </tr>
+      <tr>
+        <th scope="row">4. A violation of intent</th>
+        <td>The behavior contradicts what the code is meant to do</td>
+        <td>Nothing further. This is a bug, and a person established it</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  Level 3 has traps of its own. A test can pass on the old code only because the
+  feature did not exist there. A longer treatment, with examples from graded
+  reviews, is in
+  <a href="/research/failing-test-not-a-bug/"
+    >why a failing test is not sufficient evidence of a bug</a
+  >.
+</p>
+
+<h2 id="workflow">Doing it with arnx</h2>
+<p>
+  arnx automates checklist steps 4 and 5 and prepares step 6 for you. It maps
+  onto the levels like this:
+</p>
+<ul>
+  <li>
+    <strong>Level 1 to 2:</strong> each generated test runs three times in
+    Docker, on a throwaway copy with no network. A finding failed in every run.
+  </li>
+  <li>
+    <strong>Level 3:</strong> each failing test is rerun on the code before the
+    change. The report labels the outcome: regression, pre-existing, new code,
+    changed or unknown.
+  </li>
+  <li>
+    <strong>Toward level 4:</strong> a second model reads the test, the failure
+    and the diff and confirms or disputes it. Then <code>arnx triage</code> asks
+    you. Where intent is unclear, arnx asks a question, and your answer becomes
+    a test.
+  </li>
+  <li>
+    <strong>Step 7:</strong> the review lists changed code no test reached and
+    says <q>partly covered</q> or <q>not tested</q>.
+  </li>
+</ul>
+<div class="terminal">
+  <div class="terminal-header"><span>After the agent's change</span></div>
+  <pre><code>arnx init
+arnx review
+arnx triage
+arnx accept
+arnx check</code></pre>
+</div>
+<p>
+  Examples of each level being settled:
+  <a href="/case-studies/beets/">a regression in beets</a> that a person then
+  confirmed against the real command, and
+  <a href="/case-studies/hummingbot/">a Hummingbot finding</a> that was
+  reproduced by hand on the project's current head before anything was sent
+  upstream.
+</p>
+
+<h2 id="agent">Asking the agent to verify its own work</h2>
+<p>
+  You can ask a coding agent to do this for you, as long as the checker is not
+  just the author rereading itself. With the arnx skill installed, the agent
+  runs the review, reports the findings and stops for your marks. A prompt to
+  copy is on
+  <a href="/agents/#prompt">the agent page</a>. Guides for specific agents:
+  <a href="/guides/claude-code-review/">Claude Code</a> and
+  <a href="/guides/codex-code-review/">Codex</a>.
+</p>
+
+<h2 id="limits">Limits and trade-offs</h2>
+<ul>
+  <li>
+    Verification by generated tests only covers behavior a test can reach.
+    Design, readability and most security properties need a reader.
+  </li>
+  <li>
+    The second model is often wrong when it agrees. In our grading, 12 of 36
+    findings it confirmed were real defects, while 22 of 23 it disputed were
+    rightly disputed. See
+    <a href="/research/second-model-judge/">the judge note</a>.
+  </li>
+  <li>
+    arnx does not type check Python and does not run browser-only tests. Keep
+    your own tools for those.
+  </li>
+  <li>
+    It costs model calls: each review stops writing tests at
+    <code>review_usd</code>, $3.00 by default.
+  </li>
+  <li>
+    Finding nothing does not verify the change. It means the tests that were
+    written passed.
+  </li>
+</ul>
+<p>
+  To try the workflow on a change with a known answer, use the
+  <a href="https://github.com/arnx-dev/checkout-demo">checkout demo</a>. Install
+  steps are in the <a href="/quickstart.html#prerequisites">quickstart</a>, and
+  what each label means is on the <a href="/product.html">product page</a>.
+</p>

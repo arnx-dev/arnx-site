@@ -1,0 +1,156 @@
+<!--meta
+{
+  "title": "How to review code written by Codex",
+  "description": "A workflow for reviewing changes from OpenAI Codex: a second reader, tests that execute, and where Codex loads the arnx skill. Includes a manual flow for any agent.",
+  "summary": "Reviewing Codex's changes with tests that run: where Codex reads the arnx skill, what we have and have not tested, and a manual flow for any agent.",
+  "crumb": "Codex",
+  "listTitle": "How to review code written by Codex",
+  "kind": "article",
+  "order": 3,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Guide / Codex</p>
+<h1>How to review code written by Codex.</h1>
+<p class="descriptor">With the skill, or by hand with five commands.</p>
+<p>
+  To review a change Codex made, do not rely on the session that wrote it. Run
+  the project's tests, have a different reader look at the diff, and for logic
+  that matters, get tests that execute against the change and against the code
+  before it. arnx does the last part from the command line, so it works with
+  Codex the same way it works with any agent.
+</p>
+<p>
+  Codex can also drive arnx itself through an Agent Skill.
+  <code>arnx skill install</code> puts the skill where Codex's documentation
+  says it looks. We have not yet run the full skill loop inside Codex ourselves,
+  so this guide gives the manual flow first. It depends on nothing but a shell.
+</p>
+<nav class="article-toc" aria-label="On this page">
+  <a href="#manual">Manual flow</a><a href="#skill">The skill in Codex</a
+  ><a href="#different">A different reader</a><a href="#limits">Limits</a>
+</nav>
+
+<h2 id="manual">The manual flow, for any agent</h2>
+<p>You need Docker running and a model key, or arnx Cloud.</p>
+<div class="terminal">
+  <div class="terminal-header"><span>Once per repository</span></div>
+  <pre><code>npm install -g @arnx-dev/arnx
+arnx init</code></pre>
+</div>
+<ol class="guide-steps">
+  <li>
+    <strong>Let Codex finish the change.</strong> Stage any new files it created
+    with <code>git add</code>. arnx reviews tracked files only, so an unstaged
+    new file is left out.
+  </li>
+  <li>
+    <strong>Run <code>arnx review</code>.</strong> On a branch it looks at the
+    commits since the default branch plus uncommitted tracked work. It writes
+    tests, runs each three times in Docker, reruns failures on the code before
+    the change and asks a second model about each.
+  </li>
+  <li>
+    <strong
+      >Run <code>arnx triage</code>, then <code>arnx accept</code>.</strong
+    >
+    You mark each issue real, intended, noise or rewrite. Tests of real issues
+    are kept in <code>.arnx/tests/</code>.
+  </li>
+  <li>
+    <strong>Give Codex the fix prompt.</strong>
+    <code>arnx prompt</code> prints it: the failing tests, each bug, your
+    answers as intended behavior, and the rule to fix the code and leave the
+    tests alone. Paste it into Codex.
+  </li>
+  <li>
+    <strong>Run <code>arnx check</code>.</strong> It reruns the accepted tests
+    with no model calls. Repeat the last two steps until it passes, then run the
+    project's own suite.
+  </li>
+</ol>
+
+<h2 id="skill">The skill in Codex</h2>
+<div class="terminal">
+  <div class="terminal-header"><span>In the repository</span></div>
+  <pre><code>arnx skill install</code></pre>
+</div>
+<p>
+  This writes <code>.agents/skills/arnx/</code>, with <code>SKILL.md</code> and
+  its references.
+  <a href="https://learn.chatgpt.com/docs/build-skills"
+    >Codex's skills documentation</a
+  >
+  says it scans <code>.agents/skills</code> in every directory from the working
+  directory up to the repository root, and <code>$HOME/.agents/skills</code> for
+  user-wide skills (<code>arnx skill install --user</code> writes there).
+  <code>npx skills add arnx-dev/arnx</code> installs the same folder.
+</p>
+<p class="scope-note">
+  <strong>What we have checked:</strong> the files land in the directory Codex
+  documents, with the <code>name</code> and <code>description</code> fields it
+  requires. <strong>What we have not:</strong> a full review, triage, fix and
+  check loop driven by Codex. If you run it,
+  <a href="https://github.com/arnx-dev/arnx/issues"
+    >tell us what worked or broke</a
+  >.
+</p>
+<p>
+  The skill gives the agent the same split as the manual flow. The agent runs
+  <code>arnx review</code> once, after saying what it may cost, and later
+  <code>arnx check</code>, <code>arnx prompt</code> and the fix.
+  <code>arnx init</code>, logins, triage, accept and commits stay yours. The
+  details are on <a href="/agents/">the agent page</a>.
+</p>
+
+<h2 id="different">Use a different reader</h2>
+<p>
+  A general rule for agent-written code: the checker should differ from the
+  author. A fresh session helps. A different model helps more. A test that runs
+  helps in another way, because it does not depend on any model's reading being
+  right.
+</p>
+<p>
+  arnx's default harness reviews with Claude and, when you set
+  <code>OPENAI_API_KEY</code> as well, adds a second hunter from OpenAI. You can
+  change every role in <code>.arnx/config.toml</code>, for example to make the
+  reviewer a different vendor from the agent that wrote the code. See
+  <a href="/quickstart.html#byom">models</a>. How much a second model's verdict
+  is worth is measured in
+  <a href="/research/second-model-judge/"
+    >can a second LLM judge code review findings?</a
+  >
+</p>
+
+<h2 id="limits">Limits and trade-offs</h2>
+<ul>
+  <li>
+    The manual flow costs you a few copy and paste steps. In exchange you see
+    every finding before any fix is written.
+  </li>
+  <li>
+    A Codex sandbox without Docker access cannot run
+    <code>arnx review</code> or <code>arnx check</code>. Run them in your own
+    terminal.
+  </li>
+  <li>
+    Each review stops writing tests at <code>review_usd</code>, $3.00 by
+    default. Our own reviews ranged from $0.17 to $3.19.
+    <code>arnx check</code> costs no model calls.
+  </li>
+  <li>
+    Generated tests can be wrong. In one review of SQLFluff the only confirmed
+    finding was a bad test, while a real gap sat under another heading. Read
+    <a href="/case-studies/sqlfluff/">that case</a>.
+  </li>
+  <li>
+    Python, JavaScript, TypeScript and Rust (early). Changes up to 200 KB.
+  </li>
+</ul>
+<p>
+  Try the flow on the
+  <a href="https://github.com/arnx-dev/checkout-demo">checkout demo</a>: clone
+  it, <code>git switch discount-codes</code>, <code>arnx init</code>,
+  <code>arnx review</code>. The
+  <a href="/quickstart.html#workflow">quickstart</a> covers each command.
+</p>

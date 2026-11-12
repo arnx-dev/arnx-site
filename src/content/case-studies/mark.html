@@ -1,0 +1,152 @@
+<!--meta
+{
+  "title": "mark: a second Close returned before shutdown finished",
+  "description": "arnx reviewed recent commits of mark, a Go tool, with an unreleased Go build. A generated test showed a concurrent Close returned early. Fix merged upstream.",
+  "summary": "A generated test showed a second concurrent Close returned while the resource was still stopping. Fix merged upstream. Found with Go support that is in test and not released.",
+  "crumb": "mark",
+  "listTitle": "mark: a second Close returned before shutdown finished",
+  "kind": "article",
+  "order": 1.5,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Case study / mark</p>
+<h1>A second Close returned before shutdown finished.</h1>
+<p class="descriptor">
+  A small concurrency bug in a Go tool, found with Go support that is not
+  released yet.
+</p>
+<p class="scope-note">
+  <strong>Go is in test and not released.</strong> arnx 0.1.11 reviews Python,
+  JavaScript, TypeScript and Rust. This review ran on a development build with
+  Go support. You cannot reproduce it with the version on npm today.
+</p>
+<p>
+  mark syncs Markdown files to Confluence. A review of its recent commits
+  produced a test showing that a second, concurrent
+  <code>Close</code> returned while the resource was still stopping, against
+  what the function's own comment promises. The fix was merged upstream on
+  2026-11-11 as
+  <a href="https://github.com/kovetskiy/mark/pull/1244">kovetskiy/mark#1244</a>.
+</p>
+
+<h2>1. Repository and reviewed commit</h2>
+<p>
+  <a href="https://github.com/kovetskiy/mark">kovetskiy/mark</a>, the last ten
+  commits on <code>master</code> on 2026-11-10, range
+  <code>3113164..a18f773</code>: 29 files, 1,694 lines added and 399 removed.
+  arnx had no earlier contact with the repository.
+</p>
+
+<h2>2. Expected behavior</h2>
+<p>
+  <code>internal/lazy</code> starts a resource on first use and stops it on
+  <code>Close</code>. mark uses it for the headless browser and the mermaid
+  engine. The comment on <code>Close</code> says whatever was made
+  <q>is stopped before Close returns</q>. That should hold for every caller.
+</p>
+
+<h2>3. Actual behavior</h2>
+<p>
+  The first <code>Close</code> set a closed flag, released the lock and ran the
+  stop function, which can take a while. A second <code>Close</code> arriving
+  meanwhile saw the flag and returned at once. Its caller could carry on while
+  the resource was still shutting down.
+</p>
+
+<h2>4. Suspected defect</h2>
+<p>
+  Before any test ran, the second hunter (gpt-6.1-sol) suspected:
+  <q
+    >Concurrent Close calls can return before resource shutdown has
+    completed.</q
+  >
+</p>
+
+<h2>5. Generated test</h2>
+<p>
+  The reviewer wrote <code>TestSecondCloseWaitsForStop</code>: start a resource
+  whose stop function blocks, call <code>Close</code> in one goroutine, call it
+  again in another, and check that the second call has not returned while the
+  first is still stopping.
+</p>
+
+<h2>6. Execution result</h2>
+<div class="terminal">
+  <div class="terminal-header"><span>From review.md, quoted</span></div>
+  <pre><code><span class="syntax-heading">### F1 · confirmed by the second opinion</span>
+- <span class="syntax-call">Test:</span> `arnx_generated/lazy_arnx/lazy_arnx_test.go::TestSecondCloseWaitsForStop`
+- <span class="syntax-call">Failure:</span> `lazy_arnx_test.go:33: second Close returned while the resource was still stopping`
+- <span class="syntax-call">Reviewer:</span> The first Close sets isClosed, then stops the resource outside the lock.
+  A second concurrent Close sees isClosed and returns at once. Close's documented
+  guarantee that shutdown is finished on return does not hold for the second caller.
+- <span class="syntax-call">Before the change (unknown):</span> could not run on the code before the change</code></pre>
+</div>
+<p>
+  The review wrote 12 tests; 11 passed in every run and this one failed in every
+  run. It took 1 minute 54 seconds and cost $0.58. Reviewer and second opinion:
+  claude-sonnet-5-5. These numbers come from our local review record, not from a
+  public page.
+</p>
+
+<h2>7. Correction</h2>
+<p>
+  The fix adds a channel that is closed when the first
+  <code>Close</code> has finished stopping. A later <code>Close</code> waits on
+  it. Closing twice in a row still returns at once. The change is 14 lines of
+  code in <code>internal/lazy/lazy.go</code> and one test. The fix was drafted
+  with AI assistance; the owner of arnx reviewed it and opened the pull request,
+  with an AI disclosure.
+</p>
+
+<h2>8. Verification result</h2>
+<p>
+  From the pull request: <code>TestSecondCloseWaitsForStop</code> fails on
+  <code>master</code> and passes with the fix. The race detector ran the package
+  30 times clean, and <code>go test ./...</code> passes. A maintainer merged it
+  about an hour after it was opened, with the comment <q>Thanks!</q>
+</p>
+
+<h2>9. Upstream references</h2>
+<ul>
+  <li>
+    <a href="https://github.com/kovetskiy/mark/pull/1244">Pull request #1244</a
+    >: fix(lazy): let a concurrent Close wait for the first one to finish
+    (merged 2026-11-11).
+  </li>
+  <li>
+    <a
+      href="https://github.com/kovetskiy/mark/blob/master/internal/lazy/lazy.go"
+      >internal/lazy/lazy.go</a
+    >, the file with <code>Close</code>.
+  </li>
+</ul>
+
+<h2>10. Limitations and observations</h2>
+<ul>
+  <li>
+    <strong>Unreleased build.</strong> Go support is in test. It covers less
+    than the released languages and may change before it ships.
+  </li>
+  <li>
+    <strong>A narrow bug.</strong> It only happens when <code>Close</code> is
+    called from two places at once. We did not show that mark's own command-line
+    use does that; a program using the package as a library could.
+  </li>
+  <li>
+    <strong>No before/after evidence.</strong> The test could not run on the
+    code before the change: the sandbox has no network and a module was missing
+    there. So this was not shown to be a regression, only a failure on the
+    current code.
+  </li>
+  <li>
+    Both the reviewer and the second opinion were the same model in this run. A
+    second opinion from the same model is weaker than one from another vendor.
+  </li>
+  <li>
+    One review of one repository. It says nothing about how often arnx is right;
+    the
+    <a href="/research/unfamiliar-repositories/">research note</a> has counts
+    for the released languages.
+  </li>
+</ul>

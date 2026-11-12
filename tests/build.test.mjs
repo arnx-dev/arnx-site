@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
-import { buildSite, pages, publicAssets } from "../scripts/build.mjs";
+import { buildSite, pages, allPages, publicAssets } from "../scripts/build.mjs";
+import { content } from "../scripts/content.mjs";
 import { serve } from "../scripts/serve.mjs";
 
 test("public build: metadata, licensing, real destinations, and all internal fragments resolve", async () => {
@@ -22,7 +23,7 @@ test("public build: metadata, licensing, real destinations, and all internal fra
     await readFile("dist/robots.txt", "utf8"),
     /Sitemap: https:\/\/arnx.dev\/sitemap.xml/,
   );
-  for (const page of pages) {
+  for (const page of allPages) {
     const html = await readFile(`dist/${page}`, "utf8");
     assert.equal((html.match(/<h1(?:\s[^>]*)?>/g) || []).length, 1, page);
     assert(
@@ -32,9 +33,9 @@ test("public build: metadata, licensing, real destinations, and all internal fra
       page,
     );
     assert(
-      html.includes('href="./privacy.html"') &&
-        html.includes('href="./security.html"') &&
-        html.includes('href="./license.html"'),
+      /href="\.?\/privacy\.html"/.test(html) &&
+        /href="\.?\/security\.html"/.test(html) &&
+        /href="\.?\/license\.html"/.test(html),
       page,
     );
     assert(
@@ -67,10 +68,13 @@ test("public build: metadata, licensing, real destinations, and all internal fra
       let filename =
         target.pathname === "/" ? "index.html" : target.pathname.slice(1);
       if (pages.includes(`${filename}.html`)) filename += ".html";
-      const content = await readFile(`dist/${filename}`, "utf8");
+      if (filename.endsWith("/")) filename += "index.html";
+      const linked = await readFile(`dist/${filename}`, "utf8").catch(() => {
+        throw new Error(`${page}: broken ${href}`);
+      });
       if (target.hash)
         assert(
-          content.includes(`id="${target.hash.slice(1)}"`),
+          linked.includes(`id="${target.hash.slice(1)}"`),
           `${page}: broken ${href}`,
         );
     }
@@ -92,6 +96,28 @@ test("public build: metadata, licensing, real destinations, and all internal fra
       .license,
     "Apache-2.0",
   );
+  const overview = await readFile("dist/llms.txt", "utf8");
+  const fullText = await readFile("dist/llms-full.txt", "utf8");
+  assert.match(overview, /^# arnx\n\n> arnx is an open-source/);
+  for (const page of content) {
+    assert(sitemap.includes(`<loc>${page.canonical}</loc>`), page.file);
+    assert(fullText.includes(`Source: ${page.canonical}\n`), page.file);
+    if (page.kind !== "index")
+      assert(overview.includes(`(${page.canonical})`), page.file);
+    const html = await readFile(`dist/${page.file}`, "utf8");
+    assert(html.includes('"@type":"BreadcrumbList"'), page.file);
+    assert.equal(
+      html.includes('"@type":"TechArticle"'),
+      page.kind === "article",
+      page.file,
+    );
+    assert(html.includes('aria-label="Breadcrumb"'), page.file);
+  }
+  const home = await readFile("dist/index.html", "utf8");
+  assert(home.includes('"@type":"Organization"'));
+  assert(home.includes('href="/agents/"'));
+  assert(home.includes("Evidence from real repositories"));
+  assert(home.includes("https://github.com/arnx-dev/checkout-demo"));
   const quickstart = await readFile("dist/quickstart.html", "utf8");
   assert(
     quickstart.includes('id="install-code">npm install -g @arnx-dev/arnx'),
@@ -148,11 +174,13 @@ test("extensionless CLI links work and missing pages return 404", async () => {
       ["/credits", "arnx Cloud credits"],
       ["/credits.html", "arnx Cloud credits"],
       ["/terms.html", "Terms of Service"],
+      ["/agents/", "Your agent finishes a change. arnx tests it."],
+      ["/agents", "Your agent finishes a change. arnx tests it."],
     ]) {
       const response = await fetch(base + path);
       assert.equal(response.status, 200, path);
       assert.match(response.headers.get("content-type"), /^text\/html/);
-      assert((await response.text()).includes(`<h1>${heading}</h1>`));
+      assert((await response.text()).includes(`<h1>${heading}</h1>`), path);
     }
     assert.equal((await fetch(`${base}/no-such-page`)).status, 404);
     assert.equal((await fetch(`${base}/brand/missing.webp`)).status, 404);

@@ -1,0 +1,180 @@
+<!--meta
+{
+  "title": "beets: shell completion crashed with the titlecase plugin",
+  "description": "arnx reviewed a beets commit and wrote a test showing the titlecase plugin broke beet completion. The fix is open upstream as pull request 7161.",
+  "summary": "A generated test showed a plugin added the same command-line option twice, which crashed shell completion. Fix open upstream, not merged; most other findings in the review were intended behavior.",
+  "crumb": "beets",
+  "listTitle": "beets: shell completion crashed with the titlecase plugin",
+  "kind": "article",
+  "order": 2,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Case study / beets</p>
+<h1>Shell completion crashed with one plugin enabled.</h1>
+<p class="descriptor">
+  One real regression, in a review where most findings were not bugs.
+</p>
+<p>
+  beets is a music library manager with plugins. A review of one of its commits
+  produced a test showing that the <code>titlecase</code> plugin could not hand
+  out its commands twice. A person then found the visible effect:
+  <code>beet completion</code> exits 1 when the plugin is enabled. The fix is
+  open upstream as
+  <a href="https://github.com/beetbox/beets/pull/7161">beetbox/beets#7161</a>.
+  On 2026-11-12 it is open and not merged.
+</p>
+
+<h2>1. Repository and reviewed commit</h2>
+<p>
+  <a href="https://github.com/beetbox/beets">beetbox/beets</a>, commit
+  <code>80e970504</code>, which added a shared <code>--limit</code>
+  option to several commands (upstream pull request #7003): 45 files, 254 lines
+  added and 98 removed. The commit was picked by a rule fixed before any run, as
+  part of the experiment described in
+  <a href="/research/unfamiliar-repositories/"
+    >AI code review findings on unfamiliar repositories</a
+  >. arnx had no earlier contact with the repository.
+</p>
+
+<h2>2. Expected behavior</h2>
+<p>
+  A plugin's <code>commands()</code> method can be called more than once. beets
+  does so itself: <code>beet completion</code> asks every plugin for its
+  commands a second time to build the completion script. With
+  <code>plugins: titlecase</code> in the configuration,
+  <code>beet completion</code> should exit 0.
+</p>
+
+<h2>3. Actual behavior</h2>
+<div class="terminal">
+  <div class="terminal-header">
+    <span>beet completion, with plugins: titlecase</span>
+  </div>
+  <pre><code>optparse.OptionConflictError: option -l/--limit: conflicting option string(s): -l, --limit</code></pre>
+</div>
+<p>The command exits 1. Without the plugin it exits 0.</p>
+
+<h2>4. Suspected defect</h2>
+<p>
+  Before any test ran, the second hunter (gpt-6.1-sol) suspected:
+  <q
+    >Titlecase command discovery fails when called more than once on the same
+    plugin instance.</q
+  >
+  <code>TitlecasePlugin.commands()</code> added the limit option to a parser
+  that is built once, in <code>__init__</code>. A second call added the same
+  option again.
+</p>
+
+<h2>5. Generated test</h2>
+<p>
+  The reviewer wrote <code>test_titlecase_commands_idempotent</code> in
+  <code>tests/arnx_generated/test_limit_option.py</code>: create the plugin,
+  call <code>commands()</code> twice, and expect no error.
+</p>
+
+<h2>6. Execution result</h2>
+<div class="terminal">
+  <div class="terminal-header"><span>From review.md, quoted</span></div>
+  <pre><code><span class="syntax-heading">### F8 · regression · confirmed by the second opinion</span>
+- <span class="syntax-call">Test:</span> `tests/arnx_generated/test_limit_option.py::test_titlecase_commands_idempotent`
+- <span class="syntax-call">Failure:</span>
+  `optparse.OptionConflictError: option -l/--limit: conflicting option string(s): -l, --limit`
+- <span class="syntax-call">Reviewer:</span> `TitlecasePlugin.commands()` calls `add_limit_option()` on a parser created
+  once in `__init__`. A second call raises `optparse.OptionConflictError`, so rebuilding
+  the CLI in the same process breaks.
+- <span class="syntax-call">Before the change (regression):</span> passes on the code before the change (3 runs): the
+  change broke it</code></pre>
+</div>
+<p>
+  The review ran 55 tests in 13 minutes 39 seconds for $0.96. Reviewer:
+  claude-sonnet-5-5. Second opinion: GLM-5.3-Flash through River. These numbers
+  come from our local review record, not from a public page.
+</p>
+
+<h2>7. Correction</h2>
+<p>
+  The fix adds the option in <code>__init__</code>, right after the command is
+  created, and removes the call from <code>commands()</code>. Other beets
+  plugins that share the option already add it there. The pull request changes
+  three files: the plugin, the changelog and the plugin's tests. Claude wrote
+  the fix. The owner of arnx reproduced the crash, tested and reviewed the
+  change, and opened the pull request with the AI disclosure that beets' AI
+  policy asks for.
+</p>
+<div class="terminal">
+  <div class="terminal-header">
+    <span>The regression test in the pull request</span>
+  </div>
+  <pre><code><span class="syntax-keyword">def</span> <span class="syntax-call">test_commands_can_be_requested_twice</span>(self):
+    <span class="syntax-string">"""``beet completion`` asks every plugin for its commands again."""</span>
+    plugin = <span class="syntax-call">TitlecasePlugin</span>()
+    <span class="syntax-keyword">assert</span> plugin.<span class="syntax-call">commands</span>() == plugin.<span class="syntax-call">commands</span>()</code></pre>
+</div>
+
+<h2>8. Verification result</h2>
+<p>
+  From the pull request: the new test fails without the fix with the error
+  above. <code>beet completion</code> with the plugin enabled exits 1 before the
+  fix and 0 after. <code>beet titlecase --help</code> still lists
+  <code>--limit</code>. The full suite on Python 3.11 reported 2,817 passed and
+  182 skipped. The pull request also says its own
+  <code>test_completion</code> was skipped, because the test image had no
+  bash-completion package.
+</p>
+<p>
+  On GitHub on 2026-11-12: one approving review, checks passing, state open, a
+  further review still required. It is not merged.
+</p>
+
+<h2>9. Upstream references</h2>
+<ul>
+  <li>
+    <a href="https://github.com/beetbox/beets/pull/7161">Pull request #7161</a>:
+    titlecase: fix beet completion crash when the plugin is enabled (open).
+  </li>
+  <li>
+    <a
+      href="https://github.com/beetbox/beets/blob/master/beetsplug/titlecase.py"
+      >beetsplug/titlecase.py</a
+    >, the plugin.
+  </li>
+  <li>
+    <a href="https://github.com/beetbox/beets/pull/7003">Pull request #7003</a>,
+    which introduced the shared limit option.
+  </li>
+</ul>
+
+<h2>10. Limitations and observations</h2>
+<ul>
+  <li>
+    <strong>arnx found the cause, not the visible effect.</strong> Its test
+    showed that calling <code>commands()</code> twice fails. It did not say
+    which user command does that. A person traced it to
+    <code>beet completion</code>, which made the report worth sending.
+  </li>
+  <li>
+    <strong>Most findings in this review were not bugs.</strong> The review
+    reported 8 findings. We graded 1 real (this one), 1 real but minor, 5
+    intended behavior and 1 that no caller can reach. The intended ones tested
+    the limit against an expectation that the project's own documentation
+    contradicts.
+  </li>
+  <li>
+    <strong>The second opinion confirmed two of the intended ones.</strong>
+    One of them was labelled a regression only because the option did not exist
+    before the change, so the old code ignored it and the test passed by
+    accident.
+  </li>
+  <li>
+    A second review of another beets commit reported 2 findings. We graded both
+    intended behavior.
+  </li>
+  <li>
+    The grades are ours, from reading the code and rerunning the tests. They are
+    not the maintainers' word. The
+    <a href="/research/unfamiliar-repositories/">research note</a> has the
+    counts for the whole batch.
+  </li>
+</ul>

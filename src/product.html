@@ -121,7 +121,7 @@
 
 <span class="syntax-heading">### F2 · regression · confirmed by the second opinion</span>
 - <span class="syntax-call">Failure:</span> `<span class="syntax-string">expect(received).toBe(expected)</span>`
-- <span class="syntax-call">Before the change (regression):</span> passes on the code before the change (3 runs): the change broke it
+- <span class="syntax-call">Before the change (regression):</span> passes on the code before the change (3 runs), fails with it
 - <span class="syntax-call">Second opinion:</span> planRemove takes accepted-tests.json keys verbatim and applyRemove rmSync's join(repo, p), …</code></pre>
       </div>
       <p>
@@ -187,8 +187,10 @@
         Run the CLI before opening a pull request or while reviewing a change.
         It complements your existing tests and human review. Current runners
         cover Python/pytest, JavaScript and TypeScript with vitest, jest,
-        node:test or bun, and Rust with cargo-nextest (early). Environment setup
-        still needs validation for your repository.
+        node:test or bun, and Rust with cargo-nextest (early). arnx works best
+        on single-package Python and TypeScript repositories; tests that run
+        only in a browser are not run. Environment setup still needs validation
+        for your repository.
       </p>
       <p>
         Rust is the least-tested runner. First setup is slow because the image
@@ -208,7 +210,8 @@
         <a href="./quickstart.html" data-event="docs_click"
           >Read the quickstart</a
         >
-        · <a href="./case-study.html">Read the case study</a> ·
+        · <a href="/agents/">arnx for coding agents</a> ·
+        <a href="/case-studies/">Read the case studies</a> ·
         <a href="./security.html">Understand the boundaries</a>
       </p>
     </main>

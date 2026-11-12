@@ -1,0 +1,210 @@
+<!--meta
+{
+  "title": "How to review code written by Claude Code",
+  "description": "Ways to review Claude Code's changes: its built-in review commands, a second reader, and tests that run. Includes the arnx plugin and the agent and developer split.",
+  "summary": "Claude Code's own review commands, what they do not run, and how to add tests that execute through the arnx plugin or skill.",
+  "crumb": "Claude Code",
+  "listTitle": "How to review code written by Claude Code",
+  "kind": "article",
+  "order": 2,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Guide / Claude Code</p>
+<h1>How to review code written by Claude Code.</h1>
+<p class="descriptor">Three layers, from a second read to tests that run.</p>
+<p>
+  Review Claude Code's work in layers. First let it run the project's own tests
+  and type checks. Then get a second read of the diff, which Claude Code can do
+  itself with <code>/code-review</code>. Then, for changes where behavior
+  matters, get tests that execute against the change. The last layer is what
+  arnx adds, as a plugin or a skill.
+</p>
+<p>
+  The reason for layers: the session that wrote the code tends to share its own
+  blind spots. A fresh read catches some of them. A test that runs catches a
+  different set, because it does not depend on anyone's reading being right.
+</p>
+<nav class="article-toc" aria-label="On this page">
+  <a href="#built-in">Built-in review</a><a href="#add">Adding arnx</a
+  ><a href="#split">Who does what</a><a href="#session">A session</a
+  ><a href="#limits">Limits</a>
+</nav>
+
+<h2 id="built-in">What Claude Code reviews on its own</h2>
+<p>These exist today, according to Anthropic's documentation:</p>
+<ul>
+  <li>
+    <strong><code>/code-review</code></strong> in the terminal, with
+    <code>/review</code> as an alias. It reports findings as text.
+    <code>--fix</code> applies them to the working tree and
+    <code>--comment</code> posts them on a pull request.
+    <a href="https://code.claude.com/docs/en/code-review-local"
+      >Local review docs</a
+    >.
+  </li>
+  <li>
+    <strong><code>/code-review ultra</code></strong
+    >, a research preview that runs reviewer agents in a cloud sandbox.
+    <a href="https://code.claude.com/docs/en/ultrareview">Ultrareview docs</a>.
+  </li>
+  <li>
+    <strong><code>/security-review</code></strong> for security issues in a
+    change.
+  </li>
+  <li>
+    <strong>Code Review</strong>, a managed service that reviews pull requests
+    on GitHub for Team and Enterprise plans. Its docs say a review
+    <q
+      >works from reading the diff and the surrounding code, without building or
+      running your code</q
+    >.
+    <a href="https://code.claude.com/docs/en/code-review">Code Review docs</a>.
+  </li>
+</ul>
+<p>
+  These are a good second read and cost no setup. A side-by-side with sources is
+  in
+  <a href="/compare/claude-code-review/">arnx and Claude Code's native review</a
+  >.
+</p>
+
+<h2 id="add">Adding tests that run</h2>
+<p>
+  arnx writes tests for the change, runs them in Docker, reruns failures on the
+  code before the change and has a second model challenge each one. Install the
+  CLI, then give Claude Code the skill in one of two ways.
+</p>
+<div class="terminal">
+  <div class="terminal-header"><span>In your shell</span></div>
+  <pre><code>npm install -g @arnx-dev/arnx
+arnx init
+arnx skill install</code></pre>
+</div>
+<p>
+  <code>arnx skill install</code> writes <code>.claude/skills/arnx/</code> (and
+  <code>.agents/skills/arnx/</code>
+  for other agents). Commit them so teammates get the same workflow. Or install
+  it as a plugin inside Claude Code:
+</p>
+<div class="terminal">
+  <div class="terminal-header"><span>In Claude Code</span></div>
+  <pre><code>/plugin marketplace add arnx-dev/arnx
+/plugin install arnx@arnx</code></pre>
+</div>
+<p>
+  <code>arnx init</code> is yours to run: it writes the config that names your
+  models. With <code>ANTHROPIC_API_KEY</code> set, every job runs on Claude and
+  you pay Anthropic directly. Your Claude subscription does not cover these API
+  calls. Without a key, use <a href="/quickstart.html#cloud">arnx Cloud</a>.
+</p>
+
+<h2 id="split">Who does what</h2>
+<p>
+  The skill tells Claude Code which steps are its own and which are yours.
+  Claude runs the review once, then stops. You judge the findings. Claude fixes
+  only what you accepted.
+</p>
+<div class="table-scroll">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Claude Code</th>
+        <th scope="col">You</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Says what the review may cost, then runs it once</td>
+        <td><code>arnx init</code>, logins, consent</td>
+      </tr>
+      <tr>
+        <td>Reports findings and questions, changes no code</td>
+        <td><code>arnx triage</code>: mark findings, answer questions</td>
+      </tr>
+      <tr>
+        <td>
+          <code>arnx check</code>, <code>arnx prompt</code>, the fix,
+          <code>arnx check</code> again
+        </td>
+        <td><code>arnx accept</code></td>
+      </tr>
+      <tr>
+        <td>Runs each touched project's full suite and reports</td>
+        <td>Commit and push</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  Claude never edits accepted tests. If it did, <code>arnx check</code>
+  would refuse to run with exit 4. The full rules are on
+  <a href="/agents/#approval">the agent page</a>.
+</p>
+
+<h2 id="session">What a session looks like</h2>
+<ol class="guide-steps">
+  <li>
+    You ask Claude Code for a change. When it is done, it tells you the review
+    budget it read from <code>.arnx/config.toml</code> and runs
+    <code>arnx review</code>. The first review also sets up the project, in at
+    most 10 minutes.
+  </li>
+  <li>
+    It lists each finding with its input, actual and expected behavior, each
+    question from arnx word for word, and the cost.
+  </li>
+  <li>
+    You run <code>arnx triage</code> and <code>arnx accept</code> in your own
+    terminal, then tell Claude.
+  </li>
+  <li>
+    Claude runs <code>arnx check</code>, reads <code>arnx prompt</code>, fixes
+    the code and checks again until the accepted tests pass. After three failed
+    rounds it stops and reports.
+  </li>
+  <li>
+    It runs the project's own suite and gives you a summary. You commit the fix
+    with the accepted tests.
+  </li>
+</ol>
+<p>
+  A coding agent fixed arnx's own code from an arnx fix prompt. One result is in
+  <a href="/case-studies/arnx-self-review/"
+    >the path escape arnx found in its own remove command</a
+  >.
+</p>
+
+<h2 id="limits">Limits and trade-offs</h2>
+<ul>
+  <li>
+    The review stops for you. That is deliberate: the tests are model-written,
+    and in our grading many confirmed findings tested intended behavior. See
+    <a href="/research/unfamiliar-repositories/">the counts</a>.
+  </li>
+  <li>
+    If Claude Code runs in a sandbox that cannot reach Docker, it cannot run the
+    review or the check. It hands you the command.
+  </li>
+  <li>
+    The skill tells agents typical reviews cost $0.02 to $0.50. Each stops
+    writing tests at <code>review_usd</code>, $3.00 by default.
+  </li>
+  <li>
+    A reviewer and the author sharing a model family may share blind spots.
+    arnx's default second hunter and fallback use another vendor when you set
+    that key. See
+    <a href="/quickstart.html#byom">models</a>.
+  </li>
+  <li>
+    Python, JavaScript, TypeScript and Rust (early) only. Code in a project with
+    no test suite is reported as not reviewed.
+  </li>
+</ul>
+<p>
+  To try it without touching your own code: clone the
+  <a href="https://github.com/arnx-dev/checkout-demo">checkout demo</a>, switch
+  to <code>discount-codes</code>, and ask Claude Code to review the branch with
+  arnx. Setup details are in the
+  <a href="/quickstart.html#skill">quickstart</a>.
+</p>

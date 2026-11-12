@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { serve } from "../scripts/serve.mjs";
-import { buildSite, pages } from "../scripts/build.mjs";
+import { buildSite, allPages as pages } from "../scripts/build.mjs";
 await buildSite();
 await mkdir("artifacts", { recursive: true });
 const server = serve(0);

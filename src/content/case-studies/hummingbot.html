@@ -1,0 +1,318 @@
+<!--meta
+{
+  "title": "Hummingbot: order statuses paired with the wrong order",
+  "description": "arnx reviews of Hummingbot gateway commits: one bug sent upstream as pull request 8508, and findings that matched fixes the maintainers had already made.",
+  "summary": "One finding sent upstream as an open pull request, and a separate set of findings that matched fixes the maintainers had already made on their own. arnx caused none of those fixes.",
+  "crumb": "Hummingbot",
+  "listTitle": "Hummingbot: order statuses paired with the wrong order",
+  "kind": "article",
+  "order": 3,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Case study / Hummingbot</p>
+<h1>A status result landed on the wrong order.</h1>
+<p class="descriptor">
+  One fix sent upstream. Other findings the maintainers had already fixed
+  themselves.
+</p>
+<p>
+  Hummingbot is an open-source trading bot framework. In October 2026 arnx
+  reviewed commits from a large gateway change that had merged in August. This
+  page keeps three things apart:
+</p>
+<ul>
+  <li>
+    <strong>A finding we sent upstream.</strong> A bug in how order statuses are
+    paired with orders, with arnx's test and a fix, as
+    <a href="https://github.com/hummingbot/hummingbot/pull/8508"
+      >hummingbot/hummingbot#8508</a
+    >. On 2026-11-12 it is open, with no maintainer review yet.
+  </li>
+  <li>
+    <strong>Findings the maintainers had already fixed.</strong> A review of an
+    earlier commit confirmed issues that later commits in the same upstream pull
+    request,
+    <a href="https://github.com/hummingbot/hummingbot/pull/8431">#8431</a>, had
+    fixed two months before arnx ran.
+  </li>
+  <li>
+    <strong>What arnx did not do.</strong> It caused none of the fixes in #8431.
+    Those were the maintainers' own work.
+  </li>
+</ul>
+
+<h2>1. Repository and reviewed commit</h2>
+<p>
+  <a href="https://github.com/hummingbot/hummingbot">hummingbot/hummingbot</a>.
+  Upstream pull request #8431 merged on 2026-08-26 with 47 commits. We picked
+  single commits from it to review after the fact:
+</p>
+<ul>
+  <li>
+    <a href="https://github.com/hummingbot/hummingbot/commit/9f6a2e8ba448"
+      ><code>9f6a2e8ba</code></a
+    >
+    (2026-08-13), which bounds pending-transaction polling with a deadline: 3
+    files, 101 lines added. This review produced the finding we sent upstream.
+  </li>
+  <li>
+    <a href="https://github.com/hummingbot/hummingbot/commit/056912818fd9"
+      ><code>056912818</code></a
+    >
+    (2026-08-19), which reconciles broadcast transactions before retrying. This
+    review produced the findings the maintainers had already fixed.
+  </li>
+</ul>
+
+<h2>2. Expected behavior</h2>
+<p>
+  <code>GatewayBase.update_order_status</code> polls the status of each tracked
+  order's transaction. Each result should be applied to the order whose
+  transaction it describes. An order whose hash lookup failed should be skipped
+  for that round and nothing else.
+</p>
+
+<h2>3. Actual behavior</h2>
+<p>
+  The method looks up each order's transaction hash, drops the lookups that
+  failed, and asks for the status of the remaining hashes. It then paired those
+  results with the full order list by position:
+</p>
+<div class="terminal">
+  <div class="terminal-header">
+    <span>gateway_base.py, before the fix</span>
+  </div>
+  <pre><code><span class="syntax-keyword">for</span> tracked_order, tx_details <span class="syntax-keyword">in</span> <span class="syntax-call">zip</span>(tracked_orders, update_results):</code></pre>
+</div>
+<p>
+  Once one order is dropped, every result after it lands on the wrong order. An
+  order with no transaction yet can receive another order's status, and the
+  order that does have a hash gets no status that round.
+</p>
+
+<h2>4. Suspected defect</h2>
+<p>
+  Before any test ran, the reviewer suspected:
+  <q
+    >The status results are zipped against tracked_orders, but tx_hash_list
+    drops orders whose exchange_order_id raised an exception. The results shift
+    onto the wrong orders.</q
+  >
+  The filter that drops failed lookups predates the reviewed commit. The commit
+  added a new branch that counts not-found results, and that branch inherited
+  the misalignment.
+</p>
+
+<h2>5. Generated test</h2>
+<div class="terminal">
+  <div class="terminal-header">
+    <span>Written by arnx, as accepted</span>
+  </div>
+  <pre><code><span class="syntax-keyword">def</span> <span class="syntax-call">test_s4_s5_not_found_applied_to_correct_order</span>(loop):
+    c = <span class="syntax-call">make_connector</span>((<span class="syntax-string">"A"</span>, <span class="syntax-string">"B"</span>))
+    a = c._order_tracker.<span class="syntax-call">fetch_tracked_order</span>(<span class="syntax-string">"A"</span>)
+    b = c._order_tracker.<span class="syntax-call">fetch_tracked_order</span>(<span class="syntax-string">"B"</span>)
+    c.<span class="syntax-call">_set_current_timestamp</span>(T0 + c.TX_NOT_FOUND_DEADLINE + 1)
+    hb = <span class="syntax-string">"1"</span> * 88
+
+    <span class="syntax-keyword">async def</span> <span class="syntax-call">boom</span>():
+        <span class="syntax-keyword">raise</span> <span class="syntax-call">RuntimeError</span>(<span class="syntax-string">"no hash"</span>)
+
+    a.get_exchange_order_id = boom
+    <span class="syntax-call">poll</span>(loop, c, [a, b], {hb: -2})
+    records = c._order_tracker._order_not_found_records
+    <span class="syntax-keyword">assert</span> records[<span class="syntax-string">"A"</span>] == 0
+    <span class="syntax-keyword">assert</span> records[<span class="syntax-string">"B"</span>] == 1</code></pre>
+</div>
+<p>
+  Order A's hash lookup fails. Order B's transaction is not found. The miss
+  should count against B only.
+</p>
+
+<h2>6. Execution result</h2>
+<div class="terminal">
+  <div class="terminal-header"><span>From review.md, quoted</span></div>
+  <pre><code><span class="syntax-heading">### F4 · confirmed by the second opinion</span>
+- <span class="syntax-call">Failure:</span> `assert 1 == 0`
+- <span class="syntax-call">Reviewer:</span> tx_hash_list skips orders whose hash lookup fails, but results are paired
+  with the unfiltered orders. B's NOT_FOUND was counted against A (A's count was 1,
+  not 0), so a healthy order can be declared lost.
+- <span class="syntax-call">Before the change (new-code):</span> what it tests does not exist on the code before the
+  change</code></pre>
+</div>
+<p>
+  arnx found this twice. The first review, on 2026-10-23 with arnx 0.1.1, ran 13
+  tests in 13 minutes 32 seconds for $0.43. A second review of the same commit
+  on 2026-11-03, with arnx 0.1.7 and arnx Cloud, took 11 minutes 29 seconds and
+  was billed $0.63. The quote above is from the second. These numbers come from
+  our local review records, not from a public page.
+</p>
+<p>
+  The before/after check could not call it a regression. The test uses a
+  constant the commit adds, so there was nothing to compare on the older code.
+  We then reproduced the misalignment by hand on the repository's head at the
+  time.
+</p>
+
+<h2>7. Correction</h2>
+<p>
+  The fix keeps each order paired with its own hash and zips the results with
+  the orders that were actually queried. Orders whose lookup failed are still
+  skipped for that round, as before. A coding agent wrote the fix from arnx's
+  fix prompt. The test in the pull request is arnx's accepted test, trimmed to
+  the one case. The owner of arnx opened the pull request.
+</p>
+
+<h2>8. Verification result</h2>
+<p>
+  From the pull request: on the <code>development</code> branch the new test
+  fails with <code>assert 1 == 0</code>; with the fix A has 0 misses and B has
+  1. The gateway connector and executor tests report 572 passed without the fix
+  and 573 with it. The full suite with the fix, minus three paths that depend on
+  the environment, reported 8,643 passed.
+</p>
+<p>
+  On GitHub on 2026-11-12: open since 2026-10-23, no maintainer review, not
+  merged. Whether the maintainers consider it a bug worth fixing is not yet
+  known.
+</p>
+
+<h2>9. Upstream references</h2>
+<ul>
+  <li>
+    <a href="https://github.com/hummingbot/hummingbot/pull/8508"
+      >Pull request #8508</a
+    >: keep gateway order statuses paired with their own transaction hash (open,
+    ours).
+  </li>
+  <li>
+    <a href="https://github.com/hummingbot/hummingbot/pull/8431"
+      >Pull request #8431</a
+    >: the upstream gateway change the reviewed commits belong to (merged
+    2026-08-26, the maintainers').
+  </li>
+  <li>
+    <a
+      href="https://github.com/hummingbot/hummingbot/blob/development/hummingbot/connector/gateway/gateway_base.py"
+      >gateway_base.py</a
+    >, with <code>update_order_status</code>.
+  </li>
+</ul>
+
+<h2>Findings the maintainers had already fixed</h2>
+<p>
+  The review of <code>056912818</code>, on 2026-10-23 with arnx 0.1.1, ran 11
+  tests in 31 minutes 53 seconds for $1.83. It confirmed four issues and left a
+  fifth waiting on a question. We checked each against the repository's later
+  history. All five had been fixed by later commits in the same pull request, in
+  August:
+</p>
+<div class="table-scroll">
+  <table>
+    <caption>
+      arnx's issues on 056912818 and the upstream commits that had already fixed
+      them
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Issue arnx reported</th>
+        <th scope="col">Fixed upstream in</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          A transaction not found for a few seconds was treated as dropped and
+          submitted again
+        </td>
+        <td>
+          <a href="https://github.com/hummingbot/hummingbot/commit/4db6f3a9cb39"
+            ><code>4db6f3a9c</code></a
+          >, 2026-08-21
+        </td>
+      </tr>
+      <tr>
+        <td>Closing a position lost the collected fee and rent figures</td>
+        <td>
+          <a href="https://github.com/hummingbot/hummingbot/commit/8124b61e7737"
+            ><code>8124b61e7</code></a
+          >, 2026-08-19
+        </td>
+      </tr>
+      <tr>
+        <td>
+          The gateway swap command passed an argument that had been removed
+        </td>
+        <td>
+          <a href="https://github.com/hummingbot/hummingbot/commit/2fd25da33e00"
+            ><code>2fd25da33</code></a
+          >, 2026-08-19
+        </td>
+      </tr>
+      <tr>
+        <td>A helper method had lost its static-method marker</td>
+        <td>
+          <a href="https://github.com/hummingbot/hummingbot/commit/2fd25da33e00"
+            ><code>2fd25da33</code></a
+          >, 2026-08-19
+        </td>
+      </tr>
+      <tr>
+        <td>
+          A timed-out transaction was reconciled as confirmed with an empty
+          position address
+        </td>
+        <td>
+          <a href="https://github.com/hummingbot/hummingbot/commit/508148358c1b"
+            ><code>508148358</code></a
+          >, 2026-08-19
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  The dates settle the question of cause. The fixes are from August 2026. arnx
+  reviewed the commit in October 2026. The developer found and fixed these on
+  their own, most within hours of the reviewed commit. What the comparison shows
+  is narrower: on this commit, the issues arnx confirmed were ones the developer
+  also chose to fix.
+</p>
+<p>
+  Which upstream commit fixed which issue is our reading of the history,
+  recorded in our notes. The commits are public; the mapping is ours.
+</p>
+
+<h2>10. Limitations and observations</h2>
+<ul>
+  <li>
+    <strong>The pull request is unreviewed.</strong> Until a maintainer answers,
+    the pairing bug is our claim, backed by a failing test and a reproduction,
+    not a confirmed defect.
+  </li>
+  <li>
+    <strong>The review of 056912818 missed one.</strong> The same upstream
+    commit that fixed the fee figures also removed a leftover call that raised
+    on every failed request. arnx did not report it.
+  </li>
+  <li>
+    <strong>Hindsight is easier than review at merge time.</strong> We chose
+    commits knowing the work had merged. A review run in August would have had
+    the same code, but we did not run one, so this is not evidence that arnx
+    would have caught these before the developer did.
+  </li>
+  <li>
+    In the first review of <code>9f6a2e8ba</code> the second opinion disputed
+    four other findings. We agreed with all four disputes.
+  </li>
+  <li>
+    The repository already runs an automated pull request reviewer. This page
+    does not compare the two.
+  </li>
+  <li>
+    Reviews of three other commits from the same work found nothing we would
+    send upstream. One reported a failure that the real client cannot reach;
+    another tested behavior the commit message describes as intended.
+  </li>
+</ul>

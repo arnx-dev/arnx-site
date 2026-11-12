@@ -1,0 +1,209 @@
+<!--meta
+{
+  "title": "AI code review before you commit or open a pull request",
+  "description": "How to run AI code review before a commit or pull request, why it does not belong in a Git pre-commit hook, and which step is cheap enough to repeat in CI.",
+  "summary": "Reviewing before the commit or pull request: what gets reviewed, why not a Git hook, and the cheap check you can repeat in CI.",
+  "crumb": "Before you commit",
+  "listTitle": "AI code review before you commit or open a pull request",
+  "kind": "article",
+  "order": 4,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Guide / Before you commit</p>
+<h1>AI code review before you commit or open a pull request.</h1>
+<p class="descriptor">Pre-commit as a point in your workflow, not a hook.</p>
+<p>
+  Yes, you can review a change with AI before it reaches a pull request, and it
+  is the cheapest place to find a bug: the author still has the context, and no
+  reviewer's time has been spent. Run the review when the change is finished, on
+  your machine, against the working tree or the branch.
+</p>
+<p>
+  <q>Pre-commit</q> here means that point in the workflow. It does not mean a
+  Git pre-commit hook. A review that writes and runs tests takes minutes and
+  costs model calls. A hook runs on every commit and should finish in seconds.
+</p>
+<nav class="article-toc" aria-label="On this page">
+  <a href="#hook">Why not a hook</a><a href="#scope">What gets reviewed</a
+  ><a href="#workflow">Workflow</a><a href="#ci">The cheap step and CI</a
+  ><a href="#limits">Limits</a>
+</nav>
+
+<h2 id="hook">Why not a Git pre-commit hook?</h2>
+<ul>
+  <li>
+    <strong>Time.</strong> Hooks block the commit. Linters and formatters fit. A
+    review that builds an environment and runs generated tests several times
+    does not.
+  </li>
+  <li>
+    <strong>Cost.</strong> Every commit would spend model tokens, including the
+    ones you amend five times.
+  </li>
+  <li>
+    <strong>Judgement.</strong> A finding needs a person to decide whether it is
+    real. A hook can only pass or fail.
+  </li>
+  <li>
+    <strong>Bypass.</strong> Slow hooks get skipped with
+    <code>--no-verify</code>, and then they check nothing.
+  </li>
+</ul>
+<p>
+  What does fit a hook or a CI job is rerunning tests you already accepted. That
+  makes no model calls. See
+  <a href="#ci">below</a>.
+</p>
+
+<h2 id="scope">What gets reviewed</h2>
+<p>
+  With arnx, <code>arnx review</code> looks at what a pull request would show:
+</p>
+<ul>
+  <li>
+    <strong>On a branch:</strong> every commit since it left the default branch,
+    plus uncommitted work in tracked files.
+  </li>
+  <li>
+    <strong>On the default branch:</strong> tracked uncommitted work, or the
+    last commit when the tree is clean.
+  </li>
+  <li><strong>Any span:</strong> <code>arnx review --range A..B</code>.</li>
+</ul>
+<p>
+  Uncommitted work means tracked files: staged and unstaged changes, and new
+  files once you <code>git add</code> them. Untracked files are left out, and
+  the review says how many. <code>--untracked</code> includes them. So you can
+  review before the commit exists. Staging is enough.
+</p>
+<p>
+  A change of documentation only is skipped with exit 0.
+  <code>arnx review --docs</code> reviews it anyway. Lockfiles and generated
+  files do not count toward the 200 KB limit and are not in the diff sent to
+  models.
+</p>
+
+<h2 id="workflow">A workflow that fits before the commit</h2>
+<div class="terminal">
+  <div class="terminal-header">
+    <span>Change finished, not yet committed</span>
+  </div>
+  <pre><code>git add path/to/new_file.py
+arnx review
+arnx triage
+arnx accept
+arnx prompt
+# fix the code, or hand the prompt to your agent
+arnx check
+git commit</code></pre>
+</div>
+<ol class="guide-steps">
+  <li>
+    Review once per finished change, not per edit. The first review in a
+    repository also sets up the projects the change touches, in at most 10
+    minutes.
+  </li>
+  <li>
+    Triage while the change is fresh. You know what you meant the code to do,
+    which is the one thing the tool cannot know.
+  </li>
+  <li>
+    Commit the fix together with <code>.arnx/tests/</code> and
+    <code>.arnx/accepted-tests.json</code>. Reviewers of the pull request then
+    see the bug's test next to its fix.
+  </li>
+</ol>
+<p>
+  The pull request still gets its normal review, by people or by a PR-based
+  tool. The two do different jobs. See
+  <a href="/compare/coderabbit/">arnx and CodeRabbit</a> and
+  <a href="/compare/greptile/">arnx and Greptile</a>.
+</p>
+
+<h2 id="ci">The cheap step: arnx check, locally and in CI</h2>
+<p>
+  <code>arnx check</code> runs the accepted tests in Docker, in a throwaway copy
+  of the repository, with no model calls. That makes it the step to repeat:
+  after each fix, before each push, and in CI if your runner has Docker.
+</p>
+<div class="table-scroll">
+  <table>
+    <caption>
+      arnx check exit codes
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Exit</th>
+        <th scope="col">Meaning</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>0</td>
+        <td>All accepted tests pass</td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Some accepted tests fail</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Some tests did not report, are unproven or were not run</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Nothing accepted yet</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>An accepted test changed since accept; nothing ran</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  Commit <code>.arnx/config.toml</code>, <code>.arnx/review.yaml</code> and
+  <code>.arnx/baseline.json</code> so teammates and CI reuse the environment
+  that was proven on your machine. If you gate CI on
+  <code>arnx review</code> instead, read <code>result</code> in
+  <code>arnx review --json</code>: exit 0 does not mean no findings. Confirmed
+  findings are reported and do not fail the run. Exit 1 means a finding the
+  second opinion could not check, 2 incomplete, 3 setup needed.
+</p>
+
+<h2 id="limits">Limits and trade-offs</h2>
+<ul>
+  <li>
+    A review before the commit adds minutes to finishing a change. For a
+    one-line fix it may not be worth it.
+  </li>
+  <li>
+    Each review stops writing tests at <code>review_usd</code>, $3.00 by
+    default. On the small checkout demo, one observed first review took 29
+    seconds and $0.03 to set up and 42 seconds and $0.10 to review. Larger
+    changes cost more; our own ranged from $0.17 to $3.19.
+  </li>
+  <li>
+    A passing check covers only the accepted tests. It is not a claim about the
+    rest of the change.
+  </li>
+  <li>
+    Finding nothing is weak evidence. The review lists changed code no test
+    reached. Read that list. See
+    <a href="/research/failing-test-not-a-bug/"
+      >what a failing test does and does not show</a
+    >.
+  </li>
+  <li>
+    The diff, the files the reviewer reads and test output go to your model
+    providers or arnx Cloud. See
+    <a href="/security.html">data and execution boundaries</a>.
+  </li>
+</ul>
+<p>
+  Try it: <a href="/quickstart.html#installation">install arnx</a>, or run the
+  <a href="https://github.com/arnx-dev/checkout-demo">checkout demo</a>, where
+  the <code>discount-codes</code> branch is a ready-made unmerged change. Costs
+  are covered in the <a href="/quickstart.html#costs">quickstart</a>.
+</p>

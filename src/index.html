@@ -4,19 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#faf8f3" />
-    <title>arnx: Open-source AI code review with executable evidence</title>
+    <title>arnx | Open-source AI code review for coding agents</title>
     <meta
       name="description"
-      content="Find bugs in AI-generated code. arnx investigates changes, runs tests for suspected bugs, and keeps accepted tests as regression checks."
+      content="Review AI-generated code before you commit. arnx writes and runs tests for suspected bugs in Docker and keeps accepted ones as regression checks. Open source, BYOM or Cloud."
     />
     <link rel="canonical" href="https://arnx.dev/" />
     <meta
       property="og:title"
-      content="arnx: Open-source AI code review with executable evidence"
+      content="arnx | Open-source AI code review for coding agents"
     />
     <meta
       property="og:description"
-      content="Find bugs in AI-generated code. arnx investigates changes, runs tests for suspected bugs, and keeps accepted tests as regression checks."
+      content="Review AI-generated code before you commit. arnx writes and runs tests for suspected bugs in Docker and keeps accepted ones as regression checks. Open source, BYOM or Cloud."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://arnx.dev/" />
@@ -30,11 +30,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="arnx: Open-source AI code review with executable evidence"
+      content="arnx | Open-source AI code review for coding agents"
     />
     <meta
       name="twitter:description"
-      content="Find bugs in AI-generated code. arnx investigates changes, runs tests for suspected bugs, and keeps accepted tests as regression checks."
+      content="Review AI-generated code before you commit. arnx writes and runs tests for suspected bugs in Docker and keeps accepted ones as regression checks. Open source, BYOM or Cloud."
     />
     <meta name="twitter:image" content="https://arnx.dev/og.png" />
     <meta
@@ -80,7 +80,7 @@
               >Apache 2.0 <span>Open-source release</span></a
             ><a href="./quickstart.html#models"
               >BYOM <span>Your API keys</span></a
-            >
+            ><a href="/agents/">Agent Skill <span>Claude Code, Codex</span></a>
           </div>
           <p class="hero-footnote">{{RELEASE_NOTE}}</p>
         </div>
@@ -160,6 +160,35 @@ arnx review</code></pre>
           The first review sets up what it needs in a few minutes (it stops at
           10). No separate setup step.
         </p>
+        <div class="beta-grid two start-paths">
+          <article class="path-card">
+            <p class="mono">FOR CODING AGENTS</p>
+            <h3>Let your agent run it.</h3>
+            <p>
+              <code>arnx skill install</code> gives Claude Code, Codex and other
+              agents that read Agent Skills the review and fix loop. Triage,
+              accept and commits stay yours.
+            </p>
+            <a class="text-link" href="/agents/">arnx for coding agents ↗</a>
+          </article>
+          <article class="path-card">
+            <p class="mono">REPRODUCIBLE DEMO</p>
+            <h3>Try it on a planted bug.</h3>
+            <p>
+              Clone
+              <a
+                href="https://github.com/arnx-dev/checkout-demo"
+                data-event="github_click"
+                >arnx-dev/checkout-demo</a
+              >, switch to <code>discount-codes</code>, then run
+              <code>arnx init</code> and <code>arnx review</code>. Our clean run
+              cost $0.13.
+            </p>
+            <a class="text-link" href="/agents/#demo"
+              >The demo, step by step ↗</a
+            >
+          </article>
+        </div>
       </section>
       <div class="language-strip wrap">
         <span class="mono">SUPPORTED RUNNERS</span
@@ -180,12 +209,93 @@ arnx review</code></pre>
       </p>
       <section
         class="section wrap"
+        id="public-evidence"
+        aria-labelledby="public-evidence-title"
+      >
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">01 / Public evidence</p>
+            <h2 id="public-evidence-title">Evidence from real repositories</h2>
+          </div>
+          <span class="tag">Open source</span>
+        </div>
+        <p>
+          Reviews of public code, each with the test, the upstream pull request
+          and what arnx got wrong. These projects are examples, not customers or
+          partners.
+        </p>
+        <div class="beta-grid evidence-cases">
+          <article class="path-card">
+            <p class="mono">SQLFLUFF · MERGED</p>
+            <h3>Valid ClickHouse SQL was unparsable.</h3>
+            <p>
+              A generated test showed projections without
+              <code>ORDER BY</code> or <code>GROUP BY</code> were rejected. The
+              fix was merged upstream.
+            </p>
+            <a class="text-link" href="/case-studies/sqlfluff/"
+              >Read the SQLFluff case ↗</a
+            >
+          </article>
+          <article class="path-card">
+            <p class="mono">MARK · MERGED · GO, IN TEST</p>
+            <h3>A second Close returned too early.</h3>
+            <p>
+              A concurrency bug in a Go tool, found with Go support that is not
+              released yet. The fix was merged upstream.
+            </p>
+            <a class="text-link" href="/case-studies/mark/"
+              >Read the mark case ↗</a
+            >
+          </article>
+          <article class="path-card">
+            <p class="mono">BEETS · PULL REQUEST OPEN</p>
+            <h3>Shell completion crashed with one plugin on.</h3>
+            <p>
+              A regression test caught an option registered twice. The fix and
+              test are in an open pull request.
+            </p>
+            <a class="text-link" href="/case-studies/beets/"
+              >Read the beets case ↗</a
+            >
+          </article>
+          <article class="path-card">
+            <p class="mono">HUMMINGBOT · PULL REQUEST OPEN</p>
+            <h3>Order statuses paired with the wrong order.</h3>
+            <p>
+              One finding became a fix we submitted. Others matched fixes the
+              maintainers had already made on their own.
+            </p>
+            <a class="text-link" href="/case-studies/hummingbot/"
+              >Read the Hummingbot case ↗</a
+            >
+          </article>
+          <article class="path-card">
+            <p class="mono">ARNX · SELF-REVIEW</p>
+            <h3>A delete that could leave the repository.</h3>
+            <p>
+              arnx reviewing its own <code>remove</code> command: the test, the
+              failure, the fix and the check it still runs.
+            </p>
+            <a class="text-link" href="/case-studies/arnx-self-review/"
+              >Read the self-review ↗</a
+            >
+          </article>
+        </div>
+        <p class="scope-note">
+          How often do findings hold up on code we do not know? We graded 65 of
+          them.
+          <a href="/research/unfamiliar-repositories/">Read the counts.</a>
+        </p>
+      </section>
+      <section
+        class="section wrap"
         id="evidence"
         aria-labelledby="evidence-title"
       >
         <div class="section-heading">
           <div>
-            <p class="eyebrow">01 / A real review</p>
+            <p class="eyebrow">02 / A private review, start to finish</p>
             <h2 id="evidence-title">A finding. A fix.<br />The same tests.</h2>
           </div>
           <span class="tag">Python + Postgres</span>
@@ -230,7 +340,7 @@ arnx review</code></pre>
         id="how-it-works"
         aria-labelledby="workflow-title"
       >
-        <p class="eyebrow">02 / How arnx works</p>
+        <p class="eyebrow">03 / How arnx works</p>
         <h2 id="workflow-title">
           Investigate the change.<br />Keep the checks that matter.
         </h2>
@@ -292,7 +402,7 @@ arnx review</code></pre>
       </section>
       <section class="evidence-section">
         <div class="section wrap">
-          <p class="eyebrow">03 / Why executable evidence matters</p>
+          <p class="eyebrow">04 / Why executable evidence matters</p>
           <h2>
             A suspicion needs a test.<br />A failing test needs your judgment.
           </h2>
@@ -328,6 +438,7 @@ arnx review</code></pre>
           <a class="text-link" href="./product.html"
             >Understand the product and its boundaries ↗</a
           >
+          <a class="text-link" href="/guides/">Read the guides ↗</a>
         </div>
       </section>
       <section class="section wrap" aria-labelledby="finding-title">
@@ -398,7 +509,7 @@ arnx review</code></pre>
 
 <span class="syntax-heading">### F2 · regression · confirmed by the second opinion</span>
 - <span class="syntax-call">Failure:</span> `<span class="syntax-string">expect(received).toBe(expected)</span>`
-- <span class="syntax-call">Before the change (regression):</span> passes on the code before the change (3 runs): the change broke it
+- <span class="syntax-call">Before the change (regression):</span> passes on the code before the change (3 runs), fails with it
 - <span class="syntax-call">Second opinion:</span> planRemove takes accepted-tests.json keys verbatim and applyRemove rmSync's join(repo, p), …</code></pre>
           </div>
         </div>
@@ -413,7 +524,7 @@ arnx review</code></pre>
         </div>
       </section>
       <section class="section wrap" id="open-source">
-        <p class="eyebrow">04 / Choose your setup</p>
+        <p class="eyebrow">05 / Choose your setup</p>
         <h2>Your keys. Our Cloud. Your requirements.</h2>
         <div class="beta-grid use-options">
           <article class="path-card">
@@ -468,7 +579,7 @@ arnx review</code></pre>
         </p>
       </section>
       <section class="section wrap community-section">
-        <p class="eyebrow">05 / Built with developers</p>
+        <p class="eyebrow">06 / Built with developers</p>
         <h2>Bring a reproducible problem.</h2>
         <p>
           Report a bug, request framework support, or help make a generated test
