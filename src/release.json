@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-03",
+  "checkedAt": "2026-11-12",
   "repository": {
     "url": "https://github.com/arnx-dev/arnx",
     "publicSource": true,
@@ -7,20 +7,24 @@
     "discussionsUrl": null,
     "licenseUrl": "https://github.com/arnx-dev/arnx/blob/main/LICENSE",
     "docsUrl": "https://github.com/arnx-dev/arnx#readme",
-    "contributingUrl": "https://github.com/arnx-dev/arnx/blob/main/CONTRIBUTING.md"
+    "contributingUrl": "https://github.com/arnx-dev/arnx/blob/main/CONTRIBUTING.md",
+    "skillUrl": "https://github.com/arnx-dev/arnx/blob/main/skills/arnx/SKILL.md",
+    "demoUrl": "https://github.com/arnx-dev/checkout-demo",
+    "npmUrl": "https://www.npmjs.com/package/@arnx-dev/arnx",
+    "organizationUrl": "https://github.com/arnx-dev"
   },
   "cli": {
     "available": true,
-    "version": "0.1.7",
+    "version": "0.1.11",
     "installCommand": "npm install -g @arnx-dev/arnx",
-    "verifiedAt": "2026-11-03",
-    "verificationRecord": "Installed from npm as @arnx-dev/arnx@0.1.7, then one arnx review ran end to end with arnx cloud.",
+    "verifiedAt": "2026-11-12",
+    "verificationRecord": "npm lists @arnx-dev/arnx@0.1.11 as latest. Copy checked against tag v0.1.11 and the installed 0.1.11 help; arnx skill install ran in an empty repository. No review was run for this update.",
     "readinessRecord": "docs/public-release.md"
   },
   "cloud": {
     "available": true,
     "pilot": false,
-    "verifiedAt": "2026-11-03",
-    "verificationRecord": "Installed from npm as @arnx-dev/arnx@0.1.7, then one arnx review ran end to end with arnx cloud."
+    "verifiedAt": "2026-11-09",
+    "verificationRecord": "arnx cloud was checked live with 0.1.11 after its deployment on 2026-11-09."
   }
 }

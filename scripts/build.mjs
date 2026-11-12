@@ -1,7 +1,24 @@
 import { build } from "esbuild";
 import { mkdir, rm, copyFile, readFile, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
+import { indexNowKey } from "./indexnow.mjs";
 import { renderPage, release, validateRelease } from "./release.mjs";
-import { origin, robots, softwareApplication, llms } from "./discovery.mjs";
+import {
+  origin,
+  robots,
+  softwareApplication,
+  organization,
+  llms,
+  llmsFull,
+} from "./discovery.mjs";
+import {
+  content,
+  contentSchemas,
+  renderContentPage,
+  rootLinks,
+  sections,
+  toMarkdown,
+} from "./content.mjs";
 export const publicAssets = [
   ...[320, 430, 640, 860, 960, 1254].map(
     (width) => `mascot-inspecting-${width}.webp`,
@@ -26,6 +43,18 @@ export const pages = [
   "license.html",
   "security.html",
 ];
+// Every built HTML file: the flat pages, then the nested content pages.
+export const allPages = [...pages, ...content.map((page) => page.file)];
+// Pages whose text goes into llms-full.txt, in reading order.
+const fullTextPages = [
+  "quickstart.html",
+  "product.html",
+  "security.html",
+  ...content.map((page) => page.file),
+  "case-study.html",
+];
+const jsonLd = (schema) =>
+  `<script type="application/ld+json">${JSON.stringify(schema).replaceAll("<", "\\u003c")}</script>`;
 export async function buildSite() {
   validateRelease(release);
   const theme = await build({
@@ -92,36 +121,53 @@ export async function buildSite() {
     target: "es2022",
   });
   const urls = [];
-  for (const page of pages) {
-    const html = await renderPage(await readFile(`src/${page}`, "utf8"));
+  const built = new Map();
+  const sources = [
+    ...(await Promise.all(
+      pages.map(async (page) => ({
+        file: page,
+        html: await renderPage(await readFile(`src/${page}`, "utf8")),
+        schemas:
+          page === "index.html"
+            ? [softwareApplication(release), organization(release)]
+            : page === "product.html"
+              ? [softwareApplication(release)]
+              : [],
+      })),
+    )),
+    ...(await Promise.all(
+      content.map(async (page) => ({
+        file: page.file,
+        html: rootLinks(await renderPage(renderContentPage(page))),
+        schemas: contentSchemas(page, release),
+      })),
+    )),
+  ];
+  for (const { file, html, schemas } of sources) {
     const canonical = html.match(/rel="canonical" href="([^"]+)"/)[1];
     if (new URL(canonical).origin !== origin || urls.includes(canonical))
       throw new Error("Invalid or duplicate canonical");
     urls.push(canonical);
-    const application =
-      page === "index.html" || page === "product.html"
-        ? `<script type="application/ld+json">${JSON.stringify(softwareApplication(release)).replaceAll("<", "\\u003c")}</script>`
-        : "";
-    const structuredData = `<script type="application/ld+json">${JSON.stringify(
-      {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        url: canonical,
-        name: html.match(/<title>([^<]+)<\/title>/)[1],
-        isPartOf: {
-          "@type": "WebSite",
-          name: "arnx",
-          url: "https://arnx.dev/",
-        },
+    const structuredData = jsonLd({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      url: canonical,
+      name: html.match(/<title>([^<]+)<\/title>/)[1],
+      isPartOf: {
+        "@type": "WebSite",
+        name: "arnx",
+        url: "https://arnx.dev/",
       },
-    ).replaceAll("<", "\\u003c")}</script>`;
+    });
+    await mkdir(dirname(`dist/${file}`), { recursive: true });
     await writeFile(
-      `dist/${page}`,
+      `dist/${file}`,
       html.replace(
         "<head>",
-        `<head>${themeScript}${googleTag}${structuredData}${application}`,
+        `<head>${themeScript}${googleTag}${structuredData}${schemas.map(jsonLd).join("")}`,
       ),
     );
+    built.set(file, { canonical, html });
   }
   for (const asset of publicAssets)
     await copyFile(`public/brand/${asset}`, `dist/brand/${asset}`);
@@ -143,10 +189,22 @@ export async function buildSite() {
     "dist/sitemap.xml",
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((url) => `<url><loc>${url}</loc></url>`).join("")}</urlset>\n`,
   );
+  const key = indexNowKey();
+  if (key) await writeFile(`dist/${key}.txt`, key);
   await writeFile("dist/robots.txt", robots());
-  await writeFile("dist/llms.txt", llms(release));
+  await writeFile("dist/llms.txt", llms(release, content, sections));
+  await writeFile(
+    "dist/llms-full.txt",
+    llmsFull(
+      release,
+      fullTextPages.map((file) => ({
+        url: built.get(file).canonical,
+        markdown: toMarkdown(built.get(file).html, built.get(file).canonical),
+      })),
+    ),
+  );
   console.log(
-    `Built dist/: ${pages.length} pages, responsive brand assets, bundled fonts, CSS and JS. No internal documents.`,
+    `Built dist/: ${allPages.length} pages, responsive brand assets, bundled fonts, CSS and JS. No internal documents.`,
   );
 }
 if (process.argv[1]?.endsWith("build.mjs")) await buildSite();

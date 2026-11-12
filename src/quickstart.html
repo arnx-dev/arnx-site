@@ -104,7 +104,7 @@ arnx review</code></pre>
         <pre><code>curl -fLO https://github.com/arnx-dev/arnx/releases/latest/download/arnx-linux-x64
 chmod +x arnx-linux-x64 &amp;&amp; mv arnx-linux-x64 /usr/local/bin/arnx</code></pre>
       </div>
-      <p>This guide covers arnx 0.1.7. {{CANONICAL_DOCS}}</p>
+      <p>This guide covers arnx {{CLI_VERSION}}. {{CANONICAL_DOCS}}</p>
       <nav class="article-toc" aria-label="On this page">
         <a href="#prerequisites">Prerequisites</a><a href="#byom">BYOM</a
         ><a href="#cloud">Cloud</a><a href="#skill">Coding-agent skill</a
@@ -138,7 +138,9 @@ chmod +x arnx-linux-x64 &amp;&amp; mv arnx-linux-x64 /usr/local/bin/arnx</code><
         Supported test runners: Python with pytest; JavaScript / TypeScript with
         vitest, jest, node:test or bun; Rust with cargo-nextest (early). Single
         packages and multi-project repositories are supported, but setup is not
-        guaranteed for every framework or dependency.
+        guaranteed for every framework or dependency. arnx works best on
+        single-package Python and TypeScript repositories. Tests that run only
+        in a browser (Playwright, Cypress) are not run.
       </p>
       <p>
         More languages are planned.
@@ -239,8 +241,9 @@ arnx doctor</code></pre>
       <p>
         Don’t want to handle reviews in the terminal? No worries. Your favorite
         coding agent can take the wheel. arnx was built for that! Install the
-        arnx skill so Claude Code and other agents that read Agent Skills can
-        review and fix code after finishing a change.
+        arnx skill so Claude Code, Codex and other agents that read Agent Skills
+        can review and fix code after finishing a change. The
+        <a href="/agents/">page for coding agents</a> has the whole loop.
       </p>
       <div class="terminal">
         <div class="terminal-header">
@@ -249,11 +252,12 @@ arnx doctor</code></pre>
         <pre><code>arnx skill install</code></pre>
       </div>
       <p>
-        This writes <code>.agents/skills/arnx/</code> and
-        <code>.claude/skills/arnx/</code>, including the skill’s references.
-        Commit these directories to share the workflow with your team.
-        Alternatively, <code>arnx skill install --user</code> installs them
-        under your home directory for use across repositories.
+        This writes <code>.agents/skills/arnx/</code> (Codex and other Agent
+        Skills agents) and <code>.claude/skills/arnx/</code> (Claude Code),
+        including the skill’s references. Commit these directories to share the
+        workflow with your team. Alternatively,
+        <code>arnx skill install --user</code> installs them under your home
+        directory for use across repositories.
       </p>
       <p>
         An identical installed copy is left unchanged. To replace an older or
@@ -262,16 +266,18 @@ arnx doctor</code></pre>
         user-wide copy).
       </p>
       <p>
-        The agent runs <code>arnx review</code> once, then stops for you to run
-        <code>arnx triage</code> and <code>arnx accept</code>. After that it
-        runs <code>arnx check</code>, reads <code>arnx prompt</code>, fixes
-        until check passes, runs each touched project’s full suite, and reports.
-        Yours: init, logins, marks, answers, accept, whole-repository setup and
-        commits. The agent never edits accepted tests.
+        The agent runs <code>arnx review</code> once, after saying what it may
+        cost, then stops for you to run <code>arnx triage</code> and
+        <code>arnx accept</code>. After that it runs <code>arnx check</code>,
+        reads <code>arnx prompt</code>, fixes until check passes, runs each
+        touched project’s full suite, and reports. Yours: init, logins, marks,
+        answers, accept, whole-repository setup and commits. The agent never
+        edits accepted tests.
       </p>
       <p>
         In Claude Code: <code>/plugin marketplace add arnx-dev/arnx</code>, then
-        <code>/plugin install arnx@arnx</code>.
+        <code>/plugin install arnx@arnx</code>. The skills CLI also finds it:
+        <code>npx skills add arnx-dev/arnx</code>.
       </p>
       <h2 id="workflow">4. Run the workflow</h2>
       <p>
@@ -312,7 +318,8 @@ arnx check</code></pre>
           <strong>First review:</strong> sets up only the projects the change
           touches, proven by a quick look: the test listing, arnx’s one-line
           test and a few small test files. A later change in another project
-          sets that one up then. <code>arnx setup</code> is the optional
+          sets that one up then; one that fails is left to
+          <code>arnx setup --add</code>. <code>arnx setup</code> is the optional
           whole-repository run with every suite: <code>setup_usd</code> defaults
           to $3.00 and <code>setup_minutes</code> to 40.
         </li>
@@ -321,7 +328,8 @@ arnx check</code></pre>
           since its base plus tracked uncommitted changes. Use
           <code>arnx review --range A..B</code> for an explicit span. On the
           default branch, it reviews tracked uncommitted work, or the last
-          commit when clean.
+          commit when clean. A documentation-only change is not reviewed (exit
+          0); <code>arnx review --docs</code> reviews it anyway.
         </li>
         <li>
           <strong>Accept:</strong> replace <code>&lt;id&gt;</code> with the
@@ -361,7 +369,8 @@ arnx check</code></pre>
       </p>
       <p>
         Reviews are limited to 200 KB; use
-        <code>arnx review --range A..B</code> for long branches. Python,
+        <code>arnx review --range A..B</code> for long branches. Lockfiles and
+        generated files are not counted and not in the diff sent. Python,
         JavaScript/TypeScript and Rust only; no Windows build (use WSL 2). A
         backend whose tests need three or more services is listed as uncovered
         and must be set up by hand.
@@ -416,9 +425,11 @@ arnx check</code></pre>
       </p>
       <p>
         Expect a few cents to a few dollars per review. Our own reviews ranged
-        from $0.17 to $3.19. Set <code>review_usd</code> under
-        <code>[budget]</code> to control spending (default $3.00); the review
-        stops writing tests when it reaches the cap and reports that it did.
+        from $0.17 to $3.19; the public
+        <a href="/agents/#demo">checkout demo</a> cost $0.13 with setup. Set
+        <code>review_usd</code> under <code>[budget]</code> to control spending
+        (default $3.00); the review stops writing tests when it reaches the cap
+        and reports that it did.
       </p>
       <p>
         <code>arnx check</code> and <code>arnx check --review</code> do not call
@@ -476,12 +487,18 @@ arnx check</code></pre>
         </dd>
       </dl>
       <p>
-        Review exit codes: 0 no confirmed findings, 1 confirmed findings, 2
-        incomplete, 3 setup needed. Check exit codes: 0 passed, 1 failed, 2
-        incomplete reporting, 3 nothing accepted, 4 accepted-test integrity
-        changed. A 0 is not a correctness guarantee.
+        Review exit codes: 0 fine (confirmed findings are worth a look and do
+        not fail the run; CI reads <code>result</code> in
+        <code>arnx review --json</code>), 1 a finding the second opinion could
+        not check, 2 incomplete, 3 setup needed. Check exit codes: 0 passed, 1
+        failed, 2 some tests did not report, are unproven or were not run, 3
+        nothing accepted, 4 accepted-test integrity changed. A 0 is not a
+        correctness guarantee.
       </p>
       <p>
+        Next: <a href="/guides/">guides</a>,
+        <a href="/case-studies/">case studies</a> and
+        <a href="/research/">research</a>.
         <a href="./community.html">Report a reproducible issue</a> with the
         version, OS, runner, command, expected behavior, and sanitized output.
         <a href="./security.html#reporting">Report security issues privately</a

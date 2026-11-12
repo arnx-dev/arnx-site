@@ -1,0 +1,298 @@
+<!--meta
+{
+  "title": "AI code review findings on unfamiliar repositories",
+  "description": "We graded 65 findings from 18 arnx reviews of 12 open-source repositories we had never run before. 16 were real defects; 49 were not. Method and limits.",
+  "summary": "65 graded findings from 18 reviews of 12 repositories new to arnx: 3 real bugs, 13 minor defects, 26 intended behavior, 12 wrong tests, 11 unreachable.",
+  "crumb": "Unfamiliar repositories",
+  "listTitle": "AI code review findings on unfamiliar repositories",
+  "kind": "article",
+  "order": 1,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Research / Field study</p>
+<h1>AI code review findings on unfamiliar repositories.</h1>
+<p class="descriptor">
+  65 failing tests, graded one by one. About one in four was a real defect.
+</p>
+<p>
+  We pointed arnx at open-source repositories it had never been run on, one
+  commit each to start, and graded every finding it reported. Of 65 findings, 3
+  were real bugs and 13 were real but minor defects. The other 49 were not
+  defects: 26 tested behavior the project intends, 12 came from a wrong test,
+  and 11 described a scenario the real program cannot reach.
+</p>
+<p class="scope-note">
+  <strong>One batch, one pre-release build, graded by us.</strong> These counts
+  describe this sample. They are not an accuracy rate for arnx, and later
+  releases changed behavior this batch exposed.
+</p>
+
+<h2>Method</h2>
+<ul>
+  <li>
+    <strong>Build.</strong> A local pre-release build of arnx 0.1.8. No public
+    release matches it exactly.
+  </li>
+  <li>
+    <strong>Repositories.</strong> 16 TypeScript and Python open-source
+    repositories that arnx had not been run on before.
+  </li>
+  <li>
+    <strong>Commits.</strong> Chosen by a rule fixed before any run: the largest
+    source change of 40 to 400 lines not made by a bot, dated 28 September to 12
+    October 2026, and not documentation or dependencies. One exception: the top
+    pick in one repository was a translation bot's commit, so the next one ran.
+    A second commit per repository ran until a spending limit stopped new runs,
+    so some repositories have two reviews and some have one.
+  </li>
+  <li>
+    <strong>No help.</strong> Each run was a first arnx review of that commit,
+    with no hints, no hand-written configuration and no retries to get a better
+    result. One review was rerun after a provider outage cut the first attempt.
+  </li>
+  <li>
+    <strong>Limits.</strong> $1.50 per review and $0.75 per setup. The first
+    repository ran under lower limits.
+  </li>
+  <li>
+    <strong>Models.</strong> Reviewer: claude-sonnet-5-5 in every review. Second
+    opinion: GLM-5.3-Flash through River, with gpt-6.1-sol as the fallback when
+    it timed out. The cost line of every review also shows gpt-6.1-sol, the
+    default harness's second hunter.
+  </li>
+  <li>
+    <strong>Grading.</strong> Two graders read the code behind each finding and
+    reran the ones judged true in Docker with no network. The graders were AI
+    agents working under the direction of arnx's author. No maintainer graded
+    anything.
+  </li>
+</ul>
+
+<h2>Sample</h2>
+<p>
+  Of the 16 repositories, 12 produced at least one complete review. Those 12,
+  with 18 complete reviews between them, are the sample. All are public
+  open-source projects in Python or TypeScript. Two of them, SQLFluff and beets,
+  have findings that were sent upstream and are written up in the
+  <a href="/case-studies/">case studies</a>.
+</p>
+<p>The other 4 produced no complete review:</p>
+<ul>
+  <li>
+    Two: the first review could not set the project up within its 10-minute
+    limit.
+  </li>
+  <li>One: setup found only a web UI there, which arnx does not set up.</li>
+  <li>
+    One: arnx refused the change because a test file held text that looked like
+    a private key.
+  </li>
+</ul>
+<p>
+  In all, 28 runs were started: 18 complete, 3 refused, 2 stopped at the setup
+  limit, 2 stopped at setup for a web UI, 2 incomplete and 1 stopped before
+  review. We do not list the other repositories here: some findings graded real
+  have not been reported to their maintainers yet, and they should hear it
+  first.
+</p>
+
+<h2>Raw counts</h2>
+<p>
+  The 18 complete reviews wrote 374 tests and reported 65 findings. A finding is
+  a generated test that failed.
+</p>
+<div class="table-scroll">
+  <table>
+    <caption>
+      Grades of the 65 findings
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Grade</th>
+        <th scope="col">Findings</th>
+        <th scope="col">Share</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Real bug</th>
+        <td>3</td>
+        <td>5%</td>
+      </tr>
+      <tr>
+        <th scope="row">Real, minor</th>
+        <td>13</td>
+        <td>20%</td>
+      </tr>
+      <tr>
+        <th scope="row">Intended behavior</th>
+        <td>26</td>
+        <td>40%</td>
+      </tr>
+      <tr>
+        <th scope="row">Wrong test</th>
+        <td>12</td>
+        <td>18%</td>
+      </tr>
+      <tr>
+        <th scope="row">Unreachable scenario</th>
+        <td>11</td>
+        <td>17%</td>
+      </tr>
+      <tr>
+        <th scope="row">Total</th>
+        <td>65</td>
+        <td>100%</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  Of the 16 real findings, 15 were still present at the project's head when
+  graded. One real bug had already been fixed upstream.
+</p>
+<div class="table-scroll">
+  <table>
+    <caption>
+      Grades by what arnx's second opinion said
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Second opinion</th>
+        <th scope="col">Findings</th>
+        <th scope="col">Real</th>
+        <th scope="col">Real, minor</th>
+        <th scope="col">Intended</th>
+        <th scope="col">Wrong test</th>
+        <th scope="col">Unreachable</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Confirmed</th>
+        <td>36</td>
+        <td>3</td>
+        <td>9</td>
+        <td>13</td>
+        <td>2</td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <th scope="row">Disputed</th>
+        <td>23</td>
+        <td>0</td>
+        <td>1</td>
+        <td>11</td>
+        <td>9</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <th scope="row">Not judged (failed before the change too)</th>
+        <td>6</td>
+        <td>0</td>
+        <td>3</td>
+        <td>2</td>
+        <td>1</td>
+        <td>0</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  The second table is the subject of
+  <a href="/research/second-model-judge/"
+    >Can a second LLM judge code review findings?</a
+  >
+</p>
+<p>
+  One repository holds 18 of the 65 findings. A sample this small leans on
+  whichever commits happened to be picked.
+</p>
+
+<h2>Classification criteria</h2>
+<ul>
+  <li>
+    <strong>Real bug.</strong> The program does something wrong that a user can
+    hit, and the test shows it.
+  </li>
+  <li>
+    <strong>Real, minor.</strong> A true defect with small effect: an edge case,
+    a rarely used form, or a gap in new support.
+  </li>
+  <li>
+    <strong>Intended behavior.</strong> The test fails, but the code does what
+    the project means it to do. The test's expectation was the model's guess.
+  </li>
+  <li>
+    <strong>Wrong test.</strong> The test itself is faulty: an invalid input it
+    calls valid, a broken fixture, or an assertion that does not check what it
+    claims.
+  </li>
+  <li>
+    <strong>Unreachable scenario.</strong> The failure is real inside the
+    function under test, but no caller in the program can produce that input or
+    state.
+  </li>
+</ul>
+
+<h2>Cost and time</h2>
+<p>
+  The 18 complete reviews cost $7.42 in model spend and took 111 minutes in
+  total. One review ranged from $0.07 to $0.96 and from 79 seconds to 13 minutes
+  39 seconds. Across all 28 runs, reviews cost $7.54 and setups $1.05. These are
+  observations from this batch, not prices.
+</p>
+
+<h2>Limitations</h2>
+<ul>
+  <li>
+    The grades are an estimate by us and by AI graders we directed, not the
+    maintainers' word. A grade of <q>intended</q> or <q>unreachable</q> can be
+    wrong.
+  </li>
+  <li>
+    One pre-release build. Releases since then changed how findings are labelled
+    and when a run fails.
+  </li>
+  <li>
+    65 findings from 18 reviews is a small sample, and one repository supplies
+    more than a quarter of it.
+  </li>
+  <li>TypeScript and Python only. No Rust, no other language.</li>
+  <li>
+    Model replies vary. A second review of the same commit can report different
+    findings.
+  </li>
+  <li>
+    We counted what arnx reported. We did not count the bugs it missed, so this
+    says nothing about recall.
+  </li>
+  <li>
+    Commits of 40 to 400 lines from a two-week window are not a random sample of
+    all changes.
+  </li>
+</ul>
+
+<h2>Conflict of interest</h2>
+<p>
+  We build arnx and sell arnx Cloud. We chose the repositories, ran the reviews
+  and did the grading. Nobody outside checked this work.
+</p>
+
+<h2>Artifacts</h2>
+<p>
+  The raw review files (each review's report, generated tests, test output and
+  second-opinion record), the grade sheet with its evidence notes and the run
+  ledger are kept by us and are not published yet. To reproduce this study a
+  reader would need the list of commits, the exact build, and those files. Two
+  findings can be checked today against public pull requests:
+  <a href="/case-studies/sqlfluff/">SQLFluff</a> and
+  <a href="/case-studies/beets/">beets</a>.
+</p>
+<p>
+  Related:
+  <a href="/research/failing-test-not-a-bug/"
+    >Why a failing test is not sufficient evidence of a bug</a
+  >.
+</p>

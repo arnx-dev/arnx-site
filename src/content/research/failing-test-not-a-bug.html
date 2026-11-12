@@ -1,0 +1,209 @@
+<!--meta
+{
+  "title": "Why a failing test is not sufficient evidence of a bug",
+  "description": "A failing generated test can mean four different things. In one graded batch, 49 of 65 failing tests were not defects. How to tell the levels apart.",
+  "summary": "Four levels of evidence, from a failing assertion to a violation of intended behavior, with counts from one graded batch and two public examples.",
+  "crumb": "Failing test, not a bug",
+  "listTitle": "Why a failing test is not sufficient evidence of a bug",
+  "kind": "article",
+  "order": 3,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Research / Evidence</p>
+<h1>Why a failing test is not sufficient evidence of a bug.</h1>
+<p class="descriptor">
+  A test can fail honestly and still be wrong about what should happen.
+</p>
+<p>
+  A failing test shows that one assertion does not hold for one input. It does
+  not show that the code is wrong. Whoever wrote the test chose the input and
+  the expected result, and when a model wrote it, both are guesses about what
+  the project intends. In one batch we graded, 49 of 65 failing generated tests
+  were not defects.
+</p>
+
+<h2>Four levels of evidence</h2>
+<p>
+  Each level adds something the one before it lacks. Only the last one is a bug.
+</p>
+<ol class="guide-steps">
+  <li>
+    <strong>A failing assertion.</strong> The test ran and an assertion failed,
+    once. This rules out very little. The test may be flaky, the fixture may be
+    broken, or the input may be invalid.
+  </li>
+  <li>
+    <strong>A reproducible behavior.</strong> The test fails the same way every
+    time. Now you know what the code does with that input. You still do not know
+    whether that is wrong. arnx runs each test 3 times for this reason, and a
+    test that fails only sometimes is reported as flaky.
+  </li>
+  <li>
+    <strong>A regression caused by the change.</strong> The same test passes on
+    the code before the change and fails after it. This ties the behavior to the
+    change. It still assumes the old behavior was the intended one, and that the
+    pass on the old code was a real pass.
+  </li>
+  <li>
+    <strong>A violation of intended behavior.</strong> The code does something
+    the project does not mean it to do, in a situation real use can reach. This
+    needs a fact from outside the test: a specification, an upstream reference,
+    or the owner's word.
+  </li>
+</ol>
+<p>
+  A tool can establish the first three by running code. The fourth takes
+  knowledge of intent. That is why arnx asks the developer to mark each issue
+  real, intended, noise or rewrite, and keeps only tests of issues marked real.
+</p>
+
+<h2>Where failing tests went wrong in one batch</h2>
+<p>
+  The sample is the one in
+  <a href="/research/unfamiliar-repositories/"
+    >AI code review findings on unfamiliar repositories</a
+  >: 65 findings from 18 reviews of 12 open-source repositories, graded by us.
+  Every one of the 65 was a generated test that failed in every run. So all of
+  them had reached the second level.
+</p>
+<div class="table-scroll">
+  <table>
+    <caption>
+      Why 49 of 65 reproducible failures were not defects
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Grade</th>
+        <th scope="col">Findings</th>
+        <th scope="col">What the failing test got wrong</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Intended behavior</th>
+        <td>26</td>
+        <td>The expected result. The code does what the project means.</td>
+      </tr>
+      <tr>
+        <th scope="row">Wrong test</th>
+        <td>12</td>
+        <td>
+          The test itself: an invalid input, a broken fixture, or an assertion
+          that checks something else.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Unreachable scenario</th>
+        <td>11</td>
+        <td>The input. No caller in the real program can produce it.</td>
+      </tr>
+      <tr>
+        <th scope="row">Real, minor</th>
+        <td>13</td>
+        <td>Nothing. A true defect with small effect.</td>
+      </tr>
+      <tr>
+        <th scope="row">Real bug</th>
+        <td>3</td>
+        <td>Nothing.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  The largest group, 26 of 65, failed on intent alone. The test was sound, the
+  failure repeated, and the code was right. No amount of rerunning separates
+  these from real bugs. The 11 unreachable scenarios are similar: a unit test
+  calls a function directly with a state the rest of the program never builds.
+</p>
+<p>
+  These counts describe one small batch on one pre-release build. They are an
+  illustration, not a rate.
+</p>
+
+<h2>Two public examples</h2>
+<h3>A confirmed test that asserted invalid SQL should parse</h3>
+<p>
+  In a review of SQLFluff's ClickHouse projection grammar, arnx wrote a test
+  asserting that a projection with both <code>GROUP BY</code> and
+  <code>ORDER BY</code> should parse. The test failed in every run. The second
+  model confirmed it. It was wrong: ClickHouse itself rejects that form, so the
+  grammar was right to refuse it. The failure was reproducible and the test was
+  still mistaken about what is valid. Settling it took reading ClickHouse's own
+  source. Details:
+  <a href="/case-studies/sqlfluff/">the SQLFluff case study</a>.
+</p>
+<h3>A real gap filed under <q>already failing before</q></h3>
+<p>
+  The same review held a test showing that a projection with a bare
+  <code>SELECT</code> was unparsable. That one was a real gap, and the fix was
+  merged upstream. But the test also failed on the code before the change,
+  because the parent commit had no projection support at all. arnx listed it
+  under <q>already failing before this change</q>, the section for failures the
+  change did not cause. The label followed the rule and still pointed away from
+  the one true finding. A before-and-after comparison answers
+  <q>did this change break it</q>. It does not answer <q>is it broken</q>.
+</p>
+<p>
+  The third level can mislead in the other direction too. A test can pass on the
+  old code only because the feature did not exist there, and then look like a
+  regression when the new code handles the input differently. In the batch above
+  we saw that in several findings. See
+  <a href="/research/second-model-judge/"
+    >Can a second LLM judge code review findings?</a
+  >
+</p>
+
+<h2>Questions to ask of any failing generated test</h2>
+<ul>
+  <li>
+    <strong>Is the input valid?</strong> Check it against the specification or
+    the upstream system, not against the test's name.
+  </li>
+  <li>
+    <strong>Can real code reach this?</strong> Find a caller that can produce
+    the input or state. If the test builds the state by hand, ask who else
+    could.
+  </li>
+  <li>
+    <strong>Who says the expected result is right?</strong> If the only source
+    is the model that wrote the test, treat it as a question for the owner.
+  </li>
+  <li>
+    <strong>What did the old code do, and why?</strong> A pass or a failure
+    before the change means little when the feature is new.
+  </li>
+  <li>
+    <strong>Does it fail for the stated reason?</strong> Read the failure
+    message. A setup error or a missing import can look like a failed assertion
+    in a summary.
+  </li>
+</ul>
+
+<h2>What a failing test is still good for</h2>
+<p>
+  A review comment says something might be wrong. A failing test gives you an
+  input, an expected result and an actual result you can run yourself. Being
+  wrong in a checkable way is cheaper to settle than being vague. In the batch
+  above, each of the 49 non-defects could be dismissed by answering one of the
+  questions above. The 16 real ones came with a reproduction attached. The test
+  is where the judgment starts, not where it ends.
+</p>
+
+<h2>Limitations</h2>
+<ul>
+  <li>
+    The counts come from 65 findings in 18 reviews, graded by us and by AI
+    graders we directed, not by the projects' maintainers.
+  </li>
+  <li>
+    One pre-release build of arnx 0.1.8, TypeScript and Python only. Later
+    releases changed how before-and-after outcomes are labelled.
+  </li>
+  <li>We build arnx. Nobody outside checked the grading.</li>
+  <li>
+    The raw review files and the grade sheet are not published yet. The two
+    examples above can be checked against the public SQLFluff pull request.
+  </li>
+</ul>

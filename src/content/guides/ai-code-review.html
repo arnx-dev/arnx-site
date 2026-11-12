@@ -1,0 +1,221 @@
+<!--meta
+{
+  "title": "AI code review: comments, executable evidence, and how to choose",
+  "description": "What AI code review tools do, the difference between review comments and executable evidence, where each fits, and questions to ask before you adopt one.",
+  "summary": "What AI code review is, how comment-based and evidence-based review differ, where each fits, and how to judge a tool.",
+  "crumb": "AI code review",
+  "listTitle": "AI code review: comments versus executable evidence",
+  "kind": "article",
+  "order": 1,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Guide / AI code review</p>
+<h1>AI code review: comments versus executable evidence.</h1>
+<p class="descriptor">Two kinds of output, and what each one costs you.</p>
+<p>
+  AI code review means a language model reads a code change and reports what
+  looks wrong. Most tools report in prose: a comment on a line, often with a
+  suggested fix. A smaller group reports something you can run: a test that
+  fails on the change. Both are useful. They fail in different ways, and they
+  fit different points in the workflow.
+</p>
+<p>
+  The short version: use comment-based review for breadth on every pull request,
+  and executable evidence where a wrong claim is expensive to chase or a real
+  bug is expensive to miss. Neither replaces your own tests or a person who
+  knows what the code is meant to do.
+</p>
+<nav class="article-toc" aria-label="On this page">
+  <a href="#comments">Review comments</a
+  ><a href="#evidence">Executable evidence</a><a href="#fit">Where each fits</a
+  ><a href="#judge">Judging a tool</a><a href="#workflow">A workflow to try</a
+  ><a href="#limits">Limits</a>
+</nav>
+
+<h2 id="comments">What a review comment gives you</h2>
+<p>
+  A comment is a claim about the code. It is cheap to produce and quick to read.
+  It can cover style, naming, security patterns, missing error handling and
+  design, including things no test can express. Its weakness is that you must
+  verify it yourself. A model can describe a bug that is not there in the same
+  confident tone as one that is. When that happens often, people stop reading
+  the comments.
+</p>
+
+<h2 id="evidence">What executable evidence gives you</h2>
+<p>
+  A generated test turns the claim into inputs, an expected result and an
+  observed failure. You can rerun it, read it and argue with it line by line. If
+  it also passes on the code before the change, you know the change altered that
+  behavior.
+</p>
+<p>
+  A failing test is still not proof of a bug. The test can encode the wrong
+  expectation, or reach a state the real program never reaches. In our own
+  grading of 65 findings on repositories we did not know, more findings tested
+  intended behavior than tested real defects. See
+  <a href="/research/failing-test-not-a-bug/"
+    >why a failing test is not sufficient evidence of a bug</a
+  >
+  and the
+  <a href="/research/unfamiliar-repositories/">full counts</a>.
+</p>
+<p>
+  Executable evidence also costs more. Something must build the project, run the
+  tests in isolation and pay for the model calls that wrote them. It only works
+  where the project has a test runner the tool supports.
+</p>
+
+<h2 id="fit">Where each kind fits</h2>
+<div class="table-scroll">
+  <table>
+    <caption>
+      A rough guide, not a ranking
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Situation</th>
+        <th scope="col">Comments</th>
+        <th scope="col">Executable evidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Every pull request, whole team</th>
+        <td>Good fit: fast, no setup per change</td>
+        <td>Possible, but slower and priced per run</td>
+      </tr>
+      <tr>
+        <th scope="row">An agent just finished a change</th>
+        <td>Useful as a second read</td>
+        <td>Good fit: checks behavior before a person reads the diff</td>
+      </tr>
+      <tr>
+        <th scope="row">Style, design, security patterns</th>
+        <td>Good fit</td>
+        <td>Poor fit: not expressible as a failing test</td>
+      </tr>
+      <tr>
+        <th scope="row">Logic, edge cases, regressions</th>
+        <td>Can point at them</td>
+        <td>Good fit: reproduces them</td>
+      </tr>
+      <tr>
+        <th scope="row">Guarding the fix later</th>
+        <td>Nothing to keep</td>
+        <td>The test stays as a regression check</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  The two combine well. Run evidence-based review before you open the pull
+  request, and let a comment-based reviewer read the pull request. See how arnx
+  sits beside
+  <a href="/compare/coderabbit/">CodeRabbit</a>,
+  <a href="/compare/greptile/">Greptile</a> and
+  <a href="/compare/claude-code-review/">Claude Code's own review</a>.
+</p>
+
+<h2 id="judge">Questions to ask of any AI review tool</h2>
+<ul>
+  <li>
+    <strong>What does a finding consist of?</strong> Prose, a suggested patch,
+    or something you can run.
+  </li>
+  <li>
+    <strong>Does it run your code?</strong> If so, where, with what network
+    access, and with which secrets in reach.
+  </li>
+  <li>
+    <strong>What leaves your machine?</strong> The diff only, or files around
+    it, and to which model providers.
+  </li>
+  <li>
+    <strong>How does it handle being wrong?</strong> Look for a way to dismiss
+    or dispute a finding, and for published numbers on how often findings hold.
+  </li>
+  <li>
+    <strong>What does silence mean?</strong> A tool that reports nothing should
+    say what it did not look at.
+  </li>
+  <li>
+    <strong>What does it cost per change?</strong> Per seat, per review or per
+    token, and whether there is a cap.
+  </li>
+  <li>
+    <strong>What do you keep?</strong> A resolved thread, a rule, or a test.
+  </li>
+</ul>
+
+<h2 id="workflow">A workflow to try</h2>
+<p>
+  This is the evidence-based loop with arnx, an open-source CLI. You need Docker
+  and a model key, or arnx Cloud.
+</p>
+<div class="terminal">
+  <div class="terminal-header"><span>After a code change</span></div>
+  <pre><code>npm install -g @arnx-dev/arnx
+arnx init
+arnx review
+arnx triage
+arnx accept
+arnx prompt
+arnx check</code></pre>
+</div>
+<ol class="guide-steps">
+  <li>
+    <code>arnx review</code> writes tests for the change, runs each three times
+    in Docker, reruns the failures on the code before the change and asks a
+    second model to confirm or dispute each one.
+  </li>
+  <li>
+    <code>arnx triage</code> is where you mark each issue real, intended, noise
+    or rewrite. This step is the review. The rest is preparation.
+  </li>
+  <li>
+    <code>arnx accept</code> keeps the tests of real issues.
+    <code>arnx prompt</code> hands the fix to your coding agent.
+    <code>arnx check</code> reruns the kept tests with no model calls.
+  </li>
+</ol>
+<p>
+  Real examples:
+  <a href="/case-studies/beets/">a shell completion crash in beets</a>,
+  <a href="/case-studies/sqlfluff/">valid SQL rejected by SQLFluff's parser</a>,
+  and
+  <a href="/case-studies/arnx-self-review/"
+    >a path escape in arnx's own remove command</a
+  >.
+</p>
+
+<h2 id="limits">Limits and trade-offs</h2>
+<ul>
+  <li>
+    A review takes minutes and model spend. Each arnx review stops writing tests
+    at a cap, <code>review_usd</code>, $3.00 by default. Our own reviews ranged
+    from $0.17 to $3.19.
+  </li>
+  <li>
+    A second model's agreement is a judgement, not a proof. See
+    <a href="/research/second-model-judge/"
+      >can a second LLM judge code review findings?</a
+    >
+  </li>
+  <li>
+    Model replies vary. Two reviews of one change can report different findings,
+    and finding nothing does not show the change is correct.
+  </li>
+  <li>
+    arnx covers Python, JavaScript, TypeScript and Rust (early), on changes up
+    to 200 KB, and does not run tests that need a browser.
+  </li>
+</ul>
+<p>
+  To try it: the <a href="/quickstart.html#installation">quickstart</a>, or the
+  <a href="https://github.com/arnx-dev/checkout-demo"
+    >checkout demo repository</a
+  >, which has one planted bug to find. What a finding and a check mean is on
+  the <a href="/product.html">product page</a>.
+</p>

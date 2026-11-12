@@ -63,10 +63,11 @@
       <p>
         Values that may be secrets are replaced by stand-ins: fakes of the same
         shape in the snapshot, used by the tests too. A password in a connection
-        address counts. A private key with a body cannot get a stand-in, so its
-        file is left out. <code>[review] stand_ins = false</code> turns
-        stand-ins off. The filter is a heuristic: extend
-        <code>.arnxignore</code> for anything else private.
+        address counts. A private key is a fake in the sandbox and
+        <code>[private key]</code> to a model; its file is still reviewed.
+        <code>[review] stand_ins = false</code> turns stand-ins off. The filter
+        is a heuristic: extend <code>.arnxignore</code> for anything else
+        private.
       </p>
       <p>
         When setup needs a file excluded by <code>.arnxignore</code>, it may

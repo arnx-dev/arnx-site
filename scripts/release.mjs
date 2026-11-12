@@ -58,6 +58,8 @@ export function releaseTokens(config = release) {
   const link = (url, text) =>
     `<a href="${escape(url)}" data-event="github_click">${text}</a>`;
   return {
+    CLI_VERSION: escape(cli.version || ""),
+    CHECKED_AT: escape(config.checkedAt),
     GITHUB_URL: github,
     ISSUES_URL: escape(repo.issuesUrl),
     RELEASE_NOTE: cli.available

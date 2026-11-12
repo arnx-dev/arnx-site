@@ -1,0 +1,415 @@
+<!--meta
+{
+  "title": "arnx vs CodeRabbit: executed tests and pull request review",
+  "description": "How arnx and CodeRabbit differ: where each reviews code, what each produces, tests, languages and cost, with sources. When CodeRabbit fits better, and how to use both.",
+  "summary": "CodeRabbit reviews pull requests across a team in any language. arnx runs before the pull request and backs each finding with a test it executed. Many teams can use both.",
+  "crumb": "arnx vs CodeRabbit",
+  "listTitle": "arnx vs CodeRabbit",
+  "kind": "article",
+  "order": 1,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Compare / CodeRabbit</p>
+<h1>arnx and CodeRabbit do different jobs.</h1>
+<p class="descriptor">
+  One reviews the pull request. One tests the change before it.
+</p>
+<p>
+  CodeRabbit is a hosted AI reviewer that comments on pull requests for a whole
+  team, in any language, on the common code hosts. It also has an IDE extension
+  and a CLI. arnx is an open-source CLI that a developer or their coding agent
+  runs on their own machine once a change is finished. It writes tests for what
+  looks broken, runs them in Docker, reruns each failure on the code before the
+  change, and reports the tests that failed.
+</p>
+<p>
+  So the question is rarely which one to pick. CodeRabbit covers every pull
+  request with review comments. arnx covers one change at a time with executed
+  tests, in three languages, and lets you keep the useful tests as regression
+  checks. They fit at different points of the same workflow.
+</p>
+<nav class="article-toc" aria-label="On this page">
+  <a href="#table">Side by side</a
+  ><a href="#other">When CodeRabbit fits better</a
+  ><a href="#arnx">When arnx fits better</a><a href="#both">Using both</a
+  ><a href="#limits">arnx limits</a><a href="#sources">Sources</a>
+</nav>
+<h2 id="table">Side by side</h2>
+<div class="table-scroll">
+  <table>
+    <caption>
+      arnx 0.1.11 and CodeRabbit, from each product's own documentation on
+      2026-11-12
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col"></th>
+        <th scope="col">arnx</th>
+        <th scope="col">CodeRabbit</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Where review happens</th>
+        <td>
+          On the developer's machine, after a change is finished and before the
+          commit or pull request. Run by the developer or by their coding agent.
+        </td>
+        <td>
+          Pull requests, plus an IDE extension and a CLI:
+          <a href="https://docs.coderabbit.ai/overview/ide-cli-review"
+            ><q
+              >Review uncommitted changes as you code, apply fixes instantly,
+              integrate seamlessly with your AI coding agents, or run reviews in
+              CI/CD pipelines.</q
+            ></a
+          >
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Installation</th>
+        <td>
+          <code>npm install -g @arnx-dev/arnx</code> or a standalone binary,
+          then <code>arnx init</code>. Needs Docker. No code-host app.
+        </td>
+        <td>
+          Sign up with a Git platform account and add repositories (<a
+            href="https://docs.coderabbit.ai/getting-started/quickstart"
+            >quickstart</a
+          >). The CLI installs with
+          <code>curl -fsSL https://cli.coderabbit.ai/install.sh | sh</code>,
+          then <code>cr auth login</code> (<a
+            href="https://docs.coderabbit.ai/cli"
+            >CLI docs</a
+          >).
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Output</th>
+        <td>
+          A local report, <code>review.md</code>, where each finding is a test
+          file you can run, with its failure output. arnx posts no pull request
+          comments.
+        </td>
+        <td>
+          Review comments on the pull request, with
+          <a href="https://docs.coderabbit.ai/guides/code-review-overview"
+            ><q
+              >summaries, security findings, improvement suggestions and
+              one-click fixes</q
+            ></a
+          >.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Test generation and execution</th>
+        <td>
+          Always. It writes tests for what looks broken and runs each one 3
+          times in a local Docker sandbox with no network.
+        </td>
+        <td>
+          On request, on the Team plan and above, in open beta:
+          <a
+            href="https://docs.coderabbit.ai/finishing-touches/unit-test-generation"
+            ><q>Receive tests in a separate PR or as a new commit</q></a
+          >; your CI runs them. Linters and analyzers
+          <a href="https://docs.coderabbit.ai/tools"
+            ><q>run automatically in secure sandboxed environments</q></a
+          >. A separate beta feature,
+          <a href="https://docs.coderabbit.ai/security/runtime-verification"
+            >runtime verification</a
+          >, runs a guide in
+          <q
+            >an isolated test environment that it prepares for the scanned
+            commit</q
+          >. We did not find in their documentation that a pull request review
+          runs your project's test suite.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Before and after comparison by running code</th>
+        <td>
+          Yes. Each failing test is rerun on the code before the change. The
+          report says whether it is a regression, was already failing, or covers
+          new code.
+        </td>
+        <td>We did not find this in their documentation.</td>
+      </tr>
+      <tr>
+        <th scope="row">Developer triage</th>
+        <td>
+          <code>arnx triage</code>: mark each issue real, intended, noise or
+          rewrite, and answer arnx's questions. A second model confirms or
+          disputes each finding first.
+        </td>
+        <td>
+          Reply in the pull request. Replies become
+          <a href="https://docs.coderabbit.ai/knowledge-base/learnings"
+            >learnings</a
+          >:
+          <q
+            >it learns your team's code-review preferences based on chat
+            interactions</q
+          >.
+          <a href="https://docs.coderabbit.ai/guides/commands">Commands</a>
+          pause, resolve or rerun a review.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Keeping regression tests</th>
+        <td>
+          <code>arnx accept</code> keeps the tests of real issues in
+          <code>.arnx/tests/</code>, pinned by sha256.
+          <code>arnx check</code> reruns them with no model calls.
+        </td>
+        <td>
+          Generated unit tests land in the repository as a commit or pull
+          request.
+          <a href="https://docs.coderabbit.ai/pr-reviews/pre-merge-checks"
+            >Custom pre-merge checks</a
+          >
+          are natural language instructions that
+          <q>run in a secure, read-only sandbox</q>.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Languages and platforms</th>
+        <td>
+          Python (pytest), JavaScript and TypeScript (vitest, jest, node:test,
+          bun), Rust (cargo-nextest, early). macOS and Linux; Windows through
+          WSL 2. Any Git repository, no code host needed.
+        </td>
+        <td>
+          <a href="https://docs.coderabbit.ai/faq"
+            ><q
+              >CodeRabbit works with all programming languages, with varying
+              proficiency</q
+            ></a
+          >. GitHub, GitLab, Bitbucket and Azure DevOps (<a
+            href="https://docs.coderabbit.ai/platforms/overview"
+            >platforms</a
+          >).
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Where code is processed</th>
+        <td>
+          Tests and tool calls run locally. The diff, the files the reviewer
+          reads, the tests and their output go to your own model providers, or
+          to arnx Cloud if you choose it.
+        </td>
+        <td>
+          Hosted:
+          <a href="https://docs.coderabbit.ai/overview/architecture"
+            ><q>Sandboxed cloud execution</q> with your full repository
+            cloned</a
+          >.
+          <a href="https://docs.coderabbit.ai/faq"
+            ><q
+              >Your code is shared with OpenAI and/or Anthropic for reviewing
+              purposes only</q
+            ></a
+          >. Self-hosting is
+          <a href="https://docs.coderabbit.ai/self-hosted/overview"
+            >for Enterprise customers with 500 or more user seats</a
+          >.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Cost model</th>
+        <td>
+          Open source (Apache-2.0) with your own model keys: you pay providers
+          per review, capped by <code>review_usd</code> ($3.00 by default). Our
+          own reviews ranged from $0.17 to $3.19. Or prepaid arnx Cloud credit.
+        </td>
+        <td>
+          Per seat. From the
+          <a href="https://docs.coderabbit.ai/management/plans">plans page</a>:
+          Essentials
+          <q
+            >$24 per developer per month billed annually, or $30
+            month-to-month</q
+          >, Team $48 or $60, Advanced $72 or $90, Enterprise custom. The Free
+          plan covers <q>PR summarization only</q>, with reviews through the VS
+          Code extension and CLI.
+          <q
+            >Open-source projects receive Team features with no paid
+            subscription required.</q
+          >
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  Both products can generate tests. The difference is the default. CodeRabbit
+  writes tests when you ask and its review output is comments. arnx's only
+  output is tests it ran.
+</p>
+<h2 id="other">When CodeRabbit is the better choice</h2>
+<ul>
+  <li>
+    You want every pull request reviewed for a whole team without anyone running
+    a command.
+  </li>
+  <li>
+    Your code is not Python, JavaScript, TypeScript or Rust. CodeRabbit states
+    it works with all programming languages.
+  </li>
+  <li>
+    You want comments in the pull request, on GitHub, GitLab, Bitbucket or Azure
+    DevOps, with fixes you can apply there.
+  </li>
+  <li>
+    You want linters and security scanners in the same pass. Its architecture
+    page describes
+    <a href="https://docs.coderabbit.ai/overview/architecture"
+      >50+ static analyzers, linters and SAST tools</a
+    >.
+  </li>
+  <li>
+    You want a reviewer that learns team preferences from replies, and links to
+    issues in
+    <a href="https://docs.coderabbit.ai/overview/pull-request-review"
+      >GitHub, Jira or Linear</a
+    >.
+  </li>
+  <li>
+    You do not want to run Docker or manage model keys. It is a managed service
+    with per-seat pricing, and free Team features for open-source projects.
+  </li>
+</ul>
+<h2 id="arnx">When arnx is the better choice</h2>
+<ul>
+  <li>
+    You want a finding you can run: a test, its failure, and whether it passed
+    before the change.
+  </li>
+  <li>
+    You want to check a coding agent's work before a pull request exists. The
+    <a href="/agents/">arnx skill</a> lets the agent run the review and fix the
+    code against the accepted tests.
+  </li>
+  <li>
+    You want to keep the tests. Accepted tests are pinned and rerun by
+    <code>arnx check</code> on later changes with no model calls.
+  </li>
+  <li>
+    You want open source (Apache-2.0), your own model keys, prompts you can
+    edit, and tests that run only on your machine.
+  </li>
+  <li>You pay per review, not per seat, and set the cap yourself.</li>
+</ul>
+<h2 id="both">Using both</h2>
+<p>
+  Run arnx on your machine when the change is done: triage the findings, fix
+  what is real, and commit the accepted tests with the fix. Then open the pull
+  request and let CodeRabbit review it for the team. arnx does not replace a
+  pull request reviewer, and it posts nothing there. One example of arnx on a
+  repository that already used an automated pull request reviewer is the
+  <a href="/case-studies/hummingbot/">Hummingbot case study</a>.
+</p>
+<h2 id="limits">What arnx does not do</h2>
+<ul>
+  <li>
+    Three languages only: Python, JavaScript and TypeScript, and Rust (early).
+    It works best on single-package Python and TypeScript repositories.
+  </li>
+  <li>
+    It needs Docker and a project with an existing test suite. Code in no such
+    project is reported as not reviewed. Tests that run only in a browser are
+    not run.
+  </li>
+  <li>
+    A review takes minutes, not seconds, and the first one also sets up the test
+    environment (it stops at 10 minutes). Changes over 200 KB are refused;
+    review a long branch in parts.
+  </li>
+  <li>It posts nothing to a pull request. The report is a local file.</li>
+  <li>
+    Findings can be wrong. A failing generated test shows an assertion fails,
+    not that the code is wrong, and the second model can agree with a wrong
+    test. Our own counts are in
+    <a href="/research/unfamiliar-repositories/"
+      >AI code review findings on unfamiliar repositories</a
+    >. Deciding stays with the developer.
+  </li>
+</ul>
+<h2 id="sources">Sources</h2>
+<p>
+  Last reviewed 2026-11-12. Every statement about the other product comes from
+  its own pages below, as they read that day. Products and prices change: check
+  the vendor's pages before you decide. Found an error?
+  <a href="{{ISSUES_URL}}" data-event="github_click">Open an issue</a>
+  and we will correct it.
+</p>
+<ul>
+  <li>
+    <a href="https://docs.coderabbit.ai/overview/ide-cli-review"
+      >CodeRabbit: IDE and CLI review</a
+    >
+  </li>
+  <li>
+    <a href="https://docs.coderabbit.ai/getting-started/quickstart"
+      >CodeRabbit: quickstart</a
+    >
+  </li>
+  <li><a href="https://docs.coderabbit.ai/cli">CodeRabbit: CLI</a></li>
+  <li>
+    <a href="https://docs.coderabbit.ai/guides/code-review-overview"
+      >CodeRabbit: code review overview</a
+    >
+  </li>
+  <li>
+    <a href="https://docs.coderabbit.ai/finishing-touches/unit-test-generation"
+      >CodeRabbit: unit test generation</a
+    >
+  </li>
+  <li><a href="https://docs.coderabbit.ai/tools">CodeRabbit: tools</a></li>
+  <li>
+    <a href="https://docs.coderabbit.ai/security/runtime-verification"
+      >CodeRabbit: runtime verification</a
+    >
+  </li>
+  <li>
+    <a href="https://docs.coderabbit.ai/knowledge-base/learnings"
+      >CodeRabbit: learnings</a
+    >
+  </li>
+  <li>
+    <a href="https://docs.coderabbit.ai/guides/commands"
+      >CodeRabbit: commands</a
+    >
+  </li>
+  <li>
+    <a href="https://docs.coderabbit.ai/pr-reviews/pre-merge-checks"
+      >CodeRabbit: pre-merge checks</a
+    >
+  </li>
+  <li><a href="https://docs.coderabbit.ai/faq">CodeRabbit: FAQ</a></li>
+  <li>
+    <a href="https://docs.coderabbit.ai/platforms/overview"
+      >CodeRabbit: platforms</a
+    >
+  </li>
+  <li>
+    <a href="https://docs.coderabbit.ai/overview/architecture"
+      >CodeRabbit: architecture</a
+    >
+  </li>
+  <li>
+    <a href="https://docs.coderabbit.ai/self-hosted/overview"
+      >CodeRabbit: self-hosted</a
+    >
+  </li>
+  <li>
+    <a href="https://docs.coderabbit.ai/management/plans">CodeRabbit: plans</a>
+  </li>
+  <li>
+    <a href="/quickstart.html">arnx quickstart</a> and
+    <a href="{{GITHUB_URL}}" data-event="github_click"
+      >arnx source and release documentation</a
+    >
+  </li>
+</ul>

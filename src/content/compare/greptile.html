@@ -1,0 +1,368 @@
+<!--meta
+{
+  "title": "arnx vs Greptile: executed tests and codebase-aware PR review",
+  "description": "How arnx and Greptile differ: where each reviews code, what each produces, tests, languages and cost, with sources. When Greptile fits better, and how to use both.",
+  "summary": "Greptile reviews every pull request with a graph of the whole codebase. arnx runs before the pull request and backs each finding with a unit-level test it executed.",
+  "crumb": "arnx vs Greptile",
+  "listTitle": "arnx vs Greptile",
+  "kind": "article",
+  "order": 2,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Compare / Greptile</p>
+<h1>arnx and Greptile look at a change from two sides.</h1>
+<p class="descriptor">
+  One reads the whole codebase. One runs tests on the change.
+</p>
+<p>
+  Greptile is a hosted AI reviewer that comments on every pull request, using a
+  graph of the whole repository to reason beyond the diff. It works with any
+  language and the common code hosts. arnx is an open-source CLI that a
+  developer or their coding agent runs on their own machine once a change is
+  finished. It writes tests for what looks broken, runs them in Docker, reruns
+  each failure on the code before the change, and reports the tests that failed.
+</p>
+<p>
+  They answer different questions. Greptile asks what a reviewer who knows the
+  codebase would say about this pull request. arnx asks which suspected bugs it
+  can reproduce with a test. A team can use Greptile at the pull request and
+  arnx before it.
+</p>
+<nav class="article-toc" aria-label="On this page">
+  <a href="#table">Side by side</a><a href="#other">When Greptile fits better</a
+  ><a href="#arnx">When arnx fits better</a><a href="#both">Using both</a
+  ><a href="#limits">arnx limits</a><a href="#sources">Sources</a>
+</nav>
+<h2 id="table">Side by side</h2>
+<div class="table-scroll">
+  <table>
+    <caption>
+      arnx 0.1.11 and Greptile, from each product's own documentation on
+      2026-11-12
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col"></th>
+        <th scope="col">arnx</th>
+        <th scope="col">Greptile</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Where review happens</th>
+        <td>
+          On the developer's machine, after a change is finished and before the
+          commit or pull request. Run by the developer or by their coding agent.
+        </td>
+        <td>
+          Pull requests: it
+          <a href="https://www.greptile.com/docs/introduction"
+            ><q>automatically reviews every pull request</q></a
+          >. A
+          <a href="https://www.greptile.com/docs/code-review/greptile-cli"
+            >CLI</a
+          >
+          can <q>review local branches before you push</q>;
+          <q>It ignores uncommitted changes</q>.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Installation</th>
+        <td>
+          <code>npm install -g @arnx-dev/arnx</code> or a standalone binary,
+          then <code>arnx init</code>. Needs Docker. No code-host app.
+        </td>
+        <td>
+          Install its GitHub App, or connect GitLab with an access token and
+          webhook, then enable repositories (<a
+            href="https://www.greptile.com/docs/integrations/code-providers"
+            >code providers</a
+          >). CLI: <code>npm install -g greptile@latest</code>, then
+          <code>greptile login</code>.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Output</th>
+        <td>
+          A local report, <code>review.md</code>, where each finding is a test
+          file you can run, with its failure output. arnx posts no pull request
+          comments.
+        </td>
+        <td>
+          Pull request comments with suggested fixes. Per its
+          <a href="https://www.greptile.com/docs/code-review/key-features"
+            >key features</a
+          >, every comment has a <q>Fix with your Agent</q> button that sends
+          the issue to a coding agent.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Test generation and execution</th>
+        <td>
+          Always. It writes tests for what looks broken and runs each one 3
+          times in a local Docker sandbox with no network.
+        </td>
+        <td>
+          On request: its docs give the example
+          <a
+            href="https://www.greptile.com/docs/code-review/developer-essentials"
+            ><q>@greptileai can you create a test for this file?</q></a
+          >. An opt-in feature labelled beta,
+          <a href="https://www.greptile.com/docs/trex/overview">TREX</a>,
+          <q>Starts your app in a sandbox built from your environment</q>, uses
+          it like a user would, and posts what broke with a video. We did not
+          find in their documentation that a base review runs unit tests.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Before and after comparison by running code</th>
+        <td>
+          Yes. Each failing test is rerun on the code before the change. The
+          report says whether it is a regression, was already failing, or covers
+          new code.
+        </td>
+        <td>We did not find this in their documentation.</td>
+      </tr>
+      <tr>
+        <th scope="row">Developer triage</th>
+        <td>
+          <code>arnx triage</code>: mark each issue real, intended, noise or
+          rewrite, and answer arnx's questions. A second model confirms or
+          disputes each finding first.
+        </td>
+        <td>
+          Reactions on comments:
+          <a
+            href="https://www.greptile.com/docs/code-review/training-the-learning-system"
+            ><q>Only 👍 and 👎 train the system</q></a
+          >. Rules can also be set in the dashboard or in repository config.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Keeping regression tests</th>
+        <td>
+          <code>arnx accept</code> keeps the tests of real issues in
+          <code>.arnx/tests/</code>, pinned by sha256.
+          <code>arnx check</code> reruns them with no model calls.
+        </td>
+        <td>
+          <a href="https://www.greptile.com/docs/trex/custom-flows"
+            >TREX custom flows</a
+          >
+          are app journeys kept in the Greptile dashboard:
+          <q>TREX runs it as written whenever a pull request touches it.</q> We
+          did not find in their documentation a way to keep generated code tests
+          as pinned checks.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Languages and platforms</th>
+        <td>
+          Python (pytest), JavaScript and TypeScript (vitest, jest, node:test,
+          bun), Rust (cargo-nextest, early). macOS and Linux; Windows through
+          WSL 2. Any Git repository, no code host needed.
+        </td>
+        <td>
+          <a href="https://www.greptile.com/docs/introduction"
+            ><q>Greptile works with any programming language</q></a
+          >. GitHub, GitLab, Bitbucket and others, including Gitea and Perforce.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Where code is processed</th>
+        <td>
+          Tests and tool calls run locally. The diff, the files the reviewer
+          reads, the tests and their output go to your own model providers, or
+          to arnx Cloud if you choose it.
+        </td>
+        <td>
+          Hosted:
+          <a href="https://www.greptile.com/security"
+            ><q>Greptile Cloud is hosted on Amazon Web Services</q></a
+          >, with <q>zero data retention agreements with LLM providers</q>. A
+          licensed
+          <a
+            href="https://www.greptile.com/docs/self-hosting/deployment-options"
+            >self-hosted</a
+          >
+          option exists.
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Cost model</th>
+        <td>
+          Open source (Apache-2.0) with your own model keys: you pay providers
+          per review, capped by <code>review_usd</code> ($3.00 by default). Our
+          own reviews ranged from $0.17 to $3.19. Or prepaid arnx Cloud credit.
+        </td>
+        <td>
+          Prepaid credits, no seats. From its
+          <a href="https://www.greptile.com/docs/account/billing-seats"
+            >billing page</a
+          >:
+          <q>Credits cost $1 each and are shared across your organization.</q> A
+          Base review is 1 credit, Plus 3, Apex 10, and a TREX run 3. CLI
+          reviews cost the same and <q>The free plan doesn't include them.</q>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  Both products can execute something. Greptile's TREX drives a running app like
+  a user and records video. arnx runs unit-level tests it wrote for the change
+  and compares them with the code before it. arnx runs no browser tests.
+</p>
+<h2 id="other">When Greptile is the better choice</h2>
+<ul>
+  <li>
+    You want every pull request reviewed for a whole team without anyone running
+    a command.
+  </li>
+  <li>
+    The risk is in how a change ripples through a large codebase. Its
+    <a href="https://www.greptile.com/docs/code-review/key-features"
+      >key features page</a
+    >
+    says it <q>builds a graph of your repository</q> to reason about effects
+    beyond the diff, including across repositories.
+  </li>
+  <li>
+    Your code is not Python, JavaScript, TypeScript or Rust, or lives on a host
+    such as Bitbucket, Gitea or Perforce.
+  </li>
+  <li>
+    You want a web app exercised end to end in a sandbox, with video. That is
+    TREX, and arnx has nothing like it.
+  </li>
+  <li>
+    You need a self-hosted or air-gapped deployment of the reviewer itself,
+    which its documentation describes under a license.
+  </li>
+  <li>You do not want to run Docker or manage model keys.</li>
+</ul>
+<h2 id="arnx">When arnx is the better choice</h2>
+<ul>
+  <li>
+    You want a finding you can run: a test, its failure, and whether it passed
+    before the change.
+  </li>
+  <li>
+    You want to check uncommitted work or a coding agent's change before a pull
+    request exists. The <a href="/agents/">arnx skill</a> lets the agent run the
+    review and fix the code against the accepted tests.
+  </li>
+  <li>
+    You want to keep the tests in your repository. Accepted tests are pinned and
+    rerun by <code>arnx check</code> with no model calls.
+  </li>
+  <li>
+    You want open source (Apache-2.0), your own model keys, prompts you can
+    edit, and tests that run only on your machine.
+  </li>
+</ul>
+<h2 id="both">Using both</h2>
+<p>
+  Run arnx on your machine when the change is done: triage the findings, fix
+  what is real, and commit the accepted tests with the fix. Then open the pull
+  request and let Greptile review it with the rest of the codebase in view. arnx
+  does not replace a pull request reviewer, and it posts nothing there. One
+  example of arnx on a repository that already used an automated pull request
+  reviewer is the
+  <a href="/case-studies/hummingbot/">Hummingbot case study</a>.
+</p>
+<h2 id="limits">What arnx does not do</h2>
+<ul>
+  <li>
+    Three languages only: Python, JavaScript and TypeScript, and Rust (early).
+    It works best on single-package Python and TypeScript repositories.
+  </li>
+  <li>
+    It needs Docker and a project with an existing test suite. Code in no such
+    project is reported as not reviewed. Tests that run only in a browser are
+    not run.
+  </li>
+  <li>
+    A review takes minutes, not seconds, and the first one also sets up the test
+    environment (it stops at 10 minutes). Changes over 200 KB are refused;
+    review a long branch in parts.
+  </li>
+  <li>It posts nothing to a pull request. The report is a local file.</li>
+  <li>
+    Findings can be wrong. A failing generated test shows an assertion fails,
+    not that the code is wrong, and the second model can agree with a wrong
+    test. Our own counts are in
+    <a href="/research/unfamiliar-repositories/"
+      >AI code review findings on unfamiliar repositories</a
+    >. Deciding stays with the developer.
+  </li>
+</ul>
+<h2 id="sources">Sources</h2>
+<p>
+  Last reviewed 2026-11-12. Every statement about the other product comes from
+  its own pages below, as they read that day. Products and prices change: check
+  the vendor's pages before you decide. Found an error?
+  <a href="{{ISSUES_URL}}" data-event="github_click">Open an issue</a>
+  and we will correct it.
+</p>
+<ul>
+  <li>
+    <a href="https://www.greptile.com/docs/introduction"
+      >Greptile: introduction</a
+    >
+  </li>
+  <li>
+    <a href="https://www.greptile.com/docs/code-review/greptile-cli"
+      >Greptile: CLI</a
+    >
+  </li>
+  <li>
+    <a href="https://www.greptile.com/docs/integrations/code-providers"
+      >Greptile: code providers</a
+    >
+  </li>
+  <li>
+    <a href="https://www.greptile.com/docs/code-review/key-features"
+      >Greptile: key features</a
+    >
+  </li>
+  <li>
+    <a href="https://www.greptile.com/docs/code-review/developer-essentials"
+      >Greptile: developer essentials</a
+    >
+  </li>
+  <li>
+    <a href="https://www.greptile.com/docs/trex/overview"
+      >Greptile: TREX overview</a
+    >
+  </li>
+  <li>
+    <a href="https://www.greptile.com/docs/trex/custom-flows"
+      >Greptile: TREX custom flows</a
+    >
+  </li>
+  <li>
+    <a
+      href="https://www.greptile.com/docs/code-review/training-the-learning-system"
+      >Greptile: training the learning system</a
+    >
+  </li>
+  <li><a href="https://www.greptile.com/security">Greptile: security</a></li>
+  <li>
+    <a href="https://www.greptile.com/docs/self-hosting/deployment-options"
+      >Greptile: self-hosting</a
+    >
+  </li>
+  <li>
+    <a href="https://www.greptile.com/docs/account/billing-seats"
+      >Greptile: billing</a
+    >
+  </li>
+  <li>
+    <a href="/quickstart.html">arnx quickstart</a> and
+    <a href="{{GITHUB_URL}}" data-event="github_click"
+      >arnx source and release documentation</a
+    >
+  </li>
+</ul>

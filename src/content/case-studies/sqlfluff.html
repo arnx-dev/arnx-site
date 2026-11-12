@@ -1,0 +1,163 @@
+<!--meta
+{
+  "title": "SQLFluff: valid ClickHouse projections were unparsable",
+  "description": "arnx reviewed a SQLFluff commit and wrote a test showing valid ClickHouse projection SQL failed to parse. The fix was merged upstream as pull request 9015.",
+  "summary": "A generated test showed valid ClickHouse projection SQL was rejected by the parser. Fix merged upstream; arnx's one confirmed finding in the same review was wrong.",
+  "crumb": "SQLFluff",
+  "listTitle": "SQLFluff: valid ClickHouse projections were unparsable",
+  "kind": "article",
+  "order": 1,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Case study / SQLFluff</p>
+<h1>Valid ClickHouse projections were unparsable.</h1>
+<p class="descriptor">
+  A real gap, found by a test arnx had filed under the wrong heading.
+</p>
+<p>
+  SQLFluff is a SQL linter and formatter. A review of one of its commits
+  produced a test showing that the new ClickHouse projection grammar rejected
+  valid SQL. The fix was merged upstream on 2026-11-05 as
+  <a href="https://github.com/sqlfluff/sqlfluff/pull/9015"
+    >sqlfluff/sqlfluff#9015</a
+  >. The same review also shows two things arnx got wrong.
+</p>
+
+<h2>1. Repository and reviewed commit</h2>
+<p>
+  <a href="https://github.com/sqlfluff/sqlfluff">sqlfluff/sqlfluff</a>, commit
+  <code>c81671b3d</code>, which added ClickHouse projection support (upstream
+  pull request #8585, for issue #8583): 7 files, 2,684 lines added. The commit
+  was picked by a rule fixed before any run, as part of the experiment described
+  in
+  <a href="/research/unfamiliar-repositories/"
+    >AI code review findings on unfamiliar repositories</a
+  >. arnx had no earlier contact with the repository.
+</p>
+
+<h2>2. Expected behavior</h2>
+<p>
+  ClickHouse accepts a projection whose query has no
+  <code>ORDER BY</code> and no <code>GROUP BY</code>. Its own parser,
+  <code>ParserProjectionSelectQuery.cpp</code>, parses <code>WHERE</code>,
+  <code>GROUP BY</code> and <code>ORDER BY</code>
+  only when present. So these should parse:
+</p>
+<div class="terminal">
+  <pre><code>ALTER TABLE t ADD PROJECTION p (SELECT sum(x));
+ALTER TABLE t ADD PROJECTION p (SELECT x WHERE y = 1);</code></pre>
+</div>
+
+<h2>3. Actual behavior</h2>
+<p>
+  <code>sqlfluff parse --dialect clickhouse</code> reported an
+  <code>unparsable</code> section for both statements.
+</p>
+
+<h2>4. Suspected defect</h2>
+<p>
+  Before any test ran, the second hunter (gpt-6.1-sol) suspected:
+  <q
+    >Projection queries without GROUP BY or ORDER BY are incorrectly
+    rejected.</q
+  >
+  In <code>ProjectionBodySegment</code> the grammar listed
+  <code>ORDER BY</code> or <code>GROUP BY</code> as a required
+  <code>OneOf</code>.
+</p>
+
+<h2>5. Generated test</h2>
+<p>
+  The reviewer wrote
+  <code>test_s2_projection_without_order_or_group</code> in
+  <code>test/arnx_generated/test_ch_proj.py</code>: parse a projection with a
+  bare <code>SELECT</code> and assert that nothing is unparsable. A second test
+  from a different suspicion checked the same gap with <code>SELECT a, b</code>.
+</p>
+
+<h2>6. Execution result</h2>
+<div class="terminal">
+  <div class="terminal-header"><span>From review.md, quoted</span></div>
+  <pre><code><span class="syntax-heading">### F1 · already failing before this change</span>
+- <span class="syntax-call">Test:</span> `test/arnx_generated/test_ch_proj.py::test_s2_projection_without_order_or_group`
+- <span class="syntax-call">Failure:</span> `AssertionError: assert False`
+- <span class="syntax-call">Reviewer:</span> The projection grammar requires ORDER BY or GROUP BY. A bare SELECT in a
+  projection fails to parse. The S5 test shows the same problem. Whether ClickHouse
+  accepts a bare SELECT in a projection is unconfirmed.
+- <span class="syntax-call">Before the change (pre-existing):</span> fails the same way on the code before the change
+  (3 runs): the change did not cause it</code></pre>
+</div>
+<p>
+  The review ran 27 tests in 3 minutes 51 seconds for $0.28. Reviewer:
+  claude-sonnet-5-5. Second opinion: GLM-5.3-Flash through River. These numbers
+  come from our local review record, not from a public page.
+</p>
+
+<h2>7. Correction</h2>
+<p>
+  The fix marks that <code>OneOf</code> as optional: a small change in
+  <code>src/sqlfluff/dialects/dialect_clickhouse.py</code>, plus parser fixtures
+  for <code>alter_table</code> and <code>create_table</code>. Claude wrote the
+  fix and fixtures. The owner of arnx reproduced the bug, ran the tests,
+  reviewed the change and opened the pull request, with the AI disclosure
+  SQLFluff's contributing guide asks for.
+</p>
+
+<h2>8. Verification result</h2>
+<p>
+  From the pull request: the new fixtures fail without the fix, and with it all
+  of <code>test/dialects/</code> passes (7,858 passed). A maintainer approved it
+  and it was merged the same day, commit <code>106b3902</code>.
+</p>
+
+<h2>9. Upstream references</h2>
+<ul>
+  <li>
+    <a href="https://github.com/sqlfluff/sqlfluff/pull/9015"
+      >Pull request #9015</a
+    >: ClickHouse: parse projections without ORDER BY or GROUP BY (merged
+    2026-11-05).
+  </li>
+  <li>
+    <a
+      href="https://github.com/sqlfluff/sqlfluff/blob/main/src/sqlfluff/dialects/dialect_clickhouse.py"
+      >dialect_clickhouse.py</a
+    >, the dialect file with <code>ProjectionBodySegment</code>.
+  </li>
+  <li>
+    <a href="https://github.com/sqlfluff/sqlfluff/pull/8585"
+      >Pull request #8585</a
+    >, which introduced the grammar.
+  </li>
+</ul>
+
+<h2>10. Limitations and observations</h2>
+<ul>
+  <li>
+    <strong>arnx did not rank this as a finding.</strong> The test failed on the
+    code before the change too, because the parent commit rejected every
+    <code>ADD PROJECTION</code>. arnx therefore listed it under
+    <q>already failing before this change</q>, which does not get a second
+    opinion. It was a gap in the new grammar. A person reading that section saw
+    it.
+  </li>
+  <li>
+    <strong>The one finding arnx confirmed in this review was wrong.</strong>
+    It asserted that <code>GROUP BY</code> together with
+    <code>ORDER BY</code> should parse. ClickHouse rejects that form (<q
+      >When aggregation is used in projection, ORDER BY cannot be specified</q
+    >), so the grammar was right and the test was not. The second model agreed
+    with the wrong test.
+  </li>
+  <li>
+    The reviewer itself wrote that ClickHouse's behavior was
+    <q>unconfirmed</q>. Settling it took reading ClickHouse's parser source,
+    which a person did.
+  </li>
+  <li>
+    One review of one commit. It says nothing about how often arnx is right; the
+    <a href="/research/unfamiliar-repositories/">research note</a> has the
+    counts for the whole batch.
+  </li>
+</ul>

@@ -1,0 +1,210 @@
+<!--meta
+{
+  "title": "Can a second LLM judge code review findings?",
+  "description": "In one batch of 59 judged findings, a second model's dispute was right 22 of 23 times, while its confirmation held only 12 of 36 times. What that means.",
+  "summary": "In one batch, a second model's dispute was right 22 of 23 times; its confirmation held 12 of 36 times. Read the two verdicts differently.",
+  "crumb": "Second-model judge",
+  "listTitle": "Can a second LLM judge code review findings?",
+  "kind": "article",
+  "order": 2,
+  "updated": "2026-11-12"
+}
+-->
+<p class="eyebrow">Research / Second opinion</p>
+<h1>Can a second LLM judge code review findings?</h1>
+<p class="descriptor">
+  In our sample it was good at saying no, and poor at saying yes.
+</p>
+<p>
+  Partly. arnx asks a second model to read each failing test, the failure and
+  the diff, and to confirm or dispute the finding. In one graded batch, a
+  dispute was right 22 of 23 times. A confirmation held only 12 of 36 times. The
+  two verdicts carry very different weight, and a review should be read that
+  way.
+</p>
+<p class="scope-note">
+  <strong>One batch, one judge model, 59 judged findings.</strong> This is not a
+  measure of second-model judging in general or of arnx as a product.
+</p>
+
+<h2>Data</h2>
+<p>
+  The sample is the batch described in
+  <a href="/research/unfamiliar-repositories/"
+    >AI code review findings on unfamiliar repositories</a
+  >: 65 findings from 18 reviews of 12 open-source repositories, made with a
+  pre-release build of arnx 0.1.8 and graded by us. The second opinion ran on
+  GLM-5.3-Flash through River, with gpt-6.1-sol as the fallback when it timed
+  out. Six findings failed on the code before the change too, so arnx did not
+  send them to the second opinion. That leaves 59 judged findings.
+</p>
+<div class="table-scroll">
+  <table>
+    <caption>
+      The second opinion's verdict against our grade
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Verdict</th>
+        <th scope="col">Findings</th>
+        <th scope="col">Real defect</th>
+        <th scope="col">Not a defect</th>
+        <th scope="col">Verdict was right</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Confirmed</th>
+        <td>36</td>
+        <td>12</td>
+        <td>24</td>
+        <td>12 of 36</td>
+      </tr>
+      <tr>
+        <th scope="row">Disputed</th>
+        <td>23</td>
+        <td>1</td>
+        <td>22</td>
+        <td>22 of 23</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  The 12 confirmed findings that held were 3 real bugs and 9 real but minor
+  defects. The 24 that did not hold were 13 tests of intended behavior, 9
+  unreachable scenarios and 2 wrong tests. The one dispute that was wrong hid a
+  real, minor defect. Every finding graded a real bug had been confirmed.
+</p>
+
+<h2>Confirming and disputing are different jobs</h2>
+<p>
+  To dispute a finding, the judge needs one solid reason: the input is invalid,
+  the fixture is broken, or the assertion checks the wrong thing. Those reasons
+  are often visible in the test and the diff, which is what the judge has in
+  front of it.
+</p>
+<p>
+  To confirm a finding, the judge has to know that the test's expectation is
+  what the project intends, and that real callers can reach the scenario.
+  Neither is in the diff. Of the 24 wrong confirmations, 22 failed on exactly
+  those two points: intent (13) and reachability (9). A second model that reads
+  the same code as the first tends to share its guess about intent.
+</p>
+<p>
+  So agreement between two models is weak evidence, and disagreement is strong
+  evidence. In this sample the judge worked as a filter for bad tests, not as a
+  stamp of correctness.
+</p>
+
+<h2>What this means when you read a review</h2>
+<ul>
+  <li>
+    <strong>A disputed finding is probably not a bug.</strong> Read the reason.
+    Skim it, and move on unless it names something you know to be false.
+  </li>
+  <li>
+    <strong>A confirmed finding is worth a look, not a verdict.</strong>
+    Ask two questions the judge could not answer: is this what the code is meant
+    to do, and can anything real reach it?
+  </li>
+  <li>
+    <strong>Your mark decides.</strong> arnx marks an issue backed by a
+    confirmed test as real in advance. Change the mark when you disagree. Only
+    tests of issues you leave marked real are kept.
+  </li>
+</ul>
+<p>
+  This is also why arnx 0.1.11 does not fail a run on confirmed findings.
+  <code>arnx review</code> exits 0 when confirmed findings exist: they are worth
+  a look and do not fail the run. It exits 1 only for a finding the second
+  opinion could not check, so a review never passes because the check did not
+  run.
+</p>
+
+<h2>Defects we found in the judging step</h2>
+<p>
+  Grading this batch exposed faults in how that build handled verdicts and
+  labels. They bear on the numbers above.
+</p>
+<ul>
+  <li>
+    <strong>A verdict copied from another case.</strong> When one test ran with
+    several inputs and one case was disputed, the build applied that dispute to
+    the other cases of the same test. In two findings it replaced a verdict
+    where the judge had confirmed. In one of them the replaced confirmation was
+    the right call: that is the one wrong dispute in the table.
+  </li>
+  <li>
+    <strong><q>Regression</q> when the feature did not exist before.</strong>
+    The build called a finding a regression whenever the test passed on the code
+    before the change. Some of those tests passed there only because the feature
+    was absent or a helper thread had died. The label then told the judge, and
+    the reader, that the change broke something it had in fact added.
+  </li>
+  <li>
+    <strong>One judge named, another answered.</strong> A review's header named
+    one second-opinion model. Some verdicts came from the fallback after a
+    timeout. The per-finding lines named the right model; the header did not.
+  </li>
+</ul>
+<p>
+  Later releases changed the before-and-after check: a pass on the old code now
+  counts as a regression only when nothing shows the pass was empty. We have not
+  regraded this batch on a later release, so we cannot say how the counts would
+  move.
+</p>
+
+<h2>Replaying a judge</h2>
+<p>
+  The arnx repository ships
+  <a
+    href="https://github.com/arnx-dev/arnx/blob/main/scripts/replay-judge.ts"
+    data-event="github_click"
+    >scripts/replay-judge.ts</a
+  >. Its header says it replays the second opinion on findings already graded,
+  so a change to the judge is measured before it ships. It rebuilds each judge
+  input from what a review saved, and the grades score the replies without ever
+  being handed to a prompt.
+</p>
+
+<h2>Limitations</h2>
+<ul>
+  <li>
+    59 judged findings, 18 reviews, 12 repositories, one judge model with one
+    fallback. Another judge model could behave differently.
+  </li>
+  <li>
+    The grades are ours, made by AI graders we directed. No maintainer graded
+    anything.
+  </li>
+  <li>
+    The judge saw labels that were sometimes wrong, as described above. Some
+    wrong confirmations may be the label's fault more than the model's.
+  </li>
+  <li>
+    We did not test the judge alone on a fixed set with other models, and we did
+    not measure how its verdict varies between runs.
+  </li>
+  <li>TypeScript and Python only.</li>
+</ul>
+
+<h2>Conflict of interest</h2>
+<p>
+  We build arnx. We ran the reviews and did the grading, and nobody outside
+  checked it.
+</p>
+
+<h2>Artifacts</h2>
+<p>
+  The second-opinion records, the grade sheet and the review files are kept by
+  us and are not published yet. To reproduce the table a reader needs those
+  files, the commit list and the build. The replay script above is public; the
+  graded inputs it needs are not.
+</p>
+<p>
+  Related:
+  <a href="/research/failing-test-not-a-bug/"
+    >Why a failing test is not sufficient evidence of a bug</a
+  >.
+</p>
