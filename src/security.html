@@ -61,6 +61,13 @@
         account. Their data handling and billing terms apply.
       </p>
       <p>
+        <code>arnx scan</code> sends the diff and the files its models read, by
+        the same rules, and no test output, because it runs nothing. Before
+        <code>arnx init</code> there is no <code>.arnxignore</code>, so only the
+        secrets filter and Git’s ignore rules leave files out; scan says so
+        before it sends.
+      </p>
+      <p>
         Values that may be secrets are replaced by stand-ins: fakes of the same
         shape in the snapshot, used by the tests too. A password in a connection
         address counts. A private key is a fake in the sandbox and
@@ -77,8 +84,8 @@
         key-shaped test fixtures, not real credentials.
       </p>
       <p>
-        Setup and review exclude untracked files by default when the repository
-        has commits. <code>--untracked</code> or
+        Setup, scan and review exclude untracked files by default when the
+        repository has commits. <code>--untracked</code> or
         <code>[review] untracked = true</code> opts them in. With no commits,
         non-ignored files form the initial change. Stage and review files
         deliberately.
@@ -115,7 +122,11 @@
         once. arnx cloud asks once per repository, and
         <code>arnx cloud on</code> asks too. Without a terminal, arnx exits 3
         and sends nothing. Use <code>arnx consent --cloud</code>, with
-        <code>--yes</code> in scripts, to record it.
+        <code>--yes</code> in scripts, to record it. A scan with no model keys,
+        on a machine logged in to arnx cloud, says it is switching to arnx cloud
+        and asks this consent before anything is sent (<code>--yes</code> gives
+        it); <code>--local</code> or <code>ARNX_MODELS=local</code> never
+        switch.
       </p>
       <h2>arnx cloud</h2>
       <p>

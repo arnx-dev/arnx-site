@@ -7,7 +7,7 @@
     <title>Install arnx: CLI quickstart and regression tests</title>
     <meta
       name="description"
-      content="Bring your own API keys or use arnx Cloud, install the coding-agent skill, and run the Docker review, accept, and check workflow."
+      content="Bring your own API keys or use arnx Cloud, install the coding-agent skill, scan a change, and run the Docker review, accept, and check workflow."
     />
     <link rel="canonical" href="https://arnx.dev/quickstart.html" />
     <meta
@@ -16,7 +16,7 @@
     />
     <meta
       property="og:description"
-      content="Bring your own API keys or use arnx Cloud, install the coding-agent skill, and run the Docker review, accept, and check workflow."
+      content="Bring your own API keys or use arnx Cloud, install the coding-agent skill, scan a change, and run the Docker review, accept, and check workflow."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://arnx.dev/quickstart.html" />
@@ -34,7 +34,7 @@
     />
     <meta
       name="twitter:description"
-      content="Bring your own API keys or use arnx Cloud, install the coding-agent skill, and run the Docker review, accept, and check workflow."
+      content="Bring your own API keys or use arnx Cloud, install the coding-agent skill, scan a change, and run the Docker review, accept, and check workflow."
     />
     <meta name="twitter:image" content="https://arnx.dev/og.png" />
     <meta
@@ -60,13 +60,35 @@
       >
         <h2 id="install-title">Install arnx</h2>
         <p>
-          Docker, plus your own model key or arnx cloud with $5 of starting
-          credit.
+          Your own model key, or arnx cloud (the first 100 accounts get $5 of
+          credit). A scan needs no Docker; a review needs Docker running.
         </p>
         {{INSTALL_COMMAND}}
+        <p>
+          <strong>1. Scan:</strong> what may be broken, in under a minute. No
+          Docker, no setup, nothing run. No model key? Run
+          <code>arnx login</code> first: the scan runs on arnx cloud, and arnx
+          says so.
+        </p>
         <div class="terminal">
           <div class="terminal-header">
-            <span>First review / after a code change</span
+            <span>Scan / after a code change</span
+            ><button
+              class="copy-button"
+              data-copy="scan-code"
+              aria-label="Copy scan command"
+            >
+              Copy command
+            </button>
+          </div>
+          <pre><code id="scan-code" class="shell-commands">arnx scan</code></pre>
+        </div>
+        <p>
+          <strong>2. Review:</strong> prove the suspects with tests, in Docker.
+        </p>
+        <div class="terminal">
+          <div class="terminal-header">
+            <span>Review / with Docker</span
             ><button
               class="copy-button"
               data-copy="first-review-code"
@@ -80,7 +102,7 @@ arnx review</code></pre>
         </div>
         <p>
           The first review sets up what it needs in a few minutes (it stops at
-          10). No separate setup step.
+          10, or 20 for Go and Rust). No separate setup step.
         </p>
       </section>
       <p>
@@ -108,7 +130,7 @@ chmod +x arnx-linux-x64 &amp;&amp; mv arnx-linux-x64 /usr/local/bin/arnx</code><
       <nav class="article-toc" aria-label="On this page">
         <a href="#prerequisites">Prerequisites</a><a href="#byom">BYOM</a
         ><a href="#cloud">Cloud</a><a href="#skill">Coding-agent skill</a
-        ><a href="#workflow">Workflow</a
+        ><a href="#workflow">Workflow</a><a href="#scan">Scan</a
         ><a href="#retained-tests">Retained tests</a
         ><a href="#troubleshooting">Troubleshooting</a>
       </nav>
@@ -119,7 +141,8 @@ chmod +x arnx-linux-x64 &amp;&amp; mv arnx-linux-x64 /usr/local/bin/arnx</code><
         </li>
         <li>
           Docker installed and running, with permission to create containers and
-          build images.
+          build images. <code>arnx scan</code> needs no Docker; reviews and
+          checks do.
         </li>
         <li>
           Node.js 20 or later for the npm package. Standalone binaries do not
@@ -136,11 +159,12 @@ chmod +x arnx-linux-x64 &amp;&amp; mv arnx-linux-x64 /usr/local/bin/arnx</code><
       </ul>
       <p>
         Supported test runners: Python with pytest; JavaScript / TypeScript with
-        vitest, jest, node:test or bun; Rust with cargo-nextest (early). Single
-        packages and multi-project repositories are supported, but setup is not
-        guaranteed for every framework or dependency. arnx works best on
-        single-package Python and TypeScript repositories. Tests that run only
-        in a browser (Playwright, Cypress) are not run.
+        vitest, jest, node:test or bun; Rust with cargo-nextest (early); Go with
+        go test (early). Single packages and multi-project repositories are
+        supported, but setup is not guaranteed for every framework or
+        dependency. arnx works best on single-package Python and TypeScript
+        repositories. Tests that run only in a browser (Playwright, Cypress) are
+        not run.
       </p>
       <p>
         More languages are planned.
@@ -157,6 +181,14 @@ chmod +x arnx-linux-x64 &amp;&amp; mv arnx-linux-x64 /usr/local/bin/arnx</code><
         <a href="{{ISSUES_URL}}" data-event="github_click"
           >open an issue with what worked or broke</a
         >.
+      </p>
+      <p>
+        <strong>Go is early and the newest language.</strong> Each generated
+        test is a test-only package of its own, so it sees the module’s exported
+        API only: <code>package main</code> and unexported code are out of
+        reach. Setup picks a <code>golang</code> image from the
+        <code>go</code> line of <code>go.mod</code> (1.24 at least). First setup
+        of a Go or Rust project gets 20 minutes, since both compile first.
       </p>
       <h2 id="models">2. Bring your own keys, or use Cloud</h2>
       <p>
@@ -194,9 +226,9 @@ chmod +x arnx-linux-x64 &amp;&amp; mv arnx-linux-x64 /usr/local/bin/arnx</code><
       <h3 id="cloud">arnx cloud</h3>
       <p>
         If you don’t want to manage multiple providers and API keys, use our
-        arnx Cloud. New accounts start with <strong>$5 in Cloud credit</strong>.
-        With the CLI installed, run the commands for your project from its
-        repository directory.
+        arnx Cloud. The first 100 accounts get
+        <strong>$5 of Cloud credit</strong>. With the CLI installed, run the
+        commands for your project from its repository directory.
       </p>
       <div class="terminal">
         <div class="terminal-header"><span>Cloud / new arnx project</span></div>
@@ -219,8 +251,14 @@ arnx login</code></pre>
         first command that sends code, normally <code>arnx review</code>.
       </p>
       <p>
-        <code>arnx login</code> starts a GitHub device sign-in in your browser;
-        complete it yourself. The CLI stores the token locally in
+        Only <code>arnx scan</code> switches to arnx cloud by itself, when the
+        models’ keys are missing on a machine that is logged in. A review on
+        arnx cloud still needs <code>arnx init --cloud</code> or
+        <code>arnx cloud on</code>.
+      </p>
+      <p>
+        <code>arnx login</code> shows a link and a code: open the link and enter
+        the code yourself. The CLI stores the token locally in
         <code>~/.config/arnx/credentials.json</code>.
       </p>
       <div class="terminal">
@@ -285,12 +323,14 @@ arnx doctor</code></pre>
         once. arnx cloud asks once per repository, and
         <code>arnx cloud on</code> asks too. Without a terminal, arnx exits 3
         and sends nothing; <code>arnx consent --cloud</code> records consent
-        (add <code>--yes</code> in scripts).
+        (add <code>--yes</code> in scripts). A scan that switches to arnx cloud
+        asks for that consent first; <code>arnx scan --yes</code> gives it.
       </p>
       <p>
-        Run <code>arnx init</code> first. If already initialized, start at
-        review. Lost? <code>arnx next</code> says where you are. Every command
-        takes <code>--json</code>.
+        <code>arnx scan</code> works before <code>arnx init</code>. Run
+        <code>arnx init</code> before the first review. If already initialized,
+        start at scan or review. Lost? <code>arnx next</code> says where you
+        are. Every command takes <code>--json</code>.
       </p>
       <div class="terminal">
         <div class="terminal-header">
@@ -304,7 +344,8 @@ arnx doctor</code></pre>
             Copy commands
           </button>
         </div>
-        <pre><code id="workflow-code">arnx init
+        <pre><code id="workflow-code">arnx scan
+arnx init
 arnx review
 arnx triage
 arnx accept
@@ -314,6 +355,11 @@ arnx check</code></pre>
         <span class="sr-only" id="copy-status" role="status"></span>
       </div>
       <ol class="guide-steps">
+        <li>
+          <strong>Scan:</strong> lists ranked suspects in the change. Nothing
+          runs, so a suspect is unproven until a review tests it.
+          <a href="#scan">More below.</a>
+        </li>
         <li>
           <strong>First review:</strong> sets up only the projects the change
           touches, proven by a quick look: the test listing, arnx’s one-line
@@ -347,7 +393,7 @@ arnx check</code></pre>
         </li>
       </ol>
       <p>
-        Untracked files are excluded from setup and review by default in
+        Untracked files are excluded from setup, scan and review by default in
         repositories with commits. <code>--untracked</code> or
         <code>[review] untracked = true</code> includes them.
 
@@ -371,10 +417,51 @@ arnx check</code></pre>
         Reviews are limited to 200 KB; use
         <code>arnx review --range A..B</code> for long branches. Lockfiles and
         generated files are not counted and not in the diff sent. Python,
-        JavaScript/TypeScript and Rust only; no Windows build (use WSL 2). A
+        JavaScript/TypeScript, Rust and Go only; no Windows build (use WSL 2). A
         backend whose tests need three or more services is listed as uncovered
         and must be set up by hand.
       </p>
+      <h3 id="scan">Scan: suspects without Docker</h3>
+      <p>
+        <code>arnx scan</code> runs the first step of a review alone. The same
+        models read the same change, taken the same way (default range,
+        <code>--range</code>, <code>--untracked</code>, <code>--docs</code>, the
+        size limit), and list suspects, ranked: where, what could break, why,
+        and an input to try.
+      </p>
+      <ul>
+        <li>
+          Nothing runs and nothing is written into your project, so a scan needs
+          no Docker and no setup. It keeps
+          <code>.arnx/scans/&lt;id&gt;/</code> in a folder Git ignores.
+        </li>
+        <li>
+          A suspect is unproven. Only <code>arnx review</code> turns one into a
+          failing test, and only a failing test is a finding.
+        </li>
+        <li>
+          Before <code>arnx init</code>, a scan uses arnx’s default models for
+          the keys you have. There is no <code>.arnxignore</code> yet, so only
+          the secrets filter and Git’s ignore rules leave files out; scan says
+          so before it sends.
+        </li>
+        <li>
+          It stops at <code>scan_usd</code> under <code>[budget]</code> (default
+          $0.50).
+        </li>
+        <li>
+          Without the models’ keys, a machine logged in to arnx cloud scans
+          there: arnx says so first and asks arnx cloud’s consent (<code
+            >--yes</code
+          >
+          gives it). <code>--local</code> or
+          <code>ARNX_MODELS=local</code> never switch. Not logged in: exit 3.
+        </li>
+        <li>
+          Exit codes: 0 it ran (with suspects or none, or nothing to scan), 2 it
+          could not run, 3 something must be set first.
+        </li>
+      </ul>
       <h2 id="retained-tests">5. Keep the useful tests</h2>
       <p>
         <code>arnx accept &lt;id&gt;</code> keeps tests for findings marked
@@ -416,7 +503,7 @@ arnx check</code></pre>
       </p>
       <h2 id="costs">Costs and billing</h2>
       <p>
-        With your own keys, you pay providers directly. Setup, review, and
+        With your own keys, you pay providers directly. Scan, setup, review, and
         answer-to-test generation can incur model costs. Review your configured
         budgets; cost varies with model, change size, retries, and environment
         complexity. The CLI reports usage and writes
@@ -426,10 +513,11 @@ arnx check</code></pre>
       <p>
         Expect a few cents to a few dollars per review. Our own reviews ranged
         from $0.17 to $3.19; the public
-        <a href="/agents/#demo">checkout demo</a> cost $0.13 with setup. Set
-        <code>review_usd</code> under <code>[budget]</code> to control spending
-        (default $3.00); the review stops writing tests when it reaches the cap
-        and reports that it did.
+        <a href="/agents/#demo">checkout demo</a> cost $0.12 with setup, and its
+        scan $0.04. Set <code>review_usd</code> under <code>[budget]</code> to
+        control spending (default $3.00); the review stops writing tests when it
+        reaches the cap and reports that it did. A scan stops at
+        <code>scan_usd</code> (default $0.50).
       </p>
       <p>
         <code>arnx check</code> and <code>arnx check --review</code> do not call
@@ -491,9 +579,9 @@ arnx check</code></pre>
         not fail the run; CI reads <code>result</code> in
         <code>arnx review --json</code>), 1 a finding the second opinion could
         not check, 2 incomplete, 3 setup needed. Check exit codes: 0 passed, 1
-        failed, 2 some tests did not report, are unproven or were not run, 3
-        nothing accepted, 4 accepted-test integrity changed. A 0 is not a
-        correctness guarantee.
+        some fail, are skipped or do not report, 2 no report, unproven tests or
+        a kept file not run, 3 nothing accepted, 4 accepted-test integrity
+        changed. A 0 is not a correctness guarantee.
       </p>
       <p>
         Next: <a href="/guides/">guides</a>,

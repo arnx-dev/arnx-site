@@ -80,7 +80,7 @@ export function releaseTokens(config = release) {
         ? "Early pilot"
         : "Coming soon",
     CLOUD_DESCRIPTION: cloud.available
-      ? "Start with $5 in Cloud credit."
+      ? "The first 100 accounts get $5 of Cloud credit."
       : cloud.pilot
         ? "Managed models are in an early pilot; public signup and paid billing are not open yet. Tests run in your local Docker environment."
         : "Managed models and billing are not publicly available yet. Tests currently run in your local Docker environment.",

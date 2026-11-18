@@ -60,13 +60,20 @@
       </p>
       <h2>From a change to a regression check</h2>
       <p>
+        Start with <code>arnx scan</code>: what may be broken, in under a
+        minute. No Docker, no setup, nothing run. It lists suspects, ranked:
+        where, what could break, why, and an input to try. Each one is unproven
+        until a test fails. Then <code>arnx init</code> and
+        <code>arnx review</code> prove them with tests, in Docker.
+      </p>
+      <p>
         <code
-          >arnx init → arnx review → arnx triage → arnx accept → arnx prompt →
-          arnx check</code
-        >. Init is required. The first review sets up only the projects the
-        change touches in a few minutes (it stops at 10), with no separate setup
-        step. <code>arnx setup</code> optionally runs the whole repository’s
-        suites.
+          >arnx scan → arnx init → arnx review → arnx triage → arnx accept →
+          arnx prompt → arnx check</code
+        >. Init is required before a review; a scan works without it. The first
+        review sets up only the projects the change touches in a few minutes (it
+        stops at 10, or 20 for Go and Rust), with no separate setup step.
+        <code>arnx setup</code> optionally runs the whole repository’s suites.
       </p>
       <p>
         You or your coding agent change the production code.
@@ -187,15 +194,16 @@
         Run the CLI before opening a pull request or while reviewing a change.
         It complements your existing tests and human review. Current runners
         cover Python/pytest, JavaScript and TypeScript with vitest, jest,
-        node:test or bun, and Rust with cargo-nextest (early). arnx works best
-        on single-package Python and TypeScript repositories; tests that run
-        only in a browser are not run. Environment setup still needs validation
-        for your repository.
+        node:test or bun, Rust with cargo-nextest (early), and Go with go test
+        (early). arnx works best on single-package Python and TypeScript
+        repositories; tests that run only in a browser are not run. Environment
+        setup still needs validation for your repository.
       </p>
       <p>
         Rust is the least-tested runner. First setup is slow because the image
-        compiles dependencies and test targets, and it can take several GB. Try
-        it on your crate, swap models, and
+        compiles dependencies and test targets, and it can take several GB. Go
+        is the newest: generated tests see a module’s exported API only. Try it
+        on your crate or module, swap models, and
         <a href="{{ISSUES_URL}}" data-event="github_click"
           >tell us what breaks</a
         >.

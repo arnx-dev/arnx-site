@@ -130,18 +130,38 @@
         </div>
       </section>
       <section class="wrap results-story" aria-labelledby="first-review-title">
-        <h2 id="first-review-title">Your first review</h2>
+        <h2 id="first-review-title">Scan, then review</h2>
         <p>
-          Docker, plus your own model key or arnx cloud with $5 of starting
-          credit.
+          Your own model key, or arnx cloud (the first 100 accounts get $5 of
+          credit). macOS or Linux; on Windows, WSL 2.
         </p>
         <div class="beta-grid two">
           <div>{{INSTALL_COMMAND}}</div>
           <div>
-            <p>Then, in your repository after a code change:</p>
+            <p>
+              <strong>1. Scan:</strong> what may be broken, in under a minute.
+              No Docker, no setup, nothing run.
+            </p>
             <div class="terminal">
               <div class="terminal-header">
-                <span>First review / after a code change</span
+                <span>Scan / after a code change</span
+                ><button
+                  class="copy-button"
+                  data-copy="scan-code"
+                  aria-label="Copy scan command"
+                >
+                  Copy command
+                </button>
+              </div>
+              <pre><code id="scan-code" class="shell-commands">arnx scan</code></pre>
+            </div>
+            <p>
+              <strong>2. Review:</strong> prove the suspects with tests. You
+              need Docker running.
+            </p>
+            <div class="terminal">
+              <div class="terminal-header">
+                <span>Review / with Docker</span
                 ><button
                   class="copy-button"
                   data-copy="first-review-code"
@@ -157,8 +177,14 @@ arnx review</code></pre>
           </div>
         </div>
         <p>
+          A scan costs a few cents and lists suspects, ranked: where, what could
+          break, why, and an input to try. Each one is unproven until a test
+          fails. No model key? Run <code>arnx login</code> first: the scan runs
+          on arnx cloud, and arnx says so.
+        </p>
+        <p>
           The first review sets up what it needs in a few minutes (it stops at
-          10). No separate setup step.
+          10, or 20 for Go and Rust). No separate setup step.
         </p>
         <div class="beta-grid two start-paths">
           <article class="path-card">
@@ -181,8 +207,9 @@ arnx review</code></pre>
                 data-event="github_click"
                 >arnx-dev/checkout-demo</a
               >, switch to <code>discount-codes</code>, then run
-              <code>arnx init</code> and <code>arnx review</code>. Our clean run
-              cost $0.13.
+              <code>arnx scan</code>, <code>arnx init</code> and
+              <code>arnx review</code>. In our run the scan cost $0.04 and the
+              review $0.12, setup included.
             </p>
             <a class="text-link" href="/agents/#demo"
               >The demo, step by step ↗</a
@@ -195,6 +222,7 @@ arnx review</code></pre>
         ><span>Python <small>/ pytest</small></span
         ><span>JavaScript / TypeScript</span
         ><span>Rust <small>/ cargo-nextest · early</small></span
+        ><span>Go <small>/ go test · early</small></span
         ><span>More languages are planned</span>
         <a href="{{ISSUES_URL}}" data-event="github_click"
           >Want to see more here? ↗</a
@@ -202,9 +230,10 @@ arnx review</code></pre>
       </div>
       <p class="wrap more-languages">
         Rust is early and our least-tested runner. First setup compiles
-        dependencies and test targets into an image that can take several GB.
+        dependencies and test targets into an image that can take several GB. Go
+        is our newest language: generated tests reach exported names only.
         <a href="{{ISSUES_URL}}" data-event="github_click"
-          >Try your crate and tell us what breaks ↗</a
+          >Try your crate or module and tell us what breaks ↗</a
         >
       </p>
       <section
@@ -238,11 +267,11 @@ arnx review</code></pre>
             >
           </article>
           <article class="path-card">
-            <p class="mono">MARK · MERGED · GO, IN TEST</p>
+            <p class="mono">MARK · MERGED · GO</p>
             <h3>A second Close returned too early.</h3>
             <p>
-              A concurrency bug in a Go tool, found with Go support that is not
-              released yet. The fix was merged upstream.
+              A concurrency bug in a Go tool, found with a development build
+              before Go shipped in 0.1.14. The fix was merged upstream.
             </p>
             <a class="text-link" href="/case-studies/mark/"
               >Read the mark case ↗</a
@@ -347,26 +376,28 @@ arnx review</code></pre>
         <ol class="steps beta-steps">
           <li>
             <span class="step-number">01</span>
-            <h3>Init</h3>
+            <h3>Scan</h3>
             <p>
-              Initialize the repository. The first review sets up only the
-              projects the change touches; another project is set up when a
-              later change touches it.
+              Models read the change and list ranked suspects in under a minute.
+              No Docker, no setup, nothing run. Each suspect is unproven until a
+              review tests it.
             </p>
             <pre
               class="workflow-command"
-            ><code><span class="command-line"><span class="shell-prompt" aria-hidden="true">$ </span>arnx init</span></code></pre>
+            ><code><span class="command-line"><span class="shell-prompt" aria-hidden="true">$ </span>arnx scan</span></code></pre>
           </li>
           <li>
             <span class="step-number">02</span>
             <h3>Review</h3>
             <p>
-              Investigate the diff, generate targeted tests, and run them. Read
-              the failures, open questions, and coverage gaps.
+              Initialize once, then generate targeted tests and run them in
+              Docker. The first review sets up only the projects the change
+              touches. Read the failures, open questions, and coverage gaps.
             </p>
             <pre
               class="workflow-command"
-            ><code><span class="command-line"><span class="shell-prompt" aria-hidden="true">$ </span>arnx review</span></code></pre>
+            ><code><span class="command-line"><span class="shell-prompt" aria-hidden="true">$ </span>arnx init</span>
+<span class="command-line"><span class="shell-prompt" aria-hidden="true">$ </span>arnx review</span></code></pre>
           </li>
           <li>
             <span class="step-number">03</span>

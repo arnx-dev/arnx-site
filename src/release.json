@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-12",
+  "checkedAt": "2026-11-18",
   "repository": {
     "url": "https://github.com/arnx-dev/arnx",
     "publicSource": true,
@@ -8,23 +8,23 @@
     "licenseUrl": "https://github.com/arnx-dev/arnx/blob/main/LICENSE",
     "docsUrl": "https://github.com/arnx-dev/arnx#readme",
     "contributingUrl": "https://github.com/arnx-dev/arnx/blob/main/CONTRIBUTING.md",
-    "skillUrl": "https://github.com/arnx-dev/arnx/blob/main/skills/arnx/SKILL.md",
+    "skillUrl": "https://github.com/arnx-dev/arnx/blob/main/plugin/skills/arnx/SKILL.md",
     "demoUrl": "https://github.com/arnx-dev/checkout-demo",
     "npmUrl": "https://www.npmjs.com/package/@arnx-dev/arnx",
     "organizationUrl": "https://github.com/arnx-dev"
   },
   "cli": {
     "available": true,
-    "version": "0.1.11",
+    "version": "0.1.15",
     "installCommand": "npm install -g @arnx-dev/arnx",
-    "verifiedAt": "2026-11-12",
-    "verificationRecord": "npm lists @arnx-dev/arnx@0.1.11 as latest. Copy checked against tag v0.1.11 and the installed 0.1.11 help; arnx skill install ran in an empty repository. No review was run for this update.",
+    "verifiedAt": "2026-11-18",
+    "verificationRecord": "npm lists @arnx-dev/arnx@0.1.15 as latest. Copy checked against arnx main 3ee9922 (v0.1.15 plus the scan-first README) and the installed 0.1.15 help. The README was followed on checkout-demo with 0.1.15 on 2026-11-18: scan, init and review.",
     "readinessRecord": "docs/public-release.md"
   },
   "cloud": {
     "available": true,
     "pilot": false,
-    "verifiedAt": "2026-11-09",
-    "verificationRecord": "arnx cloud was checked live with 0.1.11 after its deployment on 2026-11-09."
+    "verifiedAt": "2026-11-18",
+    "verificationRecord": "arnx cloud was checked live with 0.1.15 after its deployment: a scan without model keys and a review, 2026-11-18."
   }
 }

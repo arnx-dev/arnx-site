@@ -79,12 +79,12 @@ export function llms(release, content = [], sections = {}) {
 > ${productDescription}
 
 - Latest release: arnx ${release.cli.version} (checked ${release.checkedAt}). Apache License 2.0.
-- Install: \`${release.cli.installCommand}\` (Node 20 or later), or a standalone binary from GitHub Releases. Docker must be running. macOS and Linux; Windows through WSL 2.
-- Languages and runners: Python (pytest); JavaScript and TypeScript (vitest, jest, node:test, bun); Rust (cargo-nextest, early). Go support is in test and not released.
-- CLI workflow: \`arnx init\`, \`arnx review\`, \`arnx triage\`, \`arnx accept\`, \`arnx prompt\`, \`arnx check\`. "Pre-commit" here means the point in the workflow before you commit or open a pull request, not a Git pre-commit hook.
+- Install: \`${release.cli.installCommand}\` (Node 20 or later), or a standalone binary from GitHub Releases. Reviews and checks need Docker running; a scan does not. macOS and Linux; Windows through WSL 2.
+- Languages and runners: Python (pytest); JavaScript and TypeScript (vitest, jest, node:test, bun); Rust (cargo-nextest, early); Go (go test, early).
+- CLI workflow: \`arnx scan\` (optional: ranked, unproven suspects in under a minute, no Docker, nothing run), then \`arnx init\`, \`arnx review\`, \`arnx triage\`, \`arnx accept\`, \`arnx prompt\`, \`arnx check\`. "Pre-commit" here means the point in the workflow before you commit or open a pull request, not a Git pre-commit hook.
 - Agent Skill: \`arnx skill install\` writes \`.agents/skills/arnx/\` and \`.claude/skills/arnx/\`. The agent runs one review and the fix loop; init, logins, triage, accept and commits stay with the developer.
-- Cost: with your own keys you pay providers directly. Each review stops writing tests at \`review_usd\` (default $3.00). \`arnx check\` makes no model calls.
-- Data: tests run in local Docker. The diff, files the reviewer reads, generated tests and their output go to your model providers, or to arnx Cloud when you choose it (it asks consent once per repository).
+- Cost: with your own keys you pay providers directly. Each review stops writing tests at \`review_usd\` (default $3.00); a scan stops at \`scan_usd\` (default $0.50). \`arnx check\` makes no model calls.
+- Data: tests run in local Docker. The diff, files the reviewer reads, generated tests and their output go to your model providers, or to arnx Cloud when you choose it (it asks consent once per repository). Without model keys, a scan on a machine logged in to arnx cloud runs there, after saying so and asking consent.
 - Limits: changes up to 200 KB per review; works best on single-package Python and TypeScript repositories; tests that run only in a browser are not run; a failing generated test shows an assertion fails, not that the code is wrong; model replies vary between reviews.
 
 ## Start here

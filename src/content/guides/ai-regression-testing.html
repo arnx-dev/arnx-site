@@ -7,7 +7,7 @@
   "listTitle": "Keeping regression tests from AI review findings",
   "kind": "article",
   "order": 6,
-  "updated": "2026-11-12"
+  "updated": "2026-11-18"
 }
 -->
 <p class="eyebrow">Guide / Regression tests</p>
@@ -186,6 +186,10 @@ git add .arnx/tests .arnx/accepted-tests.json</code></pre>
   <li>
     Rust is early: generated tests are integration tests that see the crate's
     public API only.
+  </li>
+  <li>
+    Go is early too: each generated test is its own test-only package, so it
+    sees the module's exported API only.
   </li>
 </ul>
 <p>
