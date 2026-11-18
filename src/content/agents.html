@@ -5,7 +5,7 @@
   "summary": "When an agent should use arnx, how it installs and checks it, what a review can cost, what stays with the developer, and the fix loop.",
   "crumb": "For coding agents",
   "kind": "article",
-  "updated": "2026-11-12"
+  "updated": "2026-11-18"
 }
 -->
 <p class="eyebrow">For coding agents</p>
@@ -40,13 +40,20 @@
   </li>
   <li>
     The repository is Python (pytest), JavaScript or TypeScript (vitest, jest,
-    node:test, bun) or Rust (cargo-nextest, early), and Docker is available.
+    node:test, bun), Rust (cargo-nextest, early) or Go (go test, early), and
+    Docker is available.
   </li>
 </ul>
 <p>
   It is not the right tool for a documentation-only change (arnx skips it and
   exits 0), for code in a project with no test suite (arnx reports it as not
   reviewed), or for tests that run only in a browser.
+</p>
+<p>
+  For developers, arnx also has <code>arnx scan</code>: the review's first step
+  alone, with no Docker and nothing run. It lists ranked suspects in under a
+  minute; each is unproven until <code>arnx review</code> tests it. The skill
+  does not use scan: the agent runs <code>arnx review</code>.
 </p>
 
 <h2 id="install">How does an agent install it?</h2>
@@ -94,13 +101,13 @@ arnx skill install</code></pre>
 <p>
   The skill is one file with five references:
   <a
-    href="https://github.com/arnx-dev/arnx/blob/main/skills/arnx/SKILL.md"
+    href="https://github.com/arnx-dev/arnx/blob/main/plugin/skills/arnx/SKILL.md"
     data-event="github_click"
     >SKILL.md</a
   >
   and
   <a
-    href="https://github.com/arnx-dev/arnx/tree/main/skills/arnx/references"
+    href="https://github.com/arnx-dev/arnx/tree/main/plugin/skills/arnx/references"
     data-event="github_click"
     >references/</a
   >
@@ -144,15 +151,15 @@ arnx skill install</code></pre>
   </li>
   <li>
     The first review also sets up the projects the change touches, in at most 10
-    minutes. Whole-repository <code>arnx setup</code> has its own cap,
-    <code>setup_usd</code>, $3.00 by default.
+    minutes (20 for Go and Rust). Whole-repository <code>arnx setup</code> has
+    its own cap, <code>setup_usd</code>, $3.00 by default.
   </li>
   <li>
     <code>arnx check</code> makes no model calls. Docker time is the only cost.
   </li>
   <li>
     With your own keys you pay the providers. With arnx Cloud a review reserves
-    at most the cap and is billed what it cost; new accounts start with $5 of
+    at most the cap and is billed what it cost; the first 100 accounts get $5 of
     credit.
   </li>
 </ul>
@@ -345,14 +352,18 @@ arnx skill install</code></pre>
   <pre><code>git clone https://github.com/arnx-dev/checkout-demo
 cd checkout-demo
 git switch discount-codes
+arnx scan
 arnx init
 arnx review</code></pre>
 </div>
 <p>
-  On a clean clone with arnx 0.1.11 and only an Anthropic key, on 2026-11-09,
-  the first review set the project up in 29 seconds for $0.03 and reviewed in 42
-  seconds for $0.10, and reported the planted bug. Your run can differ: model
-  replies vary, and two reviews of one change can report different findings.
+  On a fresh clone with arnx 0.1.15 and Anthropic and OpenAI keys, on
+  2026-11-18, <code>arnx scan</code> took 26 seconds for $0.04, and its top
+  suspect pointed at the planted bug. <code>arnx init</code> and
+  <code>arnx review</code> then took 1 minute 13 seconds in all, setup included,
+  for $0.12, and the review proved the planted bug with a failing test. Your run
+  can differ: model replies vary, and two reviews of one change can report
+  different findings.
 </p>
 <p>
   Next: the <a href="/quickstart.html">quickstart</a>, the

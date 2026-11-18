@@ -7,7 +7,7 @@
   "listTitle": "How to review code written by Claude Code",
   "kind": "article",
   "order": 2,
-  "updated": "2026-11-12"
+  "updated": "2026-11-18"
 }
 -->
 <p class="eyebrow">Guide / Claude Code</p>
@@ -148,7 +148,7 @@ arnx skill install</code></pre>
     You ask Claude Code for a change. When it is done, it tells you the review
     budget it read from <code>.arnx/config.toml</code> and runs
     <code>arnx review</code>. The first review also sets up the project, in at
-    most 10 minutes.
+    most 10 minutes (20 for Go and Rust).
   </li>
   <li>
     It lists each finding with its input, actual and expected behavior, each
@@ -197,8 +197,8 @@ arnx skill install</code></pre>
     <a href="/quickstart.html#byom">models</a>.
   </li>
   <li>
-    Python, JavaScript, TypeScript and Rust (early) only. Code in a project with
-    no test suite is reported as not reviewed.
+    Python, JavaScript, TypeScript, Rust (early) and Go (early) only. Code in a
+    project with no test suite is reported as not reviewed.
   </li>
 </ul>
 <p>

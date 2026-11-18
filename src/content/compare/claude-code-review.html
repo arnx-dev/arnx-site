@@ -7,7 +7,7 @@
   "listTitle": "arnx vs Claude Code's native review",
   "kind": "article",
   "order": 3,
-  "updated": "2026-11-12"
+  "updated": "2026-11-18"
 }
 -->
 <p class="eyebrow">Compare / Claude Code</p>
@@ -41,8 +41,8 @@
 <div class="table-scroll">
   <table>
     <caption>
-      arnx 0.1.11 and Claude Code's native review, from each product's own
-      documentation on 2026-11-12
+      arnx 0.1.15 and Claude Code's native review, from each product's own
+      documentation (Claude Code's on 2026-11-12, arnx's on 2026-11-18)
     </caption>
     <thead>
       <tr>
@@ -103,8 +103,10 @@
       <tr>
         <th scope="row">Test generation and execution</th>
         <td>
-          Always. It writes tests for what looks broken and runs each one 3
-          times in a local Docker sandbox with no network.
+          In every review. It writes tests for what looks broken and runs each
+          one 3 times in a local Docker sandbox with no network.
+          <code>arnx scan</code>, a review's first step alone, runs nothing and
+          lists unproven suspects.
         </td>
         <td>
           Managed Code Review:
@@ -169,8 +171,8 @@
         <th scope="row">Languages and platforms</th>
         <td>
           Python (pytest), JavaScript and TypeScript (vitest, jest, node:test,
-          bun), Rust (cargo-nextest, early). macOS and Linux; Windows through
-          WSL 2. Any Git repository, no code host needed.
+          bun), Rust (cargo-nextest, early), Go (go test, early). macOS and
+          Linux; Windows through WSL 2. Any Git repository, no code host needed.
         </td>
         <td>
           We did not find a language list in their documentation. Managed Code
@@ -284,18 +286,19 @@
 <h2 id="limits">What arnx does not do</h2>
 <ul>
   <li>
-    Three languages only: Python, JavaScript and TypeScript, and Rust (early).
-    It works best on single-package Python and TypeScript repositories.
+    Four languages only: Python, JavaScript and TypeScript, and Rust and Go
+    (both early). It works best on single-package Python and TypeScript
+    repositories.
   </li>
   <li>
-    It needs Docker and a project with an existing test suite. Code in no such
-    project is reported as not reviewed. Tests that run only in a browser are
-    not run.
+    A review needs Docker and a project with an existing test suite. Code in no
+    such project is reported as not reviewed. Tests that run only in a browser
+    are not run.
   </li>
   <li>
     A review takes minutes, not seconds, and the first one also sets up the test
-    environment (it stops at 10 minutes). Changes over 200 KB are refused;
-    review a long branch in parts.
+    environment (it stops at 10 minutes, 20 for Go and Rust). Changes over 200
+    KB are refused; review a long branch in parts.
   </li>
   <li>It posts nothing to a pull request. The report is a local file.</li>
   <li>

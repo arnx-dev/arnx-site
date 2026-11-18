@@ -1,25 +1,25 @@
 <!--meta
 {
   "title": "mark: a second Close returned before shutdown finished",
-  "description": "arnx reviewed recent commits of mark, a Go tool, with an unreleased Go build. A generated test showed a concurrent Close returned early. Fix merged upstream.",
-  "summary": "A generated test showed a second concurrent Close returned while the resource was still stopping. Fix merged upstream. Found with Go support that is in test and not released.",
+  "description": "arnx reviewed recent commits of mark, a Go tool, with a pre-release Go build. A generated test showed a concurrent Close returned early. Fix merged upstream.",
+  "summary": "A generated test showed a second concurrent Close returned while the resource was still stopping. Fix merged upstream. Found with a development build before Go shipped in arnx 0.1.14 (early).",
   "crumb": "mark",
   "listTitle": "mark: a second Close returned before shutdown finished",
   "kind": "article",
   "order": 1.5,
-  "updated": "2026-11-12"
+  "updated": "2026-11-18"
 }
 -->
 <p class="eyebrow">Case study / mark</p>
 <h1>A second Close returned before shutdown finished.</h1>
 <p class="descriptor">
-  A small concurrency bug in a Go tool, found with Go support that is not
-  released yet.
+  A small concurrency bug in a Go tool, found with Go support before it was
+  released.
 </p>
 <p class="scope-note">
-  <strong>Go is in test and not released.</strong> arnx 0.1.11 reviews Python,
-  JavaScript, TypeScript and Rust. This review ran on a development build with
-  Go support. You cannot reproduce it with the version on npm today.
+  <strong>Run before Go shipped.</strong> This review ran on a development build
+  with Go support. Go shipped later, in arnx 0.1.14, labelled early. A review
+  with the released version can differ from this one.
 </p>
 <p>
   mark syncs Markdown files to Confluence. A review of its recent commits
@@ -125,8 +125,9 @@
 <h2>10. Limitations and observations</h2>
 <ul>
   <li>
-    <strong>Unreleased build.</strong> Go support is in test. It covers less
-    than the released languages and may change before it ships.
+    <strong>A development build.</strong> The review did not run on a released
+    version. Go is still early in 0.1.14 and later: generated tests reach
+    exported names only.
   </li>
   <li>
     <strong>A narrow bug.</strong> It only happens when <code>Close</code> is
@@ -147,6 +148,6 @@
     One review of one repository. It says nothing about how often arnx is right;
     the
     <a href="/research/unfamiliar-repositories/">research note</a> has counts
-    for the released languages.
+    for Python and TypeScript.
   </li>
 </ul>

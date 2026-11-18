@@ -12,11 +12,11 @@ Checks: `npm run lint`, `npm run typecheck`, `npm test`, `npm run format:check`,
 
 `src/release.json` is the single source for GitHub links, public-source availability, CLI installation, canonical release docs, and Cloud availability. `scripts/release.mjs` validates it and expands shared HTML partials at build time. No release state is fetched at runtime.
 
-The site documents arnx 0.1.11, checked on 2026-11-12 against tag v0.1.11 and the installed 0.1.11 help. npm lists `@arnx-dev/arnx@0.1.11` as latest, and `arnx skill install` ran in an empty repository. No review was run for this update. See [the release handoff](docs/public-release.md).
+The site documents arnx 0.1.15, checked on 2026-11-18 against arnx main 3ee9922 (v0.1.15 plus the scan-first README) and the installed 0.1.15 help. npm lists `@arnx-dev/arnx@0.1.15` as latest. The README was followed on checkout-demo with 0.1.15 on 2026-11-18: scan, init and review. arnx cloud was checked live with 0.1.15 after its deployment: a scan without model keys and a review. See [the release handoff](docs/public-release.md).
 
 The version appears in one place, `src/release.json`; pages take it from the `{{CLI_VERSION}}` token. `npm run verify:release` compares it with npm and GitHub (network needed), and `tests/consistency.test.mjs` fails when a page documents another version, puts accepted tests in the project suite, or gives the old review exit codes.
 
-Home and quickstart lead with install → init → review. The first review sets up only touched projects; whole-repository setup is optional. Product explains before/after evidence and includes the CLI README’s own remove-command example. Accepted tests live outside the project suite, pinned under `.arnx/`; security describes stand-ins and Cloud-only consent.
+Home, quickstart and product lead with scan → review: `arnx scan` (no Docker, no setup, unproven suspects), then `arnx init` and `arnx review`. The first review sets up only touched projects; whole-repository setup is optional. Product explains before/after evidence and includes the CLI README’s own remove-command example. Accepted tests live outside the project suite, pinned under `.arnx/`; security describes stand-ins and Cloud-only consent.
 
 Cloud activation is documented through the CLI. New accounts start with $5 credit. Paid top-ups remain labeled “Top-ups open soon” until the owner confirms live payments. The credits page describes prepaid USD credit and per-role usage charges. GitHub Discussions remains omitted until enabled and verified.
 
