@@ -1,13 +1,13 @@
 <!--meta
 {
   "title": "beets: shell completion crashed with the titlecase plugin",
-  "description": "arnx reviewed a beets commit and wrote a test showing the titlecase plugin broke beet completion. The fix is open upstream as pull request 7161.",
-  "summary": "A generated test showed a plugin added the same command-line option twice, which crashed shell completion. Fix open upstream, not merged; most other findings in the review were intended behavior.",
+  "description": "arnx reviewed a beets commit and wrote a test showing the titlecase plugin broke beet completion. The fix was merged upstream as pull request 7161.",
+  "summary": "A generated test showed a plugin added the same command-line option twice, which crashed shell completion. Fix merged upstream; most other findings in the review were intended behavior.",
   "crumb": "beets",
   "listTitle": "beets: shell completion crashed with the titlecase plugin",
   "kind": "article",
   "order": 2,
-  "updated": "2026-11-12"
+  "updated": "2026-11-23"
 }
 -->
 <p class="eyebrow">Case study / beets</p>
@@ -19,10 +19,9 @@
   beets is a music library manager with plugins. A review of one of its commits
   produced a test showing that the <code>titlecase</code> plugin could not hand
   out its commands twice. A person then found the visible effect:
-  <code>beet completion</code> exits 1 when the plugin is enabled. The fix is
-  open upstream as
+  <code>beet completion</code> exits 1 when the plugin is enabled. The fix was
+  merged upstream on 2026-11-18 as
   <a href="https://github.com/beetbox/beets/pull/7161">beetbox/beets#7161</a>.
-  On 2026-11-12 it is open and not merged.
 </p>
 
 <h2>1. Repository and reviewed commit</h2>
@@ -123,16 +122,14 @@
   <code>test_completion</code> was skipped, because the test image had no
   bash-completion package.
 </p>
-<p>
-  On GitHub on 2026-11-12: one approving review, checks passing, state open, a
-  further review still required. It is not merged.
-</p>
+<p>A maintainer merged the pull request on 2026-11-18.</p>
 
 <h2>9. Upstream references</h2>
 <ul>
   <li>
     <a href="https://github.com/beetbox/beets/pull/7161">Pull request #7161</a>:
-    titlecase: fix beet completion crash when the plugin is enabled (open).
+    titlecase: fix beet completion crash when the plugin is enabled (merged
+    2026-11-18).
   </li>
   <li>
     <a
